@@ -172,7 +172,7 @@ client.login('token');
 
 ## Bot Example
 
-If you're looking for a practical example of how to use Ruvyrias, check out the [Bot Example Repopository](https://github.com/DarkslayerHaos/music-bot). This repository provides a complete bot and sample code to help you get started quickly.
+If you're looking for a practical example of how to use Ruvyrias, check out the [Bot Example Repository](https://github.com/DarkslayerHaos/music-bot). This repository provides a complete bot and sample code to help you get started quickly.
 
 The example bot comes with several commands to manage music playback seamlessly:
 
