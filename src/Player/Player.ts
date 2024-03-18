@@ -7,6 +7,7 @@ import { EventEmitter } from 'events';
 import { Filters } from './Filters';
 import { LoadTrackResponse, Response } from '../Guild/Response';
 import { ConnectionOptions } from '../Ruvyrias';
+import { SpotifyData, SpotifyPublicCredentials } from '../../plugins/spotify/Spotify';
 
 const escapeRegExp = (str: string) => {
     try {
@@ -308,7 +309,9 @@ export class Player extends EventEmitter {
      * @returns {Promise<Player>} - A promise that resolves to the player or the next track to play.
      */
     public async play(): Promise<Player> {
-        if (!this.queue.length) return;
+        if (!this.queue.length) {
+            return Promise.resolve(this);
+        }
 
         this.currentTrack = this.queue.shift() as Track;
         if (!this.currentTrack?.track) {
@@ -381,7 +384,7 @@ export class Player extends EventEmitter {
      * @returns {Promise<Player>} Returns a Player object
      */
     public async restart(): Promise<Player> {
-        if (!this.currentTrack?.track && !this.queue.length) return;
+        if (!this.currentTrack?.track && !this.queue.length) Promise.resolve(this);
         if (!this.currentTrack) return this.play();
 
         await this.node.rest.updatePlayer({
@@ -391,6 +394,8 @@ export class Player extends EventEmitter {
                 track: this.currentTrack,
             },
         });
+
+        return this;
     }
 
     /**
@@ -540,14 +545,14 @@ export class Player extends EventEmitter {
     /**
      * Moves the player to a different lavalink node.
      * @param {string} name - The name of the node to move to.
-     * @returns {Promise<Node>} - A Promise that resolves once the player has been successfully moved to the specified node.
+     * @returns {Promise<Node | void>} - A Promise that resolves once the player has been successfully moved to the specified node.
      */
-    public async moveNode(name: string): Promise<Node> {
-        let node = this.ruvyrias.nodes.get(name);
+    public async moveNode(name: string): Promise<Node | void> {
+        const node = this.ruvyrias.nodes.get(name);
 
-        if (!node ?? node.name === this.node.name) return;
+        if (!node ?? (node && node.name === this.node.name)) return;
         if (!node.isConnected) {
-            throw new Error('Provided Node not is not connected');
+            throw new Error('Provided Node is not connected');
         }
 
         try {
@@ -564,9 +569,9 @@ export class Player extends EventEmitter {
 
     /**
      * Automatically moves the player to the least used Lavalink node.
-     * @returns {Promise<Node | boolean>} Resolves with the moved Node or false, or if an error occurred.
+     * @returns {Promise<Node | boolean | void>} Resolves with the moved Node or false, or if an error occurred.
      */
-    public async autoMoveNode(): Promise<Node | boolean> {
+    public async autoMoveNode(): Promise<Node | boolean | void> {
         if (!this.ruvyrias.leastUsedNodes.length) {
             throw new Error('[Ruvyrias Error] No nodes are available');
         }
@@ -603,27 +608,58 @@ export class Player extends EventEmitter {
      * @returns {Promise<Player>} - The updated player instance playing the new song.
      */
     public async autoplay(player: Player): Promise<Player> {
+        if (!player ?? !player.isAutoPlay) {
+            return this;
+        }
+
         const trackIdentifier = player.previousTrack?.info?.identifier ?? player.currentTrack?.info?.identifier;
         const trackRequester = player.previousTrack?.info?.requester ?? player.currentTrack?.info?.requester;
         const trackSource = player.previousTrack?.info?.sourceName ?? player.currentTrack?.info?.sourceName;
 
-        try {
-            const data = `https://www.youtube.com/watch?v=${trackIdentifier}&list=RD${trackIdentifier}`;
+        if (trackSource === 'youtube') {
+            try {
+                const data = `https://www.youtube.com/watch?v=${trackIdentifier}&list=RD${trackIdentifier}`;
 
-            const response = await this.ruvyrias.resolve({ query: data, source: trackSource, requester: trackRequester });
-            if (!response ?? !response.tracks ?? ['error', 'empty'].includes(response.loadType)) {
+                const response = await this.ruvyrias.resolve({ query: data, source: trackSource, requester: trackRequester });
+                if (!response ?? !response.tracks ?? ['error', 'empty'].includes(response.loadType)) {
+                    return await this.skip();
+                }
+
+                response.tracks.shift();
+
+                const track = response.tracks[Math.floor(Math.random() * Math.floor(response.tracks.length))];
+                this.queue.add(track);
+
+                return this;
+            } catch (e) {
                 return await this.skip();
             }
+        } else if (trackSource === 'spotify') {
+            try {
+                const data = await fetch("https://open.spotify.com/get_access_token?reason=transport&productType=embed");
+                const body = await data.json() as SpotifyPublicCredentials;
 
-            response.tracks.shift();
+                const res = await fetch(`https://api.spotify.com/v1/recommendations?limit=10&seed_tracks=${trackIdentifier}`, {
+                    headers: {
+                        'Authorization': `Bearer ${body?.accessToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
 
-            const track = response.tracks[Math.floor(Math.random() * Math.floor(response.tracks.length))];
-            this.queue.add(track);
-            await this.play();
+                const json = await res.json() as SpotifyData;
+                const trackId = json.tracks[Math.floor(Math.random() * json.tracks.length)].id;
 
-            return this;
-        } catch (e) {
-            return await this.skip();
+                const response = await this.ruvyrias.resolve({ query: `https://open.spotify.com/track/${trackId}`, source: 'spsearch', requester: trackRequester });
+                if (!response ?? !response.tracks ?? ['error', 'empty'].includes(response.loadType)) {
+                    return await this.skip();
+                }
+
+                this.queue.add(response.tracks[0]);
+
+                return this;
+            } catch (e) {
+                return await this.skip();
+            }
         }
     }
 

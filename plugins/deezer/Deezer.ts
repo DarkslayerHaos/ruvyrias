@@ -47,7 +47,7 @@ export class Deezer extends Plugin {
     public async load(ruvyrias: Ruvyrias) {
         this.ruvyrias = ruvyrias;
         this._resolve = ruvyrias.resolve.bind(ruvyrias);
-        ruvyrias.resolve = this.resolve.bind(this);
+        ruvyrias.resolve = this.resolve.bind(this) as never;
     }
 
     /**
@@ -67,7 +67,7 @@ export class Deezer extends Plugin {
     private async resolve({ query, source, requester }: ResolveOptions): Promise<unknown> {
 
         if (this.isDeezerShareLink(query)) {
-            let newURL: string = await this.decodeDeezerShareLink(query);
+            const newURL = await this.decodeDeezerShareLink(query) as string;
             if (newURL.startsWith('https://www.deezer.com/')) {
                 return this.resolve({ query: newURL, source: source ?? this.ruvyrias.options.defaultPlatform, requester });
             }
@@ -111,7 +111,7 @@ export class Deezer extends Plugin {
 
             return this.buildResponse('track', [unresolvedTracks]);
 
-        } catch (e) {
+        } catch (e: any) {
             return this.buildResponse(
                 'error',
                 [],
@@ -134,7 +134,7 @@ export class Deezer extends Plugin {
 
             return this.buildResponse('playlist', unresolvedPlaylistTracks, playlist.title);
 
-        } catch (e) {
+        } catch (e: any) {
             return this.buildResponse(
                 'error',
                 [],
@@ -165,7 +165,7 @@ export class Deezer extends Plugin {
 
             return this.buildResponse('playlist', unresolvedArtistTracks, `${artistData.name}'s top songs`);
 
-        } catch (e) {
+        } catch (e: any) {
             return this.buildResponse(
                 'error',
                 [],
@@ -210,7 +210,7 @@ export class Deezer extends Plugin {
                 tracks.data.map((x: any) => this.buildUnresolved(x, requester))
             );
             return this.buildResponse('search', unresolvedTracks);
-        } catch (e) {
+        } catch (e: any) {
             return this.buildResponse(
                 'empty',
                 [],
@@ -236,7 +236,7 @@ export class Deezer extends Plugin {
 
             return this.buildResponse('playlist', unresolvedAlbumTracks, album.title);
 
-        } catch (e) {
+        } catch (e: any) {
             return this.buildResponse(
                 'error',
                 [],
@@ -249,17 +249,20 @@ export class Deezer extends Plugin {
     /**
      * Decodes a Deezer share link to obtain the original URL.
      * @param {string} url - The Deezer share link to decode.
-     * @returns {Promise<string>} - A promise that resolves to the original URL after decoding the Deezer share link.
+     * @returns {Promise<string | undefined>} - A promise that resolves to the original URL after decoding the Deezer share link.
      */
-    private async decodeDeezerShareLink(url: string): Promise<string> {
-        let req: any = await fetch(url, {
+    private async decodeDeezerShareLink(url: string): Promise<string | undefined> {
+        const req = await fetch(url, {
             method: 'GET',
             redirect: 'manual',
-        });
+        }); 
+
         if (req.status === 302) {
             const location = req.headers.get('location');
             return location;
         }
+
+        return undefined
     }
 
     /**

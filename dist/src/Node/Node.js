@@ -67,7 +67,7 @@ class Node {
         const headers = {
             'Authorization': this.password,
             'User-Id': this.ruvyrias.options.clientId,
-            'Client-Name': Config_1.Config.clientName,
+            'Client-Name': this.ruvyrias.options.clientName ?? Config_1.Config.clientName,
         };
         if (this.sessionId)
             headers['Session-Id'] = this.sessionId;
@@ -148,7 +148,7 @@ class Node {
     async open() {
         if (this.reconnectAttempt) {
             clearTimeout(this.reconnectAttempt);
-            delete this.reconnectAttempt;
+            this.reconnectAttempt = null;
         }
         this.ruvyrias.emit('nodeConnect', this);
         this.isConnected = true;

@@ -64,9 +64,9 @@ export declare class Rest {
     /**
      * Performs an HTTP GET request to the specified path.
      * @param {RouteLike} path - The path to make the GET request.
-     * @returns {Promise<RestMethodGet>} A Promise that resolves with the response data.
+     * @returns {Promise<RestMethodGet | null>} A Promise that resolves with the response data.
      */
-    get(path: RouteLike): Promise<RestMethodGet>;
+    get(path: RouteLike): Promise<RestMethodGet | null>;
     /**
      * Performs an HTTP PATCH request to the specified endpoint with the provided body.
      * @param {RouteLike} endpoint - The endpoint to make the PATCH request.

@@ -218,6 +218,32 @@ export interface SpotifyRegularError {
     message: string;
 }
 
+/**
+ * Represents a Spotify public credentials.
+ */
+export interface SpotifyPublicCredentials {
+    clientId: string;
+    accessToken: string;
+    accessTokenExpirationTimestampMs: number;
+    isAnonymous: boolean;
+}
+
+
+export interface Seed {
+    initialPoolSize: number;
+    afterFilteringSize: number;
+    afterRelinkingSize: number;
+    id: string;
+    type: string;
+    href: string;
+}
+
+export interface SpotifyData {
+    tracks: SpotifyTrack[];
+    seeds: Seed[];
+}
+
+
 export class Spotify extends Plugin {
     private baseURL: string = 'https://api.spotify.com/v1';
     public ruvyrias: Ruvyrias;
@@ -337,7 +363,7 @@ export class Spotify extends Plugin {
         const spotifyLink = $('a.secondary-action');
         const spotifyUrl = spotifyLink.attr('href');
 
-        return this.resolve({ query: spotifyUrl, source, requester });
+        return this.resolve({ query: spotifyUrl as string, source, requester });
     }
 
     /**
@@ -354,12 +380,10 @@ export class Spotify extends Plugin {
             await this.fetchPlaylistTracks(playlist);
 
             const limitedTracks = this.options.playlistLimit
-                ? playlist.tracks.items.slice(0, this.options.playlistLimit)
-                : playlist.tracks.items;
+                ? playlist.tracks?.items.slice(0, this.options.playlistLimit)
+                : playlist.tracks?.items;
 
-            const unresolvedPlaylistTracks = await Promise.all(
-                limitedTracks.map((x: any) => this.buildUnresolved(x.track, requester))
-            );
+            const unresolvedPlaylistTracks = await Promise.all((limitedTracks as object[]).map((x: any) => this.buildUnresolved(x.track, requester)));
 
             return this.buildResponse(
                 'playlist',
@@ -503,13 +527,13 @@ export class Spotify extends Plugin {
      * @returns {Promise<void>} - A Promise that resolves when the tracks are fetched.
      */
     private async fetchPlaylistTracks(spotifyPlaylist: SpotifyPlaylist): Promise<void> {
-        let nextPage = spotifyPlaylist.tracks.next;
+        let nextPage = spotifyPlaylist.tracks?.next;
         let pageLoaded = 1;
         while (nextPage) {
             if (!nextPage) break;
             const body: any = await this.spotifyManager.getData(nextPage);
             if (body.error) break;
-            spotifyPlaylist.tracks.items.push(...body.items);
+            spotifyPlaylist.tracks?.items.push(...body.items);
 
             nextPage = body.next;
             pageLoaded++;

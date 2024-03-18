@@ -282,6 +282,8 @@ export class Ruvyrias extends EventEmitter {
                 break;
             }
         }
+
+        return this;
     }
 
     /**
@@ -542,7 +544,7 @@ export class Ruvyrias extends EventEmitter {
      * @param {string} guildId - Guild ID.
      * @returns {Player | undefined} The player instance for the specified guild or undefined in case of nothing.
      */
-    public get(guildId: string): Player | undefined{
+    public get(guildId: string): Player | undefined {
         return this.players.get(guildId);
     }
 }

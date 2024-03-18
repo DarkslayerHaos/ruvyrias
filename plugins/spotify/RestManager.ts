@@ -32,8 +32,8 @@ export class RestManager {
         await this.renew();
 
         const req = await fetch(`${SPOTIFY_API_URL}${endpoint}`, {
-            headers: { Authorization: this.options.token },
-        })
+            headers: { 'Authorization': this.options.token as string },
+        });
 
         const data = (await req.json()) as Promise<T>;
 
@@ -53,10 +53,10 @@ export class RestManager {
      */
     public async getData<T>(url: string): Promise<T> {
         await this.renew();
-        const req = await fetch(url,
-            {
-                headers: { Authorization: this.options.token },
-            })
+        const req = await fetch(url, {
+            headers: { 'Authorization': this.options.token as string },
+        });
+
         const data = (await req.json()) as Promise<T>;
 
         if (req.headers.get('x-ratelimit-remaining') === '0') {

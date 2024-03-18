@@ -61,7 +61,7 @@ export class Node {
     public stats: NodeStats | null;
     public isConnected: boolean;
     public readonly options: NodeGroup;
-    
+
     /**
      * The Node class that is used to connect to a lavalink node
      * @param ruvyrias Ruvyrias
@@ -102,7 +102,7 @@ export class Node {
         const headers = {
             'Authorization': this.password,
             'User-Id': this.ruvyrias.options.clientId,
-            'Client-Name': Config.clientName,
+            'Client-Name': this.ruvyrias.options.clientName ?? Config.clientName,
         };
         if (this.sessionId) headers['Session-Id'] = this.sessionId;
         this.ws = new WebSocket(`${this.socketURL}`, { headers });
@@ -187,7 +187,7 @@ export class Node {
     private async open(): Promise<void> {
         if (this.reconnectAttempt) {
             clearTimeout(this.reconnectAttempt);
-            delete this.reconnectAttempt;
+            this.reconnectAttempt = null;
         }
 
         this.ruvyrias.emit('nodeConnect', this);

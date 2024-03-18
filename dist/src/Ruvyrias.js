@@ -102,6 +102,7 @@ class Ruvyrias extends events_1.EventEmitter {
                 break;
             }
         }
+        return this;
     }
     /**
      * Handles Voice State Update and Voice Server Update packets from the Discord API.

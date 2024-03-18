@@ -29,7 +29,7 @@ export class customFilter extends Filters {
      * @returns {Filters} - Returns the current instance of the player or undefined if player is not available.
      */
     public setBassboost(val: number): Filters {
-        if (!this.player) return;
+        if (!this.player) return this;
         if (val < 0 && val > 6) {
             throw Error('Bassboost value must be between 0 to 5');
         }
@@ -50,19 +50,20 @@ export class customFilter extends Filters {
      * @returns {Filters} - Returns the current instance of the player or undefined if player is not available.
      */
     public setSlowmode(val: boolean): Filters {
-        if (!this.player) return;
+        if (!this.player) return this;
         this.slowmode = val;
 
         this.setFilters(val ? { timescale: { speed: 0.5, pitch: 1.0, rate: 0.8, }, } : this.clearFilters());
+        return this;
     }
 
     /**
      * Sets the Nightcore filter for the player.
      * @param {boolean} val - Boolean value indicating whether to enable or disable Nightcore.
-     * @returns {boolean} - Returns the boolean value if Nightcore is enabled or undefined if the player is not available.
+     * @returns {Filter | boolean} - Returns the boolean value if Nightcore is enabled or undefined if the player is not available.
      */
-    public setNightcore(val: boolean): boolean {
-        if (!this.player) return;
+    public setNightcore(val: boolean): Filters | boolean {
+        if (!this.player) return this;
         this.nightcore = val;
 
         this.setTimescale(val ? { rate: 1.5 } : null);
@@ -79,7 +80,7 @@ export class customFilter extends Filters {
      * @returns {Filters} - Returns nothing.
      */
     public setVaporwave(val: boolean): Filters {
-        if (!this.player) return;
+        if (!this.player) return this;
         this.vaporwave = val;
 
         if (val) {
@@ -87,6 +88,7 @@ export class customFilter extends Filters {
         }
 
         this.setTimescale(val ? { pitch: 0.5 } : null);
+        return this;
     }
 
     /**
@@ -95,9 +97,10 @@ export class customFilter extends Filters {
      * @returns {Filters} - Returns nothing.
      */
     public set8D(val: boolean): Filters {
-        if (!this.player) return;
+        if (!this.player) return this;
         this._8d = val;
 
         this.setRotation(val ? { rotationHz: 0.2 } : null);
+        return this;
     }
 }

@@ -307,14 +307,14 @@ export declare class Player extends EventEmitter {
     /**
      * Moves the player to a different lavalink node.
      * @param {string} name - The name of the node to move to.
-     * @returns {Promise<Node>} - A Promise that resolves once the player has been successfully moved to the specified node.
+     * @returns {Promise<Node | void>} - A Promise that resolves once the player has been successfully moved to the specified node.
      */
-    moveNode(name: string): Promise<Node>;
+    moveNode(name: string): Promise<Node | void>;
     /**
      * Automatically moves the player to the least used Lavalink node.
-     * @returns {Promise<Node | boolean>} Resolves with the moved Node or false, or if an error occurred.
+     * @returns {Promise<Node | boolean | void>} Resolves with the moved Node or false, or if an error occurred.
      */
-    autoMoveNode(): Promise<Node | boolean>;
+    autoMoveNode(): Promise<Node | boolean | void>;
     /**
      * Sets the provided value for the given key.
      * @param {string} key - The key to set the value.

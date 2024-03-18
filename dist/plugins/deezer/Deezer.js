@@ -53,7 +53,7 @@ class Deezer extends Plugin_1.Plugin {
      */
     async resolve({ query, source, requester }) {
         if (this.isDeezerShareLink(query)) {
-            let newURL = await this.decodeDeezerShareLink(query);
+            const newURL = await this.decodeDeezerShareLink(query);
             if (newURL.startsWith('https://www.deezer.com/')) {
                 return this.resolve({ query: newURL, source: source ?? this.ruvyrias.options.defaultPlatform, requester });
             }
@@ -186,10 +186,10 @@ class Deezer extends Plugin_1.Plugin {
     /**
      * Decodes a Deezer share link to obtain the original URL.
      * @param {string} url - The Deezer share link to decode.
-     * @returns {Promise<string>} - A promise that resolves to the original URL after decoding the Deezer share link.
+     * @returns {Promise<string | undefined>} - A promise that resolves to the original URL after decoding the Deezer share link.
      */
     async decodeDeezerShareLink(url) {
-        let req = await fetch(url, {
+        const req = await fetch(url, {
             method: 'GET',
             redirect: 'manual',
         });
@@ -197,6 +197,7 @@ class Deezer extends Plugin_1.Plugin {
             const location = req.headers.get('location');
             return location;
         }
+        return undefined;
     }
     /**
      * Fetches data from the Deezer API based on the specified endpoint.

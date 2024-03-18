@@ -189,3 +189,7 @@ The example bot comes with several commands to manage music playback seamlessly:
 | `.bassboost`                    | Enhance the bass of the music.                                        |
 | `.save`                         | Save the currently playing track and send the link in DM to the user. |
 | `.volume <1-100>`               | Adjust the volume of the music.                                       |
+
+## Credits
+
+The [Ruvyrias](https://github.com/DarkslayerHaos/ruvyrias) client, customized by [DarkslayerHaos](https://github.com/DarkslayerHaos), is a fork originally derived from the code of [Poru](https://github.com/parasop/poru) developed by [Parasop](https://github.com/parasop).

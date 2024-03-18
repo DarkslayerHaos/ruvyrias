@@ -30,7 +30,7 @@ class customFilter extends Filters_1.Filters {
      */
     setBassboost(val) {
         if (!this.player)
-            return;
+            return this;
         if (val < 0 && val > 6) {
             throw Error('Bassboost value must be between 0 to 5');
         }
@@ -49,18 +49,19 @@ class customFilter extends Filters_1.Filters {
      */
     setSlowmode(val) {
         if (!this.player)
-            return;
+            return this;
         this.slowmode = val;
         this.setFilters(val ? { timescale: { speed: 0.5, pitch: 1.0, rate: 0.8, }, } : this.clearFilters());
+        return this;
     }
     /**
      * Sets the Nightcore filter for the player.
      * @param {boolean} val - Boolean value indicating whether to enable or disable Nightcore.
-     * @returns {boolean} - Returns the boolean value if Nightcore is enabled or undefined if the player is not available.
+     * @returns {Filter | boolean} - Returns the boolean value if Nightcore is enabled or undefined if the player is not available.
      */
     setNightcore(val) {
         if (!this.player)
-            return;
+            return this;
         this.nightcore = val;
         this.setTimescale(val ? { rate: 1.5 } : null);
         if (val) {
@@ -75,12 +76,13 @@ class customFilter extends Filters_1.Filters {
      */
     setVaporwave(val) {
         if (!this.player)
-            return;
+            return this;
         this.vaporwave = val;
         if (val) {
             this.nightcore = false;
         }
         this.setTimescale(val ? { pitch: 0.5 } : null);
+        return this;
     }
     /**
      * Sets the 8D filter for the player.
@@ -89,9 +91,10 @@ class customFilter extends Filters_1.Filters {
      */
     set8D(val) {
         if (!this.player)
-            return;
+            return this;
         this._8d = val;
         this.setRotation(val ? { rotationHz: 0.2 } : null);
+        return this;
     }
 }
 exports.customFilter = customFilter;

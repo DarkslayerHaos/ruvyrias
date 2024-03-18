@@ -193,6 +193,27 @@ export interface SpotifyRegularError {
     status: number;
     message: string;
 }
+/**
+ * Represents a Spotify public credentials.
+ */
+export interface SpotifyPublicCredentials {
+    clientId: string;
+    accessToken: string;
+    accessTokenExpirationTimestampMs: number;
+    isAnonymous: boolean;
+}
+export interface Seed {
+    initialPoolSize: number;
+    afterFilteringSize: number;
+    afterRelinkingSize: number;
+    id: string;
+    type: string;
+    href: string;
+}
+export interface SpotifyData {
+    tracks: SpotifyTrack[];
+    seeds: Seed[];
+}
 export declare class Spotify extends Plugin {
     private baseURL;
     ruvyrias: Ruvyrias;
@@ -288,3 +309,4 @@ export declare class Spotify extends Plugin {
      */
     private buildResponse;
 }
+export {};

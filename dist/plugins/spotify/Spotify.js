@@ -131,8 +131,8 @@ class Spotify extends Plugin_1.Plugin {
             const playlist = (await this.spotifyManager.send(`/playlists/${id}`));
             await this.fetchPlaylistTracks(playlist);
             const limitedTracks = this.options.playlistLimit
-                ? playlist.tracks.items.slice(0, this.options.playlistLimit)
-                : playlist.tracks.items;
+                ? playlist.tracks?.items.slice(0, this.options.playlistLimit)
+                : playlist.tracks?.items;
             const unresolvedPlaylistTracks = await Promise.all(limitedTracks.map((x) => this.buildUnresolved(x.track, requester)));
             return this.buildResponse('playlist', unresolvedPlaylistTracks, playlist.name);
         }
@@ -221,7 +221,7 @@ class Spotify extends Plugin_1.Plugin {
      * @returns {Promise<void>} - A Promise that resolves when the tracks are fetched.
      */
     async fetchPlaylistTracks(spotifyPlaylist) {
-        let nextPage = spotifyPlaylist.tracks.next;
+        let nextPage = spotifyPlaylist.tracks?.next;
         let pageLoaded = 1;
         while (nextPage) {
             if (!nextPage)
@@ -229,7 +229,7 @@ class Spotify extends Plugin_1.Plugin {
             const body = await this.spotifyManager.getData(nextPage);
             if (body.error)
                 break;
-            spotifyPlaylist.tracks.items.push(...body.items);
+            spotifyPlaylist.tracks?.items.push(...body.items);
             nextPage = body.next;
             pageLoaded++;
         }

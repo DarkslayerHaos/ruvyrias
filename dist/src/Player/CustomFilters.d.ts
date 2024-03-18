@@ -32,9 +32,9 @@ export declare class customFilter extends Filters {
     /**
      * Sets the Nightcore filter for the player.
      * @param {boolean} val - Boolean value indicating whether to enable or disable Nightcore.
-     * @returns {boolean} - Returns the boolean value if Nightcore is enabled or undefined if the player is not available.
+     * @returns {Filter | boolean} - Returns the boolean value if Nightcore is enabled or undefined if the player is not available.
      */
-    setNightcore(val: boolean): boolean;
+    setNightcore(val: boolean): Filters | boolean;
     /**
      * Sets the Vaporwave filter for the player.
      * @param {boolean} val - Boolean value indicating whether to enable or disable Vaporwave.

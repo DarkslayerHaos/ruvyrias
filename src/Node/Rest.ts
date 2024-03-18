@@ -95,9 +95,9 @@ export class Rest {
     /**
      * Performs an HTTP GET request to the specified path.
      * @param {RouteLike} path - The path to make the GET request.
-     * @returns {Promise<RestMethodGet>} A Promise that resolves with the response data.
+     * @returns {Promise<RestMethodGet | null>} A Promise that resolves with the response data.
      */
-    public async get(path: RouteLike): Promise<RestMethodGet> {
+    public async get(path: RouteLike): Promise<RestMethodGet | null> {
         try {
             const req = await fetch(this.url + path, {
                 method: RequestMethod.Get,
@@ -108,7 +108,7 @@ export class Rest {
             });
             return req.headers.get('content-type') === 'application/json' ? await req.json() as RestMethodGet : await req.text() as RestMethodGet;
         } catch (e) {
-            return null;
+            throw new Error('Failed to patch data');
         }
     }
 
@@ -131,7 +131,7 @@ export class Rest {
 
             return await req.json() as Player;
         } catch (e) {
-            return null;
+            throw new Error('Failed to patch data');
         }
     }
 

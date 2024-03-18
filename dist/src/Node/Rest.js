@@ -55,7 +55,7 @@ class Rest {
     /**
      * Performs an HTTP GET request to the specified path.
      * @param {RouteLike} path - The path to make the GET request.
-     * @returns {Promise<RestMethodGet>} A Promise that resolves with the response data.
+     * @returns {Promise<RestMethodGet | null>} A Promise that resolves with the response data.
      */
     async get(path) {
         try {
@@ -69,7 +69,7 @@ class Rest {
             return req.headers.get('content-type') === 'application/json' ? await req.json() : await req.text();
         }
         catch (e) {
-            return null;
+            throw new Error('Failed to patch data');
         }
     }
     /**
@@ -91,7 +91,7 @@ class Rest {
             return await req.json();
         }
         catch (e) {
-            return null;
+            throw new Error('Failed to patch data');
         }
     }
     /**
