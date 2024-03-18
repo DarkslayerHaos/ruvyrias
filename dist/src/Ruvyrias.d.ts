@@ -79,13 +79,13 @@ export interface RuvyriasOptions {
     /** Whether to use custom filters for audio processing. */
     useCustomFilters?: boolean;
     /** The name of the client using Ruvyrias. */
-    clientName: string;
+    clientName?: string;
     /** The client ID associated with the Ruvyrias instance. */
-    clientId: string | null;
+    clientId?: string | null;
     /** The version number of the client using Ruvyrias. */
-    clientVersion: number;
+    clientVersion?: number;
     /** Indicates whether the Ruvyrias instance is activated or not. */
-    isActivated: boolean;
+    isActivated?: boolean;
     /** A function used for sending packets to the communication library. */
     send?: Function | null;
 }

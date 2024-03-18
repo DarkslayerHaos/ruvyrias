@@ -1,6 +1,6 @@
 {
   "name": "ruvyrias",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "A stable and powerful Lavalink client for NodeJS.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
