@@ -225,8 +225,8 @@ export declare class Player extends EventEmitter {
     isPlaying: boolean;
     isPaused: boolean;
     isConnected: boolean;
-    isAutoPlay: boolean | undefined;
-    isQuietMode: boolean | undefined;
+    isAutoPlay: boolean;
+    isQuietMode: boolean;
     mute?: boolean;
     deaf?: boolean;
     loop: Loop;

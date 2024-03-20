@@ -2,7 +2,7 @@ import { Ruvyrias } from './Ruvyrias';
 /**
  * Represents a plugin for the Ruvyrias library.
  */
-export declare class Plugin {
+export declare abstract class Plugin {
     /** The name of the plugin. */
     readonly name: string;
     /**
@@ -15,5 +15,5 @@ export declare class Plugin {
      * @param {Ruvyrias} ruvyrias - The Ruvyrias instance to load the plugin into.
      * @returns {Promise<void>}
      */
-    load(ruvyrias: Ruvyrias): Promise<void>;
+    abstract load(ruvyrias: Ruvyrias): Promise<void>;
 }

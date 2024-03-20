@@ -99,14 +99,14 @@ client.on('ready', (client) => {
 
 // Event handler for message creation.
 client.on('messageCreate', async (message) => {
-    // Ignore messages that don't start with '!' or are from bots.
-    if (!message.content.startsWith('!') || message.author.bot) return;
+    // Ignore messages that are from bots.
+    if (message.author.bot) return;
 
     // Extract command and arguments from the message
     const args = message.content.slice(1).trim().split(/ +/g);
     const command = args.shift()?.toLowerCase()
 
-    if (command === 'play') {
+    if (command === '!play') {
         const query = args.join(' ');
 
         // Creating the Player.
@@ -155,7 +155,7 @@ client.ruvyrias.on('nodeConnect', node => {
 client.ruvyrias.on('trackStart', (player, track) => {
     const channel = client.channels.cache.get(player.textChannel);
 
-    channel.send(`Now playing: \`${track.info.title}\` by \`${track.info.author}\`.`);
+    channel.send(`🎶 Now playing: \`${track.info.title}\` by \`${track.info.author}\`.`);
 });
 
 // Runs when the music playlist reaches the end and the music player leaves the voice channel.
@@ -163,7 +163,7 @@ client.ruvyrias.on('queueEnd', player => {
     player.stop();
 
     const channel = client.channels.cache.get(player.textChannel);
-    channel.send('The player queue has ended, i\'m leaving voice channal!');
+    channel.send('⛔ The player queue has ended, i\'m leaving voice channal!');
 });
 
 // Log in the bot using the provided token.
@@ -172,7 +172,7 @@ client.login('token');
 
 ## Bot Example
 
-If you're looking for a practical example of how to use Ruvyrias, check out the [Bot Example Repository](https://github.com/DarkslayerHaos/music-bot). This repository provides a complete bot and sample code to help you get started quickly.
+If you're looking for a practical example of how to use Ruvyrias, check out the [Bot Example Repository](https://github.com/DarkslayerHaos/ruvyrias-example). This repository provides a complete bot and sample code to help you get started quickly.
 
 The example bot comes with several commands to manage music playback seamlessly:
 

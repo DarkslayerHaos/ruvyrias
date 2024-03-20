@@ -359,7 +359,7 @@ class Player extends events_1.EventEmitter {
         if (trackSource === 'youtube') {
             try {
                 const data = `https://www.youtube.com/watch?v=${trackIdentifier}&list=RD${trackIdentifier}`;
-                const response = await this.ruvyrias.resolve({ query: data, source: trackSource, requester: trackRequester });
+                const response = await this.ruvyrias.resolve({ query: data, source: 'ytmsearch', requester: trackRequester });
                 if (!response ?? !response.tracks ?? ['error', 'empty'].includes(response.loadType)) {
                     return await this.skip();
                 }

@@ -256,8 +256,8 @@ export class Player extends EventEmitter {
     public isPlaying: boolean;
     public isPaused: boolean;
     public isConnected: boolean;
-    public isAutoPlay: boolean | undefined;
-    public isQuietMode: boolean | undefined;
+    public isAutoPlay: boolean;
+    public isQuietMode: boolean;
     public mute?: boolean;
     public deaf?: boolean;
     public loop: Loop;
@@ -620,7 +620,7 @@ export class Player extends EventEmitter {
             try {
                 const data = `https://www.youtube.com/watch?v=${trackIdentifier}&list=RD${trackIdentifier}`;
 
-                const response = await this.ruvyrias.resolve({ query: data, source: trackSource, requester: trackRequester });
+                const response = await this.ruvyrias.resolve({ query: data, source: 'ytmsearch', requester: trackRequester });
                 if (!response ?? !response.tracks ?? ['error', 'empty'].includes(response.loadType)) {
                     return await this.skip();
                 }

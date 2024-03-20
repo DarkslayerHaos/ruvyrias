@@ -530,7 +530,7 @@ export class Ruvyrias extends EventEmitter {
     * @param {string} name The name of the node
     * @returns {Promise<string>} The version of the node
     */
-    public async getLavalinkVersion(name: string): Promise<string | unknown> {
+    public async getLavalinkVersion(name: string): Promise<string> {
         const node = this.nodes.get(name)
         if (!node) {
             throw new Error('Node not found!');

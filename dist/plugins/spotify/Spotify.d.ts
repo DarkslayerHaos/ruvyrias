@@ -309,4 +309,3 @@ export declare class Spotify extends Plugin {
      */
     private buildResponse;
 }
-export {};

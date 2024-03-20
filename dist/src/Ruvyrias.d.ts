@@ -285,7 +285,7 @@ export declare class Ruvyrias extends EventEmitter {
     * @param {string} name The name of the node
     * @returns {Promise<string>} The version of the node
     */
-    getLavalinkVersion(name: string): Promise<string | unknown>;
+    getLavalinkVersion(name: string): Promise<string>;
     /**
      * Get a player from Ruvyrias instance.
      * @param {string} guildId - Guild ID.

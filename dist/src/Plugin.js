@@ -14,11 +14,5 @@ class Plugin {
     constructor(name) {
         this.name = name;
     }
-    /**
-     * Loads the plugin into the Ruvyrias instance.
-     * @param {Ruvyrias} ruvyrias - The Ruvyrias instance to load the plugin into.
-     * @returns {Promise<void>}
-     */
-    async load(ruvyrias) { }
 }
 exports.Plugin = Plugin;

@@ -47,7 +47,7 @@ export class Deezer extends Plugin {
     public async load(ruvyrias: Ruvyrias) {
         this.ruvyrias = ruvyrias;
         this._resolve = ruvyrias.resolve.bind(ruvyrias);
-        ruvyrias.resolve = this.resolve.bind(this) as never;
+        ruvyrias.resolve = this.resolve.bind(this);
     }
 
     /**
@@ -255,7 +255,7 @@ export class Deezer extends Plugin {
         const req = await fetch(url, {
             method: 'GET',
             redirect: 'manual',
-        }); 
+        });
 
         if (req.status === 302) {
             const location = req.headers.get('location');
