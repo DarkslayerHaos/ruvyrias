@@ -17,19 +17,6 @@ class Deezer extends Plugin_1.Plugin {
         super('Deezer');
     }
     /**
-     * Checks if the provided URL is a Deezer share link.
-     * @param {string} url - The URL to check.
-     * @returns {boolean} - True if the URL is a Deezer share link, false otherwise.
-     */
-    isDeezerShareLink(url) {
-        if (url) {
-            return url.startsWith(DEEZER_SHARE_LINK);
-        }
-        else {
-            return false;
-        }
-    }
-    /**
      * Overrides the load method of the Plugin class, enabling the Deezer plugin to interact with the Ruvyrias instance.
      * @param {Ruvyrias} ruvyrias - The Ruvyrias instance.
      */
@@ -45,6 +32,19 @@ class Deezer extends Plugin_1.Plugin {
      */
     check(url) {
         return DEEZER_REGEX.test(url);
+    }
+    /**
+     * Checks if the provided URL is a Deezer share link.
+     * @param {string} url - The URL to check.
+     * @returns {boolean} - True if the URL is a Deezer share link, false otherwise.
+     */
+    isDeezerShareLink(url) {
+        if (url) {
+            return url.startsWith(DEEZER_SHARE_LINK);
+        }
+        else {
+            return false;
+        }
     }
     /**
      * Resolves a track, album, playlist, or artist from Deezer based on the provided query, source, and requester.
@@ -83,7 +83,7 @@ class Deezer extends Plugin_1.Plugin {
      * Retrieves information about a Deezer track based on the provided ID and requester.
      * @param {string} id - The ID of the Deezer track.
      * @param {any} requester - The requester of the track information.
-     * @returns {Promise<object>} - A promise that resolves to the Deezer track information.
+     * @returns {Promise<DeezerTrack | object>} - A promise that resolves to the Deezer track information.
      */
     async getTrack(id, requester) {
         try {
@@ -115,7 +115,7 @@ class Deezer extends Plugin_1.Plugin {
      * Retrieves information about a Deezer artist based on the provided ID and requester.
      * @param {string} id - The ID of the Deezer artist.
      * @param {any} requester - The requester of the artist information.
-     * @returns {Promise<object>} - A promise that resolves to the Deezer artist information.
+     * @returns {Promise<DeezerArtist | object>} - A promise that resolves to the Deezer artist information.
      */
     async getArtist(id, requester) {
         try {
@@ -159,7 +159,7 @@ class Deezer extends Plugin_1.Plugin {
         if (this.check(query))
             return this.resolve(query);
         try {
-            let tracks = await this.getData(`/search?q=${encodeURIComponent(query)}`);
+            const tracks = await this.getData(`/search?q=${encodeURIComponent(query)}`);
             const unresolvedTracks = await Promise.all(tracks.data.map((x) => this.buildUnresolved(x, requester)));
             return this.buildResponse('search', unresolvedTracks);
         }
@@ -171,7 +171,7 @@ class Deezer extends Plugin_1.Plugin {
      * Retrieves Deezer album tracks based on the album ID and requester.
      * @param {string} id - The ID of the Deezer album.
      * @param {any} requester - The requester for the album tracks.
-     * @returns {Promise<object>} - A promise that resolves to Deezer album tracks based on the album ID.
+     * @returns {Promise<DeezerAlbum | object>} - A promise that resolves to Deezer album tracks based on the album ID.
      */
     async getAlbum(id, requester) {
         try {

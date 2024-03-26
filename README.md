@@ -49,7 +49,7 @@ Ruvyrias is a robust Discord music bot client tailored for Lavalink V4 and above
 - **Customizable:** Adapt the client to your bot preferences.
 - **Easy Setup:** Quick and hassle-free installation.
 - **Queue System:** Efficiently manage music playback.
-- **Platform Support:** Built-in compatibility with Youtube, Soundcloud, Spotify, and Deezer.
+- **Platform Support:** Built-in compatibility with Youtube, Soundcloud, Spotify, Apple Music, and Deezer.
 
 ## Basic Usage
 
@@ -172,7 +172,7 @@ client.login('token');
 
 ## Bot Example
 
-If you're looking for a practical example of how to use Ruvyrias, check out the [Bot Example Repository](https://github.com/DarkslayerHaos/ruvyrias-example). This repository provides a complete bot and sample code to help you get started quickly.
+If you're looking for a practical example of how to use Ruvyrias, check out the [Ruvyrias Example Bot](https://github.com/DarkslayerHaos/ruvyrias-example). This repository provides a complete bot and sample code to help you get started quickly.
 
 The example bot comes with several commands to manage music playback seamlessly:
 

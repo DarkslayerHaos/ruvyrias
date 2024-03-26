@@ -1,6 +1,7 @@
 import mod from "./index.js";
 
 export default mod;
+export const AppleMusic = mod.AppleMusic;
 export const Connection = mod.Connection;
 export const Deezer = mod.Deezer;
 export const Filters = mod.Filters;

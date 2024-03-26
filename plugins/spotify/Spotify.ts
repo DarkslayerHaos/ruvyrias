@@ -243,7 +243,9 @@ export interface SpotifyData {
     seeds: Seed[];
 }
 
-
+/**
+ * Represents the Spotify class, extending the base Plugin class.
+ */
 export class Spotify extends Plugin {
     private baseURL: string = 'https://api.spotify.com/v1';
     public ruvyrias: Ruvyrias;
@@ -267,15 +269,6 @@ export class Spotify extends Plugin {
     }
 
     /**
-     * Checks if the provided URL is a Spotify URL.
-     * @param {string} url - The URL to check.
-     * @returns {boolean} - True if the URL is a Spotify URL, false otherwise.
-     */
-    private check(url: string): boolean {
-        return spotifyPattern.test(url);
-    }
-
-    /**
      * Loads the Spotify plugin into the Ruvyrias instance.
      * @param {Ruvyrias} ruvyrias - The Ruvyrias instance.
      */
@@ -283,6 +276,15 @@ export class Spotify extends Plugin {
         this.ruvyrias = ruvyrias;
         this._resolve = ruvyrias.resolve.bind(ruvyrias);
         ruvyrias.resolve = this.resolve.bind(this);
+    }
+
+    /**
+     * Checks if the provided URL is a Spotify URL.
+     * @param {string} url - The URL to check.
+     * @returns {boolean} - True if the URL is a Spotify URL, false otherwise.
+     */
+    private check(url: string): boolean {
+        return spotifyPattern.test(url);
     }
 
     /**

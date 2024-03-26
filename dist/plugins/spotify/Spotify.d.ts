@@ -214,6 +214,9 @@ export interface SpotifyData {
     tracks: SpotifyTrack[];
     seeds: Seed[];
 }
+/**
+ * Represents the Spotify class, extending the base Plugin class.
+ */
 export declare class Spotify extends Plugin {
     private baseURL;
     ruvyrias: Ruvyrias;
@@ -222,16 +225,16 @@ export declare class Spotify extends Plugin {
     spotifyManager: SpotifyManager;
     constructor(options: Omit<SpotifyOptions, 'authorization' | 'interval' | 'token'>);
     /**
+     * Loads the Spotify plugin into the Ruvyrias instance.
+     * @param {Ruvyrias} ruvyrias - The Ruvyrias instance.
+     */
+    load(ruvyrias: Ruvyrias): Promise<void>;
+    /**
      * Checks if the provided URL is a Spotify URL.
      * @param {string} url - The URL to check.
      * @returns {boolean} - True if the URL is a Spotify URL, false otherwise.
      */
     private check;
-    /**
-     * Loads the Spotify plugin into the Ruvyrias instance.
-     * @param {Ruvyrias} ruvyrias - The Ruvyrias instance.
-     */
-    load(ruvyrias: Ruvyrias): Promise<void>;
     /**
      * Requests an access token from the Spotify API using client credentials.
      * @returns {Promise<void>} - A promise that resolves when the token is successfully requested and set.

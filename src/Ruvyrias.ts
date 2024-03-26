@@ -6,8 +6,9 @@ import { LoadTrackResponse, Response } from './Guild/Response';
 import { Plugin } from './Plugin';
 import { Track, TrackData } from './Guild/Track';
 import { Filters } from './Player/Filters';
-import { Deezer } from '../plugins/deezer/Deezer';
+import { Deezer } from '../plugins/deezer';
 import { Spotify } from '../plugins/spotify';
+import { AppleMusic } from '../plugins/applemusic';
 
 /**
  * @extends EventEmitter The main class of Ruvyrias
@@ -17,7 +18,7 @@ export type Constructor<T> = new (...args: any[]) => T;
 /**
  * Exporting the plugins to the Ruvyrias class.
  */
-export { Deezer, Spotify };
+export { Deezer, Spotify, AppleMusic };
 
 /**
  * Configuration for a group of nodes in Ruvyrias.

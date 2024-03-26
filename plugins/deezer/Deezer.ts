@@ -17,6 +17,95 @@ export type loadType =
     | 'error';
 
 /**
+ * Represents a contributor to a track on Deezer, providing information such as their ID, name, and role.
+ */
+export interface DeezerContributor {
+    id: number;
+    name: string;
+    link: string;
+    share: string;
+    picture: string;
+    picture_small: string;
+    picture_medium: string;
+    picture_big: string;
+    picture_xl: string;
+    radio: boolean;
+    tracklist: string;
+    type: string;
+    role: string;
+}
+
+/**
+ * Represents an artist on Deezer, containing details such as their ID, name, and link.
+ */
+export interface DeezerArtist {
+    data: any;
+    id: number;
+    name: string;
+    link: string;
+    share: string;
+    picture: string;
+    picture_small: string;
+    picture_medium: string;
+    picture_big: string;
+    picture_xl: string;
+    radio: boolean;
+    tracklist: string;
+    type: string;
+}
+
+/**
+ * Represents an album on Deezer, containing information such as its ID, title, and release date.
+ */
+export interface DeezerAlbum {
+    tracks: DeezerTrack;
+    id: number;
+    title: string;
+    link: string;
+    cover: string;
+    cover_small: string;
+    cover_medium: string;
+    cover_big: string;
+    cover_xl: string;
+    md5_image: string;
+    release_date: string;
+    tracklist: string;
+    type: string;
+}
+
+/**
+ * Represents a track on Deezer, providing details like its ID, title, duration, and associated artist and album.
+ */
+export interface DeezerTrack {
+    data: any
+    id: string;
+    readable: boolean;
+    title: string;
+    title_short: string;
+    title_version: string;
+    isrc: string;
+    link: string;
+    share: string;
+    duration: number;
+    track_position: number;
+    disk_number: number;
+    rank: number;
+    release_date: string;
+    explicit_lyrics: boolean;
+    explicit_content_lyrics: number;
+    explicit_content_cover: number;
+    preview: string;
+    bpm: number;
+    gain: number;
+    available_countries: string[];
+    contributors: DeezerContributor[];
+    md5_image: string;
+    artist: DeezerArtist;
+    album: DeezerAlbum;
+    type: string;
+}
+
+/**
  * Represents the Deezer class, extending the base Plugin class.
  */
 export class Deezer extends Plugin {
@@ -25,19 +114,6 @@ export class Deezer extends Plugin {
     private _resolve!: ({ query, source, requester }: ResolveOptions) => any;
     public constructor() {
         super('Deezer');
-    }
-
-    /**
-     * Checks if the provided URL is a Deezer share link.
-     * @param {string} url - The URL to check.
-     * @returns {boolean} - True if the URL is a Deezer share link, false otherwise.
-     */
-    private isDeezerShareLink(url?: string): boolean {
-        if (url) {
-            return url.startsWith(DEEZER_SHARE_LINK);
-        } else {
-            return false;
-        }
     }
 
     /**
@@ -57,6 +133,19 @@ export class Deezer extends Plugin {
      */
     private check(url: string): boolean {
         return DEEZER_REGEX.test(url);
+    }
+
+    /**
+     * Checks if the provided URL is a Deezer share link.
+     * @param {string} url - The URL to check.
+     * @returns {boolean} - True if the URL is a Deezer share link, false otherwise.
+     */
+    private isDeezerShareLink(url?: string): boolean {
+        if (url) {
+            return url.startsWith(DEEZER_SHARE_LINK);
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -102,11 +191,11 @@ export class Deezer extends Plugin {
      * Retrieves information about a Deezer track based on the provided ID and requester.
      * @param {string} id - The ID of the Deezer track.
      * @param {any} requester - The requester of the track information.
-     * @returns {Promise<object>} - A promise that resolves to the Deezer track information.
+     * @returns {Promise<DeezerTrack | object>} - A promise that resolves to the Deezer track information.
      */
-    private async getTrack(id: string, requester: any): Promise<object> {
+    private async getTrack(id: string, requester: any): Promise<DeezerTrack | object> {
         try {
-            const track = await this.getData(`/track/${id}`);
+            const track = await this.getData(`/track/${id}`) as DeezerTrack;
             const unresolvedTracks = await this.buildUnresolved(track, requester)
 
             return this.buildResponse('track', [unresolvedTracks]);
@@ -130,7 +219,7 @@ export class Deezer extends Plugin {
     private async getPlaylist(id: string, requester: any): Promise<object> {
         try {
             const playlist: any = await this.getData(`/playlist/${id}`);
-            const unresolvedPlaylistTracks = await Promise.all(playlist.tracks.data.map((x: any) => this.buildUnresolved(x, requester)));
+            const unresolvedPlaylistTracks = await Promise.all(playlist.tracks.data.map((x: DeezerTrack) => this.buildUnresolved(x, requester)));
 
             return this.buildResponse('playlist', unresolvedPlaylistTracks, playlist.title);
 
@@ -148,20 +237,18 @@ export class Deezer extends Plugin {
      * Retrieves information about a Deezer artist based on the provided ID and requester.
      * @param {string} id - The ID of the Deezer artist.
      * @param {any} requester - The requester of the artist information.
-     * @returns {Promise<object>} - A promise that resolves to the Deezer artist information.
+     * @returns {Promise<DeezerArtist | object>} - A promise that resolves to the Deezer artist information.
      */
-    private async getArtist(id: string, requester: any): Promise<object> {
+    private async getArtist(id: string, requester: any): Promise<DeezerArtist | object> {
         try {
 
-            const artistData: any = await this.getData(`/artist/${id}`);
-            const artist: any = await this.getData(`/artist/${id}/top`);
+            const artistData = await this.getData(`/artist/${id}`) as DeezerArtist;
+            const artist = await this.getData(`/artist/${id}/top`) as DeezerArtist;
             await this.getArtistTracks(artist)
 
             if (artist.data.length === 0) return this.buildResponse('error', [], undefined, 'This artist does not have any top songs');
 
-            const unresolvedArtistTracks = await Promise.all(
-                artist.data.map((x: any) => this.buildUnresolved(x, requester))
-            );
+            const unresolvedArtistTracks = await Promise.all(artist.data.map((x: DeezerTrack) => this.buildUnresolved(x, requester)));
 
             return this.buildResponse('playlist', unresolvedArtistTracks, `${artistData.name}'s top songs`);
 
@@ -205,10 +292,8 @@ export class Deezer extends Plugin {
         if (this.check(query)) return this.resolve(query);
 
         try {
-            let tracks: any = await this.getData(`/search?q=${encodeURIComponent(query)}`);
-            const unresolvedTracks = await Promise.all(
-                tracks.data.map((x: any) => this.buildUnresolved(x, requester))
-            );
+            const tracks = await this.getData(`/search?q=${encodeURIComponent(query)}`) as DeezerTrack;
+            const unresolvedTracks = await Promise.all(tracks.data.map((x: DeezerTrack) => this.buildUnresolved(x, requester)));
             return this.buildResponse('search', unresolvedTracks);
         } catch (e: any) {
             return this.buildResponse(
@@ -224,15 +309,12 @@ export class Deezer extends Plugin {
      * Retrieves Deezer album tracks based on the album ID and requester.
      * @param {string} id - The ID of the Deezer album.
      * @param {any} requester - The requester for the album tracks.
-     * @returns {Promise<object>} - A promise that resolves to Deezer album tracks based on the album ID.
+     * @returns {Promise<DeezerAlbum | object>} - A promise that resolves to Deezer album tracks based on the album ID.
      */
-    private async getAlbum(id: string, requester: any): Promise<object> {
+    private async getAlbum(id: string, requester: any): Promise<DeezerAlbum | object> {
         try {
-            const album: any = await this.getData(`/album/${id}`);
-
-            const unresolvedAlbumTracks = await Promise.all(
-                album.tracks.data.map((x: any) => this.buildUnresolved(x, requester))
-            );
+            const album = await this.getData(`/album/${id}`) as DeezerAlbum;
+            const unresolvedAlbumTracks = await Promise.all(album.tracks.data.map((x: DeezerTrack) => this.buildUnresolved(x, requester)));
 
             return this.buildResponse('playlist', unresolvedAlbumTracks, album.title);
 
@@ -282,7 +364,7 @@ export class Deezer extends Plugin {
      * @param {any} requester - The requester for the track.
      * @returns {Promise<Track>} - An unresolved Track instance representing the Deezer track.
      */
-    private async buildUnresolved(track: any, requester: any): Promise<Track> {
+    private async buildUnresolved(track: DeezerTrack, requester: any): Promise<Track> {
         if (!track) {
             throw new ReferenceError('The Deezer track object was not provided');
         }

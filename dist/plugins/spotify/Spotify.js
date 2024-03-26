@@ -10,6 +10,9 @@ const SpotifyManager_1 = require("./SpotifyManager");
 const cheerio_1 = __importDefault(require("cheerio"));
 const spotifyPattern = /^(?:https:\/\/open\.spotify\.com\/(?:intl-\w+\/)?(?:user\/[A-Za-z0-9]+\/)?|spotify:)(album|playlist|track|artist)(?:[/:])([A-Za-z0-9]+).*$/;
 const SHORT_LINK_PATTERN = 'https://spotify.link';
+/**
+ * Represents the Spotify class, extending the base Plugin class.
+ */
 class Spotify extends Plugin_1.Plugin {
     baseURL = 'https://api.spotify.com/v1';
     ruvyrias;
@@ -31,14 +34,6 @@ class Spotify extends Plugin_1.Plugin {
         };
     }
     /**
-     * Checks if the provided URL is a Spotify URL.
-     * @param {string} url - The URL to check.
-     * @returns {boolean} - True if the URL is a Spotify URL, false otherwise.
-     */
-    check(url) {
-        return spotifyPattern.test(url);
-    }
-    /**
      * Loads the Spotify plugin into the Ruvyrias instance.
      * @param {Ruvyrias} ruvyrias - The Ruvyrias instance.
      */
@@ -46,6 +41,14 @@ class Spotify extends Plugin_1.Plugin {
         this.ruvyrias = ruvyrias;
         this._resolve = ruvyrias.resolve.bind(ruvyrias);
         ruvyrias.resolve = this.resolve.bind(this);
+    }
+    /**
+     * Checks if the provided URL is a Spotify URL.
+     * @param {string} url - The URL to check.
+     * @returns {boolean} - True if the URL is a Spotify URL, false otherwise.
+     */
+    check(url) {
+        return spotifyPattern.test(url);
     }
     /**
      * Requests an access token from the Spotify API using client credentials.

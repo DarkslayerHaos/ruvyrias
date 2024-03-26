@@ -1,15 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Ruvyrias = exports.Spotify = exports.Deezer = void 0;
+exports.Ruvyrias = exports.AppleMusic = exports.Spotify = exports.Deezer = void 0;
 const Node_1 = require("./Node/Node");
 const Player_1 = require("./Player/Player");
 const events_1 = require("events");
 const Config_1 = require("./Config");
 const Response_1 = require("./Guild/Response");
-const Deezer_1 = require("../plugins/deezer/Deezer");
-Object.defineProperty(exports, "Deezer", { enumerable: true, get: function () { return Deezer_1.Deezer; } });
+const deezer_1 = require("../plugins/deezer");
+Object.defineProperty(exports, "Deezer", { enumerable: true, get: function () { return deezer_1.Deezer; } });
 const spotify_1 = require("../plugins/spotify");
 Object.defineProperty(exports, "Spotify", { enumerable: true, get: function () { return spotify_1.Spotify; } });
+const applemusic_1 = require("../plugins/applemusic");
+Object.defineProperty(exports, "AppleMusic", { enumerable: true, get: function () { return applemusic_1.AppleMusic; } });
 /**
  * Represents the main Ruvyrias instance, coordinating interactions with nodes and players.
  */

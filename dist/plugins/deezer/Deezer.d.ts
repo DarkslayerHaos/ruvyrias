@@ -5,6 +5,91 @@ import { Plugin } from '../../src/Plugin';
  */
 export type loadType = 'track' | 'playlist' | 'search' | 'empty' | 'error';
 /**
+ * Represents a contributor to a track on Deezer, providing information such as their ID, name, and role.
+ */
+export interface DeezerContributor {
+    id: number;
+    name: string;
+    link: string;
+    share: string;
+    picture: string;
+    picture_small: string;
+    picture_medium: string;
+    picture_big: string;
+    picture_xl: string;
+    radio: boolean;
+    tracklist: string;
+    type: string;
+    role: string;
+}
+/**
+ * Represents an artist on Deezer, containing details such as their ID, name, and link.
+ */
+export interface DeezerArtist {
+    data: any;
+    id: number;
+    name: string;
+    link: string;
+    share: string;
+    picture: string;
+    picture_small: string;
+    picture_medium: string;
+    picture_big: string;
+    picture_xl: string;
+    radio: boolean;
+    tracklist: string;
+    type: string;
+}
+/**
+ * Represents an album on Deezer, containing information such as its ID, title, and release date.
+ */
+export interface DeezerAlbum {
+    tracks: DeezerTrack;
+    id: number;
+    title: string;
+    link: string;
+    cover: string;
+    cover_small: string;
+    cover_medium: string;
+    cover_big: string;
+    cover_xl: string;
+    md5_image: string;
+    release_date: string;
+    tracklist: string;
+    type: string;
+}
+/**
+ * Represents a track on Deezer, providing details like its ID, title, duration, and associated artist and album.
+ */
+export interface DeezerTrack {
+    data: any;
+    id: string;
+    readable: boolean;
+    title: string;
+    title_short: string;
+    title_version: string;
+    isrc: string;
+    link: string;
+    share: string;
+    duration: number;
+    track_position: number;
+    disk_number: number;
+    rank: number;
+    release_date: string;
+    explicit_lyrics: boolean;
+    explicit_content_lyrics: number;
+    explicit_content_cover: number;
+    preview: string;
+    bpm: number;
+    gain: number;
+    available_countries: string[];
+    contributors: DeezerContributor[];
+    md5_image: string;
+    artist: DeezerArtist;
+    album: DeezerAlbum;
+    type: string;
+}
+/**
  * Represents the Deezer class, extending the base Plugin class.
  */
 export declare class Deezer extends Plugin {
@@ -12,12 +97,6 @@ export declare class Deezer extends Plugin {
     private ruvyrias;
     private _resolve;
     constructor();
-    /**
-     * Checks if the provided URL is a Deezer share link.
-     * @param {string} url - The URL to check.
-     * @returns {boolean} - True if the URL is a Deezer share link, false otherwise.
-     */
-    private isDeezerShareLink;
     /**
      * Overrides the load method of the Plugin class, enabling the Deezer plugin to interact with the Ruvyrias instance.
      * @param {Ruvyrias} ruvyrias - The Ruvyrias instance.
@@ -30,6 +109,12 @@ export declare class Deezer extends Plugin {
      */
     private check;
     /**
+     * Checks if the provided URL is a Deezer share link.
+     * @param {string} url - The URL to check.
+     * @returns {boolean} - True if the URL is a Deezer share link, false otherwise.
+     */
+    private isDeezerShareLink;
+    /**
      * Resolves a track, album, playlist, or artist from Deezer based on the provided query, source, and requester.
      * @param {ResolveOptions} options - The options for resolving a track.
      * @returns {Promise<unknown>} - A promise that resolves to the result of the Deezer resolution.
@@ -39,7 +124,7 @@ export declare class Deezer extends Plugin {
      * Retrieves information about a Deezer track based on the provided ID and requester.
      * @param {string} id - The ID of the Deezer track.
      * @param {any} requester - The requester of the track information.
-     * @returns {Promise<object>} - A promise that resolves to the Deezer track information.
+     * @returns {Promise<DeezerTrack | object>} - A promise that resolves to the Deezer track information.
      */
     private getTrack;
     /**
@@ -53,7 +138,7 @@ export declare class Deezer extends Plugin {
      * Retrieves information about a Deezer artist based on the provided ID and requester.
      * @param {string} id - The ID of the Deezer artist.
      * @param {any} requester - The requester of the artist information.
-     * @returns {Promise<object>} - A promise that resolves to the Deezer artist information.
+     * @returns {Promise<DeezerArtist | object>} - A promise that resolves to the Deezer artist information.
      */
     private getArtist;
     /**
@@ -73,7 +158,7 @@ export declare class Deezer extends Plugin {
      * Retrieves Deezer album tracks based on the album ID and requester.
      * @param {string} id - The ID of the Deezer album.
      * @param {any} requester - The requester for the album tracks.
-     * @returns {Promise<object>} - A promise that resolves to Deezer album tracks based on the album ID.
+     * @returns {Promise<DeezerAlbum | object>} - A promise that resolves to Deezer album tracks based on the album ID.
      */
     private getAlbum;
     /**
