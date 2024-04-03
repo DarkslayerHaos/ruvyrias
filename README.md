@@ -24,6 +24,7 @@
 - [Installation](#installation)
 - [About](#about)
 - [Basic Usage](#basic-usage)
+- [Implementation Public Repo](#implementation-public-repo)
 - [Bot Example](#bot-example)
 
 ## Installation
@@ -169,6 +170,13 @@ client.ruvyrias.on('queueEnd', player => {
 // Log in the bot using the provided token.
 client.login('token');
 ```
+
+## Implementation Public Repo:
+Note: Send PR to add your repo here
+
+| URL                                                          | Additional Information                   |
+| ------------------------------------------------------------ | -----------------------------------------|
+| [Poru V4](https://github.com/adh319/Lunox/tree/Lavalink_v4)  | Works with the latest Discord.js version |
 
 ## Bot Example
 
