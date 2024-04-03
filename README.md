@@ -23,8 +23,8 @@
 - [Documentation](https://ruvyrias-lock.vercel.app/)
 - [Installation](#installation)
 - [About](#about)
-- [Basic Usage](#basic-usage)
 - [Implementation Public Repo](#implementation-public-repo)
+- [Basic Usage](#basic-usage)
 - [Bot Example](#bot-example)
 
 ## Installation
@@ -51,6 +51,14 @@ Ruvyrias is a robust Discord music bot client tailored for Lavalink V4 and above
 - **Easy Setup:** Quick and hassle-free installation.
 - **Queue System:** Efficiently manage music playback.
 - **Platform Support:** Built-in compatibility with Youtube, Soundcloud, Spotify, Apple Music, and Deezer.
+
+## Implementation Public Repo:
+Note: Send PR to add your repo here
+
+| Repository                                                             | Creator                                             | Additional Information                              |
+| ---------------------------------------------------------------------- | ----------------------------------------------------| ----------------------------------------------------|
+| [Ruvyrias Example](https://github.com/DarkslayerHaos/ruvyrias-example) | [DarkslayerHaos](https://github.com/DarkslayerHaos) | Official Ruvyrias Exampe bot, easy setup and usage. |
+| [Lunox](https://github.com/adh319/Lunox/tree/Lavalink_v4)              | [adh319](https://github.com/adh319)                 | Check out the repository for futher information.    |
 
 ## Basic Usage
 
@@ -170,13 +178,6 @@ client.ruvyrias.on('queueEnd', player => {
 // Log in the bot using the provided token.
 client.login('token');
 ```
-
-## Implementation Public Repo:
-Note: Send PR to add your repo here
-
-| URL                                                          | Additional Information                   |
-| ------------------------------------------------------------ | -----------------------------------------|
-| [Poru V4](https://github.com/adh319/Lunox/tree/Lavalink_v4)  | Works with the latest Discord.js version |
 
 ## Bot Example
 
