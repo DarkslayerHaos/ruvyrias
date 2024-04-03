@@ -53,11 +53,11 @@ Ruvyrias is a robust Discord music bot client tailored for Lavalink V4 and above
 - **Platform Support:** Built-in compatibility with Youtube, Soundcloud, Spotify, Apple Music, and Deezer.
 
 ## Implementation Repositories
-Note: Send PR to add your repo here
+Note: `Send PR to add your repository here.`
 
 | Repository                                                             | Creator                                             | Additional Information                              |
 | ---------------------------------------------------------------------- | ----------------------------------------------------| ----------------------------------------------------|
-| [Ruvyrias Example](https://github.com/DarkslayerHaos/ruvyrias-example) | [DarkslayerHaos](https://github.com/DarkslayerHaos) | Official Ruvyrias Exampe bot, easy setup and usage. |
+| [Ruvyrias Example](https://github.com/DarkslayerHaos/ruvyrias-example) | [DarkslayerHaos](https://github.com/DarkslayerHaos) | Official Ruvyrias Exampe Bot, easy setup and usage. |
 | [Lunox](https://github.com/adh319/Lunox/tree/Lavalink_v4)              | [adh319](https://github.com/adh319)                 | Check out the repository for futher information.    |
 
 ## Basic Usage
