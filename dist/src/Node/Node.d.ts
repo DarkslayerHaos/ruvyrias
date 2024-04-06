@@ -67,9 +67,9 @@ export declare class Node {
     constructor(ruvyrias: Ruvyrias, node: NodeGroup, options: RuvyriasOptions);
     /**
      * Establishes a connection to the Lavalink node.
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    connect(): void;
+    connect(): Promise<void>;
     /**
      * Sends a payload to the Lavalink node.
      * @param {any} payload The payload to be sent.
@@ -78,9 +78,9 @@ export declare class Node {
     send(payload: any): void;
     /**
      * Initiates a reconnection attempt to the Lavalink node.
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    reconnect(): void;
+    reconnect(): Promise<void>;
     /**
      * Disconnects the Lavalink node.
      * @returns {Promise<void>} void
@@ -111,7 +111,7 @@ export declare class Node {
     /**
      * This will close the connection to the node
      * @param {any} event any
-     * @returns {void} void
+     * @returns {Promise<void>} void
      */
     private close;
     /**

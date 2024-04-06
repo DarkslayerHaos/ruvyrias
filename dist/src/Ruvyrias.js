@@ -47,13 +47,13 @@ class Ruvyrias extends events_1.EventEmitter {
     /**
      * Initializes the Ruvyrias instance with the specified VoiceClient.
      * @param {any} client - VoiceClient for the Ruvyrias library to use to connect to the Lavalink node server (discord.js, eris, oceanic).
-     * @returns {this} - The current Ruvyrias instance.
+     * @returns {Promise<this>} - The current Ruvyrias instance.
      */
-    init(client) {
+    async init(client) {
         if (this.options.isActivated)
             return this;
         this.options.clientId = client.user?.id;
-        this._nodes.forEach((node) => this.addNode(node));
+        this._nodes.forEach(async (node) => await this.addNode(node));
         this.options.isActivated = true;
         if (this.options.plugins) {
             this.options.plugins.forEach((plugin) => {
@@ -129,24 +129,24 @@ class Ruvyrias extends events_1.EventEmitter {
     /**
      * Adds a node to the Ruvyrias instance.
      * @param {NodeGroup} options - NodeGroup containing node configuration.
-     * @returns {Node} - The created Node instance.
+     * @returns {Promise<Node>} - The created Node instance.
      */
-    addNode(options) {
+    async addNode(options) {
         const node = new Node_1.Node(this, options, this.options);
         this.nodes.set(options.name, node);
-        node.connect();
+        await node.connect();
         return node;
     }
     /**
      * Removes a node from the Ruvyrias instance.
      * @param {string} identifier - Node name.
-     * @returns {void} void
+     * @returns {Promise<void>} void
      */
-    removeNode(identifier) {
+    async removeNode(identifier) {
         const node = this.nodes.get(identifier);
         if (!node)
             return;
-        node.disconnect();
+        await node.disconnect();
         this.nodes.delete(identifier);
     }
     /**
@@ -263,16 +263,9 @@ class Ruvyrias extends events_1.EventEmitter {
             throw new Error('No nodes are available.');
         }
         node = node ?? this.leastUsedNodes[0];
-        const regex = /^https?:\/\//;
-        if (regex.test(query)) {
-            const response = await node.rest.get(`/v4/loadtracks?identifier=${encodeURIComponent(query)}`);
-            return new Response_1.Response(response, requester);
-        }
-        else {
-            const track = `${source ?? 'ytsearch'}:${query}`;
-            const response = await node.rest.get(`/v4/loadtracks?identifier=${encodeURIComponent(track)}`);
-            return new Response_1.Response(response, requester);
-        }
+        const trackIdentifier = /^https?:\/\//.test(query) ? query : `${source ?? 'ytsearch'}:${query}`;
+        const response = await node.rest.get(`/v4/loadtracks?identifier=${encodeURIComponent(trackIdentifier)}`);
+        return new Response_1.Response(response, requester);
     }
     /**
      * Decode a track from Ruvyrias instance.

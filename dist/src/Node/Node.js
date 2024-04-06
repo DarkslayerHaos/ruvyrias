@@ -56,9 +56,9 @@ class Node {
     }
     /**
      * Establishes a connection to the Lavalink node.
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    connect() {
+    async connect() {
         if (this.ws)
             this.ws.close();
         if (!this.ruvyrias.nodes.get(this.name)) {
@@ -67,7 +67,7 @@ class Node {
         const headers = {
             'Authorization': this.password,
             'User-Id': this.ruvyrias.options.clientId,
-            'Client-Name': this.ruvyrias.options.clientName ?? Config_1.Config.clientName,
+            'Client-Name': `${Config_1.Config.clientName}/${Config_1.Config.clientVersion}`,
         };
         if (this.sessionId)
             headers['Session-Id'] = this.sessionId;
@@ -92,10 +92,10 @@ class Node {
     }
     /**
      * Initiates a reconnection attempt to the Lavalink node.
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    reconnect() {
-        this.reconnectAttempt = setTimeout(() => {
+    async reconnect() {
+        this.reconnectAttempt = setTimeout(async () => {
             if (this.attempt > this.reconnectTries) {
                 throw new Error(`[Ruvyrias Websocket] Unable to connect with ${this.name} node after ${this.reconnectTries} tries`);
             }
@@ -103,7 +103,7 @@ class Node {
             this.ws?.removeAllListeners();
             this.ws = null;
             this.ruvyrias.emit('nodeReconnect', this);
-            this.connect();
+            await this.connect();
             this.attempt++;
         }, this.reconnectTimeout);
     }
@@ -200,14 +200,14 @@ class Node {
     /**
      * This will close the connection to the node
      * @param {any} event any
-     * @returns {void} void
+     * @returns {Promise<void>} void
      */
-    close(event) {
-        this.disconnect();
+    async close(event) {
+        await this.disconnect();
         this.ruvyrias.emit('nodeDisconnect', this, event);
         this.ruvyrias.emit('debug', this.name, `[Web Socket] Connection closed with Error code : ${event ?? 'Unknown code'}`);
         if (event !== 1000)
-            this.reconnect();
+            await this.reconnect();
     }
     /**
      * This function will emit the error so that the user's listeners can get them and listen to them

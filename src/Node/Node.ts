@@ -92,9 +92,9 @@ export class Node {
 
     /**
      * Establishes a connection to the Lavalink node.
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    public connect(): void {
+    public async connect(): Promise<void> {
         if (this.ws) this.ws.close();
         if (!this.ruvyrias.nodes.get(this.name)) {
             this.ruvyrias.nodes.set(this.name, this)
@@ -102,7 +102,7 @@ export class Node {
         const headers = {
             'Authorization': this.password,
             'User-Id': this.ruvyrias.options.clientId,
-            'Client-Name': this.ruvyrias.options.clientName ?? Config.clientName,
+            'Client-Name': `${Config.clientName}/${Config.clientVersion}`,
         };
         if (this.sessionId) headers['Session-Id'] = this.sessionId;
         this.ws = new WebSocket(`${this.socketURL}`, { headers });
@@ -127,10 +127,10 @@ export class Node {
 
     /**
      * Initiates a reconnection attempt to the Lavalink node.
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    public reconnect(): void {
-        this.reconnectAttempt = setTimeout(() => {
+    public async reconnect(): Promise<void> {
+        this.reconnectAttempt = setTimeout(async () => {
             if (this.attempt > this.reconnectTries) {
                 throw new Error(`[Ruvyrias Websocket] Unable to connect with ${this.name} node after ${this.reconnectTries} tries`);
             }
@@ -138,7 +138,7 @@ export class Node {
             this.ws?.removeAllListeners();
             this.ws = null;
             this.ruvyrias.emit('nodeReconnect', this);
-            this.connect();
+            await this.connect();
             this.attempt++;
         }, this.reconnectTimeout);
     }
@@ -245,13 +245,13 @@ export class Node {
     /**
      * This will close the connection to the node
      * @param {any} event any
-     * @returns {void} void
+     * @returns {Promise<void>} void
      */
-    private close(event: any): void {
-        this.disconnect();
+    private async close(event: any): Promise<void> {
+        await this.disconnect();
         this.ruvyrias.emit('nodeDisconnect', this, event);
         this.ruvyrias.emit('debug', this.name, `[Web Socket] Connection closed with Error code : ${event ?? 'Unknown code'}`);
-        if (event !== 1000) this.reconnect();
+        if (event !== 1000) await this.reconnect();
     }
 
     /**

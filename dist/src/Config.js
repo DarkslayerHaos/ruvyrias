@@ -8,7 +8,7 @@ exports.Config = void 0;
 var Config;
 (function (Config) {
     /** Client version. */
-    Config[Config["clientVersion"] = 1.2] = "clientVersion";
+    Config[Config["clientVersion"] = 1.3] = "clientVersion";
     /** Client name. */
     Config["clientName"] = "Ruvyrias";
 })(Config || (exports.Config = Config = {}));

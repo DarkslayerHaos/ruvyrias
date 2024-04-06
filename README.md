@@ -25,7 +25,7 @@
 - [About](#about)
 - [Implementation Repositories](#implementation-repositories)
 - [Basic Usage](#basic-usage)
-- [Bot Example](#bot-example)
+- [Bot Example](https://github.com/DarkslayerHaos/ruvyrias-example)
 
 ## Installation
 
@@ -178,26 +178,6 @@ client.ruvyrias.on('queueEnd', player => {
 // Log in the bot using the provided token.
 client.login('token');
 ```
-
-## Bot Example
-
-If you're looking for a practical example of how to use Ruvyrias, check out the [Ruvyrias Example Bot](https://github.com/DarkslayerHaos/ruvyrias-example). This repository provides a complete bot and sample code to help you get started quickly.
-
-The example bot comes with several commands to manage music playback seamlessly:
-
-| Command                         | Description                                                           |
-| ------------------------------- | --------------------------------------------------------------------- |
-| `.play <link or song-name>`     | Play a song by providing a link or the name of the song.              |
-| `.pause`                        | Pause the currently playing track.                                    |
-| `.resume`                       | Resume playback.                                                      |
-| `.skip`                         | Skip to the next track in the queue.                                  |
-| `.stop`                         | Stop the music and clear the queue.                                   |
-| `.queue`                        | Display the current music queue.                                      |
-| `.playprevious`                 | Play the previously played track.                                     |
-| `.loop`                         | Toggle loop mode for the entire queue.                                |
-| `.bassboost`                    | Enhance the bass of the music.                                        |
-| `.save`                         | Save the currently playing track and send the link in DM to the user. |
-| `.volume <1-100>`               | Adjust the volume of the music.                                       |
 
 ## Credits
 

@@ -503,16 +503,9 @@ class Player extends events_1.EventEmitter {
      * @returns {Promise<Response>} - The response containing information about the resolved track.
      */
     async resolve({ query, source, requester }) {
-        const regex = /^https?:\/\//;
-        if (regex.test(query)) {
-            const response = await this.node.rest.get(`/v4/loadtracks?identifier=${encodeURIComponent(query)}`);
-            return new Response_1.Response(response, requester);
-        }
-        else {
-            const track = `${source ?? 'ytsearch'}:${query}`;
-            const response = await this.node.rest.get(`/v4/loadtracks?identifier=${encodeURIComponent(track)}`);
-            return new Response_1.Response(response, requester);
-        }
+        const trackIdentifier = /^https?:\/\//.test(query) ? query : `${source ?? 'ytsearch'}:${query}`;
+        const response = await this.node.rest.get(`/v4/loadtracks?identifier=${encodeURIComponent(trackIdentifier)}`);
+        return new Response_1.Response(response, requester);
     }
     /**
      * Sends data to the Ruvyrias instance.

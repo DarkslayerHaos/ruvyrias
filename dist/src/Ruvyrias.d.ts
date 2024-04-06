@@ -9,6 +9,7 @@ import { Filters } from './Player/Filters';
 import { Deezer } from '../plugins/deezer';
 import { Spotify } from '../plugins/spotify';
 import { AppleMusic } from '../plugins/applemusic';
+import { IVoiceServer, SetStateUpdate } from './Player/Connection';
 /**
  * @extends EventEmitter The main class of Ruvyrias
  */
@@ -35,6 +36,43 @@ export interface NodeGroup {
     secure?: boolean;
     /** An array of region identifiers supported by the node for voice connections. */
     region?: string[];
+}
+/**
+ * Represents a packet sent over a communication channel, which can be one of several types.
+ */
+export type Packet = PacketVoiceStateUpdate | PacketVoiceServerUpdate | AnyOtherPacket;
+/**
+ * Represents a packet containing an update to the voice state.
+ */
+export interface PacketVoiceStateUpdate {
+    /** The opcode for this packet type. */
+    op: number;
+    /** The data payload containing the state update. */
+    d: SetStateUpdate;
+    /** The type identifier for this packet. */
+    t: "VOICE_STATE_UPDATE";
+}
+/**
+ * Represents a packet containing an update to the voice server information.
+ */
+export interface PacketVoiceServerUpdate {
+    /** The opcode for this packet type. */
+    op: number;
+    /** The data payload containing the voice server information. */
+    d: IVoiceServer;
+    /** The type identifier for this packet. */
+    t: "VOICE_SERVER_UPDATE";
+}
+/**
+ * Represents a packet of any other type not explicitly defined.
+ */
+export interface AnyOtherPacket {
+    /** The opcode for this packet type. */
+    op: number;
+    /** The data payload containing arbitrary information. */
+    d: any;
+    /** The type identifier for this packet. */
+    t: string;
 }
 /**
  * Options for resolving a track in Ruvyrias.
@@ -191,9 +229,9 @@ export declare class Ruvyrias extends EventEmitter {
     /**
      * Initializes the Ruvyrias instance with the specified VoiceClient.
      * @param {any} client - VoiceClient for the Ruvyrias library to use to connect to the Lavalink node server (discord.js, eris, oceanic).
-     * @returns {this} - The current Ruvyrias instance.
+     * @returns {Promise<this>} - The current Ruvyrias instance.
      */
-    init(client: any): this;
+    init(client: any): Promise<this>;
     /**
      * Handles Voice State Update and Voice Server Update packets from the Discord API.
      * @param {any} packet Packet from Discord API.
@@ -203,15 +241,15 @@ export declare class Ruvyrias extends EventEmitter {
     /**
      * Adds a node to the Ruvyrias instance.
      * @param {NodeGroup} options - NodeGroup containing node configuration.
-     * @returns {Node} - The created Node instance.
+     * @returns {Promise<Node>} - The created Node instance.
      */
-    addNode(options: NodeGroup): Node;
+    addNode(options: NodeGroup): Promise<Node>;
     /**
      * Removes a node from the Ruvyrias instance.
      * @param {string} identifier - Node name.
-     * @returns {void} void
+     * @returns {Promise<void>} void
      */
-    removeNode(identifier: string): void;
+    removeNode(identifier: string): Promise<void>;
     /**
      * Retrieves an array of nodes from the Ruvyrias instance based on the specified region.
      * @param {string} region - Region of the node.

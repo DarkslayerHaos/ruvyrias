@@ -782,16 +782,9 @@ export class Player extends EventEmitter {
      * @returns {Promise<Response>} - The response containing information about the resolved track.
      */
     public async resolve({ query, source, requester }: ResolveOptions): Promise<Response> {
-        const regex = /^https?:\/\//;
-
-        if (regex.test(query)) {
-            const response = await this.node.rest.get(`/v4/loadtracks?identifier=${encodeURIComponent(query)}`) as LoadTrackResponse;
-            return new Response(response, requester);
-        } else {
-            const track = `${source ?? 'ytsearch'}:${query}`;
-            const response = await this.node.rest.get(`/v4/loadtracks?identifier=${encodeURIComponent(track)}`) as LoadTrackResponse;
-            return new Response(response, requester);
-        }
+        const trackIdentifier = /^https?:\/\//.test(query) ? query : `${source ?? 'ytsearch'}:${query}`;
+        const response = await this.node.rest.get(`/v4/loadtracks?identifier=${encodeURIComponent(trackIdentifier)}`) as LoadTrackResponse;
+        return new Response(response, requester);
     }
 
     /**

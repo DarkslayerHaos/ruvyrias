@@ -9,6 +9,7 @@ import { Filters } from './Player/Filters';
 import { Deezer } from '../plugins/deezer';
 import { Spotify } from '../plugins/spotify';
 import { AppleMusic } from '../plugins/applemusic';
+import { IVoiceServer, SetStateUpdate } from './Player/Connection';
 
 /**
  * @extends EventEmitter The main class of Ruvyrias
@@ -38,6 +39,47 @@ export interface NodeGroup {
     secure?: boolean;
     /** An array of region identifiers supported by the node for voice connections. */
     region?: string[];
+}
+
+/**
+ * Represents a packet sent over a communication channel, which can be one of several types.
+ */
+export type Packet = PacketVoiceStateUpdate | PacketVoiceServerUpdate | AnyOtherPacket;
+
+/**
+ * Represents a packet containing an update to the voice state.
+ */
+export interface PacketVoiceStateUpdate {
+    /** The opcode for this packet type. */
+    op: number;
+    /** The data payload containing the state update. */
+    d: SetStateUpdate;
+    /** The type identifier for this packet. */
+    t: "VOICE_STATE_UPDATE";
+}
+
+/**
+ * Represents a packet containing an update to the voice server information.
+ */
+export interface PacketVoiceServerUpdate {
+    /** The opcode for this packet type. */
+    op: number;
+    /** The data payload containing the voice server information. */
+    d: IVoiceServer;
+    /** The type identifier for this packet. */
+    t: "VOICE_SERVER_UPDATE";
+}
+
+/**
+ * Represents a packet of any other type not explicitly defined.
+ */
+export interface AnyOtherPacket {
+    /** The opcode for this packet type. */
+    op: number;
+    /** The data payload containing arbitrary information. */
+    d: any;
+    /** The type identifier for this packet. */
+    t: string;
 }
 
 /**
@@ -225,12 +267,12 @@ export class Ruvyrias extends EventEmitter {
     /**
      * Initializes the Ruvyrias instance with the specified VoiceClient.
      * @param {any} client - VoiceClient for the Ruvyrias library to use to connect to the Lavalink node server (discord.js, eris, oceanic).
-     * @returns {this} - The current Ruvyrias instance.
+     * @returns {Promise<this>} - The current Ruvyrias instance.
      */
-    public init(client: any): this {
+    public async init(client: any): Promise<this> {
         if (this.options.isActivated) return this;
         this.options.clientId = client.user?.id as string;
-        this._nodes.forEach((node) => this.addNode(node));
+        this._nodes.forEach(async (node) => await this.addNode(node));
         this.options.isActivated = true;
 
         if (this.options.plugins) {
@@ -243,7 +285,7 @@ export class Ruvyrias extends EventEmitter {
 
         switch (this.options.library) {
             case 'discord.js': {
-                this.send = (packet: any) => {
+                this.send = (packet: Packet) => {
                     const guild = client.guilds.cache.get(packet.d.guild_id);
                     if (guild) guild.shard?.send(packet);
                 };
@@ -253,7 +295,7 @@ export class Ruvyrias extends EventEmitter {
                 break;
             }
             case 'eris': {
-                this.send = (packet: any) => {
+                this.send = (packet: Packet) => {
                     const guild = client.guilds.get(packet.d.guild_id);
                     if (guild) guild.shard.sendWS(packet?.op, packet?.d);
                 };
@@ -264,12 +306,12 @@ export class Ruvyrias extends EventEmitter {
                 break;
             }
             case 'oceanic': {
-                this.send = (packet: any) => {
+                this.send = (packet: Packet) => {
                     const guild = client.guilds.get(packet.d.guild_id);
                     if (guild) guild.shard.send(packet?.op, packet?.d);
                 };
 
-                client.on('packet', async (packet: any) => {
+                client.on('packet', async (packet: Packet) => {
                     this.packetUpdate(packet);
                 });
                 break;
@@ -309,24 +351,24 @@ export class Ruvyrias extends EventEmitter {
     /**
      * Adds a node to the Ruvyrias instance.
      * @param {NodeGroup} options - NodeGroup containing node configuration.
-     * @returns {Node} - The created Node instance.
+     * @returns {Promise<Node>} - The created Node instance.
      */
-    public addNode(options: NodeGroup): Node {
+    public async addNode(options: NodeGroup): Promise<Node> {
         const node = new Node(this, options, this.options);
         this.nodes.set(options.name, node);
-        node.connect();
+        await node.connect();
         return node;
     }
 
     /**
      * Removes a node from the Ruvyrias instance.
      * @param {string} identifier - Node name.
-     * @returns {void} void
+     * @returns {Promise<void>} void
      */
-    public removeNode(identifier: string) {
+    public async removeNode(identifier: string): Promise<void> {
         const node = this.nodes.get(identifier);
         if (!node) return;
-        node.disconnect();
+        await node.disconnect();
         this.nodes.delete(identifier);
     }
 
@@ -462,16 +504,9 @@ export class Ruvyrias extends EventEmitter {
 
         node = node ?? this.leastUsedNodes[0];
 
-        const regex = /^https?:\/\//;
-
-        if (regex.test(query)) {
-            const response = await node.rest.get(`/v4/loadtracks?identifier=${encodeURIComponent(query)}`) as LoadTrackResponse;
-            return new Response(response, requester);
-        } else {
-            const track = `${source ?? 'ytsearch'}:${query}`;
-            const response = await node.rest.get(`/v4/loadtracks?identifier=${encodeURIComponent(track)}`) as LoadTrackResponse;
-            return new Response(response, requester);
-        }
+        const trackIdentifier = /^https?:\/\//.test(query) ? query : `${source ?? 'ytsearch'}:${query}`;
+        const response = await node.rest.get(`/v4/loadtracks?identifier=${encodeURIComponent(trackIdentifier)}`) as LoadTrackResponse;
+        return new Response(response, requester);
     }
 
     /**

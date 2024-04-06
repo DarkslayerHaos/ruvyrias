@@ -5,11 +5,11 @@ import { Player } from './Player';
  */
 export interface IVoiceServer {
     /** The authentication token for the voice server connection. */
-    token: string | null;
+    token: string;
     /** The session ID for the voice server connection. */
-    sessionId: string | null;
+    sessionId: string;
     /** The endpoint URL for the voice server connection. */
-    endpoint: string | null;
+    endpoint?: string;
 }
 
 /** Type representing a four-digit year. */
