@@ -289,7 +289,7 @@ export class Ruvyrias extends EventEmitter {
                     const guild = client.guilds.cache.get(packet.d.guild_id);
                     if (guild) guild.shard?.send(packet);
                 };
-                client.on('raw', async (packet: any) => {
+                client.on('raw', async (packet: Packet) => {
                     this.packetUpdate(packet);
                 });
                 break;
@@ -300,7 +300,7 @@ export class Ruvyrias extends EventEmitter {
                     if (guild) guild.shard.sendWS(packet?.op, packet?.d);
                 };
 
-                client.on('rawWS', async (packet: any) => {
+                client.on('rawWS', async (packet: Packet) => {
                     this.packetUpdate(packet);
                 });
                 break;
