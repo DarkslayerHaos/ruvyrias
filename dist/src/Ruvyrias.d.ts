@@ -234,10 +234,10 @@ export declare class Ruvyrias extends EventEmitter {
     init(client: any): Promise<this>;
     /**
      * Handles Voice State Update and Voice Server Update packets from the Discord API.
-     * @param {any} packet Packet from Discord API.
+     * @param {Packet} packet Packet from Discord API.
      * @returns {void}
      */
-    packetUpdate(packet: any): void;
+    packetUpdate(packet: Packet): void;
     /**
      * Adds a node to the Ruvyrias instance.
      * @param {NodeGroup} options - NodeGroup containing node configuration.
@@ -247,9 +247,9 @@ export declare class Ruvyrias extends EventEmitter {
     /**
      * Removes a node from the Ruvyrias instance.
      * @param {string} identifier - Node name.
-     * @returns {Promise<void>} void
+     * @returns {Promise<boolean>} Whether the node was successfully removed.
      */
-    removeNode(identifier: string): Promise<void>;
+    removeNode(identifier: string): Promise<boolean>;
     /**
      * Retrieves an array of nodes from the Ruvyrias instance based on the specified region.
      * @param {string} region - Region of the node.

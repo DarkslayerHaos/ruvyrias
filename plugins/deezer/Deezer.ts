@@ -360,7 +360,7 @@ export class Deezer extends Plugin {
 
     /**
      * Builds an unresolved track using the provided Deezer track object and requester.
-     * @param {any} track - The Deezer track object.
+     * @param {DeezerTrack} track - The Deezer track object.
      * @param {any} requester - The requester for the track.
      * @returns {Promise<Track>} - An unresolved Track instance representing the Deezer track.
      */

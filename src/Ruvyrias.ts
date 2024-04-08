@@ -331,10 +331,10 @@ export class Ruvyrias extends EventEmitter {
 
     /**
      * Handles Voice State Update and Voice Server Update packets from the Discord API.
-     * @param {any} packet Packet from Discord API.
+     * @param {Packet} packet Packet from Discord API.
      * @returns {void} 
      */
-    public packetUpdate(packet: any): void {
+    public packetUpdate(packet: Packet): void {
         if (!['VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE'].includes(packet.t)) return;
         const player = this.players.get(packet.d.guild_id);
         if (!player) return;
@@ -363,13 +363,17 @@ export class Ruvyrias extends EventEmitter {
     /**
      * Removes a node from the Ruvyrias instance.
      * @param {string} identifier - Node name.
-     * @returns {Promise<void>} void
+     * @returns {Promise<boolean>} Whether the node was successfully removed.
      */
-    public async removeNode(identifier: string): Promise<void> {
+    public async removeNode(identifier: string): Promise<boolean> {
         const node = this.nodes.get(identifier);
-        if (!node) return;
+        if (!node) {
+            throw new Error('The node identifier you specified doesn\'t exist');
+        }
+        
         await node.disconnect();
         this.nodes.delete(identifier);
+        return true;
     }
 
     /**
@@ -408,7 +412,7 @@ export class Ruvyrias extends EventEmitter {
 
         const node = this.nodes.get(identifier);
         if (!node) {
-            throw new Error('The node identifier you provided is not found');
+            throw new Error('The node identifier you specified doesn\'t exist');
         }
 
         if (!node.isConnected) node.connect();

@@ -108,14 +108,14 @@ client.on('ready', (client) => {
 
 // Event handler for message creation.
 client.on('messageCreate', async (message) => {
-    // Ignore messages that are from bots.
-    if (message.author.bot) return;
+    // Ignore messages that don't start with '!' or are from bots.
+    if (!message.content.toLowerCase().startsWith('!') || message.author.bot) return;
 
     // Extract command and arguments from the message
     const args = message.content.slice(1).trim().split(/ +/g);
     const command = args.shift()?.toLowerCase()
 
-    if (command === '!play') {
+    if (command === 'play') {
         const query = args.join(' ');
 
         // Creating the Player.
