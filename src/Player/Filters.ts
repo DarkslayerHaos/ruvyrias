@@ -284,29 +284,6 @@ export class Filters {
     }
 
     /**
-     * Changes the filters of the currently playing track.
-     * @param {FiltersOptions} options - An object that conforms to the FiltersOptions type, defining the filters to apply.
-     * @returns {Filters} - Returns the current Filters instance for method chaining.
-     */
-    public setFilters(options: FiltersOptions): Filters {
-        this.player.filters = this.player.ruvyrias.options.customFilter ? new this.player.ruvyrias.options.customFilter(this, options) : new Filters(this.player, options);
-        this.updateFilters();
-
-        return this;
-    }
-
-    /**
-     * Clears all filters applied to the currently playing track.
-     * @returns {Filters} - Returns the current Filters instance with no filters applied.
-     */
-    public clearFilters(): Filters {
-        this.player.filters = this.player.ruvyrias.options.customFilter ? new this.player.ruvyrias.options.customFilter(this.player) : new Filters(this.player);
-        this.updateFilters()
-
-        return this;
-    }
-
-    /**
      * Updates the filters applied to the currently playing track on the lavalink node.
      * @returns {Filters} - Returns the current Filters instance with updated filters.
      */

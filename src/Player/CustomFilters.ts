@@ -6,13 +6,11 @@ import { Filters } from './Filters';
  * @extends Filters
  */
 export class customFilter extends Filters {
-    public band: number;
-    public gain: number;
+    public bassboost: number;
     public slowmode: boolean;
     public nightcore: boolean;
     public vaporwave: boolean;
     public _8d: boolean;
-    public bassboost: number;
     /**
      * The customFilters class that is used to apply filters to the currently playing track
      * @param player Player
@@ -21,21 +19,25 @@ export class customFilter extends Filters {
         super(player);
         this.player = player;
         this.bassboost = 0;
+        this.slowmode = null;
+        this.nightcore = null;
+        this.vaporwave = null;
+        this._8d = null;
     }
 
     /**
-     * Sets the bass boost value for the player.
-     * @param {number} val - The value of the bass boost. Should be between 0 to 5.
+     * Sets the Bass boost value for the player.
+     * @param {number} value - The value of the Bass boost, it should be between 0 to 5.
      * @returns {Filters} - Returns the current instance of the player or undefined if player is not available.
      */
-    public setBassboost(val: number): Filters {
+    public setBassboost(value: number): Filters {
         if (!this.player) return this;
-        if (val < 0 && val > 6) {
+        if (value < 0 && value > 6) {
             throw Error('Bassboost value must be between 0 to 5');
         }
-        this.bassboost = val;
+        this.bassboost = value;
 
-        let num = (val - 1) * (1.25 / 9) - 0.25;
+        const num = (value - 1) * (1.25 / 9) - 0.25;
         this.setEqualizer(Array(13).fill(0).map((n, i) => ({
             band: i,
             gain: num
@@ -45,62 +47,96 @@ export class customFilter extends Filters {
     }
 
     /**
-     * Sets the slowmode filter for the player.
-     * @param {boolean} val - The value to enable or disable slowmode.
+     * Sets the Slowmode filter for the player.
+     * @param {boolean} value - The value to enable or disable Slowmode.
      * @returns {Filters} - Returns the current instance of the player or undefined if player is not available.
      */
-    public setSlowmode(val: boolean): Filters {
+    public setSlowmode(value: boolean): Filters {
         if (!this.player) return this;
-        this.slowmode = val;
+        this.slowmode = value;
 
-        this.setFilters(val ? { timescale: { speed: 0.5, pitch: 1.0, rate: 0.8, }, } : this.clearFilters());
+        this.setTimescale(value ? { speed: 0.5, pitch: 1.0, rate: 0.8, } : null);
         return this;
     }
 
     /**
      * Sets the Nightcore filter for the player.
-     * @param {boolean} val - Boolean value indicating whether to enable or disable Nightcore.
-     * @returns {Filter | boolean} - Returns the boolean value if Nightcore is enabled or undefined if the player is not available.
+     * @param {boolean} value - Boolean value indicating whether to enable or disable Nightcore.
+     * @returns {Filter} - Returns the current instance of the player or undefined if player is not available.
      */
-    public setNightcore(val: boolean): Filters | boolean {
+    public setNightcore(value: boolean): Filters {
         if (!this.player) return this;
-        this.nightcore = val;
+        this.nightcore = value;
 
-        this.setTimescale(val ? { rate: 1.5 } : null);
-        if (val) {
+        if (value) {
             this.vaporwave = false;
         }
 
-        return val;
+        this.setTimescale(value ? { speed: 1.165, pitch: 1.125, rate: 1.05 } : null);
+        return this;
+    }
+
+    /**
+     * Sets the Daycore filter for the player.
+     * @param {boolean} value - Boolean value indicating whether to enable or disable Daycore.
+     * @returns {Filter} - Returns the current instance of the player or undefined if player is not available.
+     */
+    public setDaycore(value: boolean): Filters {
+        if (!this.player) return this;
+        this.nightcore = value;
+
+        if (value) {
+            this.vaporwave = false;
+        }
+
+        this.setEqualizer([
+            { band: 0, gain: 0 },
+            { band: 1, gain: 0 },
+            { band: 2, gain: 0 },
+            { band: 3, gain: 0 },
+            { band: 4, gain: 0 },
+            { band: 5, gain: 0 },
+            { band: 6, gain: 0 },
+            { band: 7, gain: 0 },
+            { band: 8, gain: -0.25 },
+            { band: 9, gain: -0.25 },
+            { band: 10, gain: -0.25 },
+            { band: 11, gain: -0.25 },
+            { band: 12, gain: -0.25 },
+            { band: 13, gain: -0.25 },
+        ]);
+        this.setTimescale(value ? { pitch: 0.63, rate: 1.05 } : null);
+
+        return this;
     }
 
     /**
      * Sets the Vaporwave filter for the player.
-     * @param {boolean} val - Boolean value indicating whether to enable or disable Vaporwave.
+     * @param {boolean} value - Boolean value indicating whether to enable or disable Vaporwave.
      * @returns {Filters} - Returns nothing.
      */
-    public setVaporwave(val: boolean): Filters {
+    public setVaporwave(value: boolean): Filters {
         if (!this.player) return this;
-        this.vaporwave = val;
+        this.vaporwave = value;
 
-        if (val) {
+        if (value) {
             this.nightcore = false;
         }
 
-        this.setTimescale(val ? { pitch: 0.5 } : null);
+        this.setTimescale(value ? { pitch: 0.5 } : null);
         return this;
     }
 
     /**
      * Sets the 8D filter for the player.
-     * @param {boolean} val - Boolean value indicating whether to enable or disable the 8D filter.
+     * @param {boolean} value - Boolean value indicating whether to enable or disable the 8D filter.
      * @returns {Filters} - Returns nothing.
      */
-    public set8D(val: boolean): Filters {
+    public set8D(value: boolean): Filters {
         if (!this.player) return this;
-        this._8d = val;
+        this._8d = value;
 
-        this.setRotation(val ? { rotationHz: 0.2 } : null);
+        this.setRotation(value ? { rotationHz: 0.2 } : null);
         return this;
     }
 }

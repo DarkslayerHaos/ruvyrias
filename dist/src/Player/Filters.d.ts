@@ -204,17 +204,6 @@ export declare class Filters {
      */
     setLowPass(pass: LowPassOptions): Filters;
     /**
-     * Changes the filters of the currently playing track.
-     * @param {FiltersOptions} options - An object that conforms to the FiltersOptions type, defining the filters to apply.
-     * @returns {Filters} - Returns the current Filters instance for method chaining.
-     */
-    setFilters(options: FiltersOptions): Filters;
-    /**
-     * Clears all filters applied to the currently playing track.
-     * @returns {Filters} - Returns the current Filters instance with no filters applied.
-     */
-    clearFilters(): Filters;
-    /**
      * Updates the filters applied to the currently playing track on the lavalink node.
      * @returns {Filters} - Returns the current Filters instance with updated filters.
      */
