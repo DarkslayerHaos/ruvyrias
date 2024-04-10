@@ -473,8 +473,8 @@ export class Ruvyrias extends EventEmitter {
      * @returns {Promise<boolean>} A promise that resolves to true if the player is successfully removed; otherwise, false.
      */
     public async removeConnection(guildId: string): Promise<boolean> {
-        await this.players.get(guildId)?.stop() ?? false;
-        return this.players.delete(guildId);
+        this.players.delete(guildId);
+        return await this.players.get(guildId)?.stop() ?? false;
     }
 
     /**

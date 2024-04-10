@@ -240,8 +240,8 @@ class Ruvyrias extends events_1.EventEmitter {
      * @returns {Promise<boolean>} A promise that resolves to true if the player is successfully removed; otherwise, false.
      */
     async removeConnection(guildId) {
-        await this.players.get(guildId)?.stop() ?? false;
-        return this.players.delete(guildId);
+        this.players.delete(guildId);
+        return await this.players.get(guildId)?.stop() ?? false;
     }
     /**
      * Gets an array of least used nodes from the Ruvyrias instance.
