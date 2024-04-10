@@ -78,8 +78,8 @@ export class Connection {
     public region: string | null;
     public self_mute: boolean;
     public self_deaf: boolean;
-    public channel_id: string;
-    public session_id: string;
+    public channel_id: string | null;
+    public session_id: string | null;
 
     /**
      * The connection class
@@ -114,7 +114,7 @@ export class Connection {
                 }
             },
         });
-        
+
         this.player.ruvyrias.emit(
             'debug',
             this.player.node.name,
@@ -128,6 +128,11 @@ export class Connection {
      */
     public setStateUpdate(data: SetStateUpdate): void {
         const { session_id, channel_id, self_deaf, self_mute } = data;
+
+        if (channel_id == null) {
+            this.player.stop();
+        }
+
         if (this.player.voiceChannel && channel_id && this.player.voiceChannel !== channel_id) {
             this.player.voiceChannel = channel_id;
         }

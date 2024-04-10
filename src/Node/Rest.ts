@@ -5,6 +5,19 @@ import { Player } from '../Player/Player';
 import { LoadTrackResponse, LoadType } from '../Guild/Response';
 
 /**
+ * This interface represents the LavaLink V4 Error Responses
+ * @reference https://lavalink.dev/api/rest.html#error-responses
+ */
+export interface ErrorResponses {
+    timestamp: number;
+    status: number;
+    error: string;
+    trace?: string;
+    message: string;
+    path: string;
+}
+
+/**
  * Represents the options for playing audio in a guild.
  */
 export interface PlayOptions {
@@ -177,5 +190,22 @@ export class Rest {
         } catch (e) {
             return null;
         }
+    }
+
+    /**
+     * This function will get the RoutePlanner status
+     * @returns {Promise<unknown>}
+     */
+    public async getRoutePlannerStatus(): Promise<unknown> {
+        return await this.get(`/v4/routeplanner/status`);
+    }
+
+    /**
+     * This function will Unmark a failed address
+     * @param {string} address The address to unmark as failed. This address must be in the same ip block.
+     * @returns {ErrorResponses | unknown} This function will most likely error if you havn't enabled the route planner
+     */
+    public async unmarkFailedAddress(address: string): Promise<ErrorResponses | unknown> {
+        return this.post(`/v4/routeplanner/free/address`, { address });
     }
 }

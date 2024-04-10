@@ -23,4 +23,3 @@ __exportStar(require("./src/Node/Rest"), exports);
 __exportStar(require("./src/Player/Filters"), exports);
 __exportStar(require("./src/Guild/Track"), exports);
 __exportStar(require("./src/Guild/Response"), exports);
-__exportStar(require("./src/Player/CustomFilters"), exports);

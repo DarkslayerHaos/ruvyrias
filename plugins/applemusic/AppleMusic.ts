@@ -110,7 +110,7 @@ export class AppleMusic extends Plugin {
     public async load(ruvyrias: Ruvyrias) {
         this.ruvyrias = ruvyrias;
         this._resolve = ruvyrias.resolve.bind(ruvyrias);
-        ruvyrias.resolve = this.resolve.bind(this);
+        ruvyrias.resolve = this.resolve.bind(this) as never;
     }
 
     /**
@@ -132,7 +132,7 @@ export class AppleMusic extends Plugin {
             headers: {
                 'Authorization': this.options.token,
                 'Origin': 'https://music.apple.com',
-            },
+            } as any,
         });
 
         const body = await req.json();
@@ -154,7 +154,7 @@ export class AppleMusic extends Plugin {
             return this._resolve({ query, source: source ?? this?.ruvyrias.options.defaultPlatform, requester: requester });
         }
 
-        const [, , type] = URL_PATTERN.exec(query);
+        const [, , type] = URL_PATTERN.exec(query)!;
         switch (type) {
             case 'album': {
                 return this.getAlbum(query, requester);
@@ -184,7 +184,7 @@ export class AppleMusic extends Plugin {
             const unresolvedTracks = await Promise.all(await tracks.map((x: AppleMusicTrack) => this.buildUnresolved(x, requester)));
 
             return this.buildResponse('playlist', unresolvedTracks, name);
-        } catch (e) {
+        } catch (e: any) {
             return this.buildResponse(
                 'error',
                 [],
@@ -210,7 +210,7 @@ export class AppleMusic extends Plugin {
             const unresolvedTracks = await Promise.all(await tracks.map((x: AppleMusicTrack) => this.buildUnresolved(x, requester)));
 
             return this.buildResponse('playlist', unresolvedTracks, name);
-        } catch (e) {
+        } catch (e: any) {
             return this.buildResponse(
                 'error',
                 [],
@@ -236,7 +236,7 @@ export class AppleMusic extends Plugin {
             const unresolvedTracks = await Promise.all(await tracks.map((x: AppleMusicTrack) => this.buildUnresolved(x, requester)));
 
             return this.buildResponse('playlist', unresolvedTracks, name);
-        } catch (e) {
+        } catch (e: any) {
             return this.buildResponse(
                 'error',
                 [],
@@ -258,7 +258,7 @@ export class AppleMusic extends Plugin {
             const unresolvedTracks = await Promise.all(tracks.results.songs.data.map((x: AppleMusicTrack) => this.buildUnresolved(x, requester)));
 
             return this.buildResponse('track', unresolvedTracks);
-        } catch (e) {
+        } catch (e: any) {
             return this.buildResponse(
                 'error',
                 [],

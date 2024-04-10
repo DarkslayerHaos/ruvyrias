@@ -28,19 +28,6 @@ export interface NodeStats {
     };
 }
 
-/**
- * This interface represents the LavaLink V4 Error Responses
- * @reference https://lavalink.dev/api/rest.html#error-responses
- */
-export interface ErrorResponses {
-    timestamp: number;
-    status: number;
-    error: string;
-    trace?: string;
-    message: string;
-    path: string;
-}
-
 export class Node {
     public ruvyrias: Ruvyrias;
     public readonly name: string;
@@ -99,7 +86,7 @@ export class Node {
         if (!this.ruvyrias.nodes.get(this.name)) {
             this.ruvyrias.nodes.set(this.name, this)
         }
-        const headers = {
+        const headers: any = {
             'Authorization': this.password,
             'User-Id': this.ruvyrias.options.clientId,
             'Client-Name': `${Config.clientName}/${Config.clientVersion}`,
@@ -152,12 +139,15 @@ export class Node {
 
         this.ruvyrias.players.forEach(async (player) => {
             if (player.node == this) {
+                await this.ruvyrias.destroyPlayer(player.guildId);
                 await player.autoMoveNode();
             }
         });
+
         this.ws?.close(1000, 'destroy');
         this.ws?.removeAllListeners();
         this.ws = null;
+
         this.ruvyrias.nodes.delete(this.name);
         this.ruvyrias.emit('nodeDisconnect', this);
     }
@@ -263,22 +253,5 @@ export class Node {
         if (!event) return;
         this.ruvyrias.emit('nodeError', this, event);
         this.ruvyrias.emit('debug', `[Web Socket] Connection for Lavalink Node (${this.name}) has error code: ${event.code ?? event}`);
-    }
-
-    /**
-     * This function will get the RoutePlanner status
-     * @returns {Promise<unknown>}
-     */
-    public async getRoutePlannerStatus(): Promise<unknown> {
-        return await this.rest.get(`/v4/routeplanner/status`);
-    }
-
-    /**
-     * This function will Unmark a failed address
-     * @param {string} address The address to unmark as failed. This address must be in the same ip block.
-     * @returns {ErrorResponses | unknown} This function will most likely error if you havn't enabled the route planner
-     */
-    public async unmarkFailedAddress(address: string): Promise<ErrorResponses | unknown> {
-        return this.rest.post(`/v4/routeplanner/free/address`, { address });
     }
 }

@@ -123,7 +123,7 @@ export class Deezer extends Plugin {
     public async load(ruvyrias: Ruvyrias) {
         this.ruvyrias = ruvyrias;
         this._resolve = ruvyrias.resolve.bind(ruvyrias);
-        ruvyrias.resolve = this.resolve.bind(this);
+        ruvyrias.resolve = this.resolve.bind(this) as never;
     }
 
     /**
@@ -331,9 +331,9 @@ export class Deezer extends Plugin {
     /**
      * Decodes a Deezer share link to obtain the original URL.
      * @param {string} url - The Deezer share link to decode.
-     * @returns {Promise<string | undefined>} - A promise that resolves to the original URL after decoding the Deezer share link.
+     * @returns {Promise<string | null>} - A promise that resolves to the original URL after decoding the Deezer share link.
      */
-    private async decodeDeezerShareLink(url: string): Promise<string | undefined> {
+    private async decodeDeezerShareLink(url: string): Promise<string | null> {
         const req = await fetch(url, {
             method: 'GET',
             redirect: 'manual',
@@ -344,7 +344,7 @@ export class Deezer extends Plugin {
             return location;
         }
 
-        return undefined
+        return null
     }
 
     /**

@@ -5,7 +5,6 @@ import { EventEmitter } from 'events';
 import { Response } from './Guild/Response';
 import { Plugin } from './Plugin';
 import { Track, TrackData } from './Guild/Track';
-import { Filters } from './Player/Filters';
 import { Deezer } from '../plugins/deezer';
 import { Spotify } from '../plugins/spotify';
 import { AppleMusic } from '../plugins/applemusic';
@@ -99,10 +98,6 @@ export type SupportedPlatforms = 'spsearch' | 'dzsearch' | 'amsearch' | 'scsearc
 export interface RuvyriasOptions {
     /** An array of plugins to be used with Ruvyrias. */
     plugins?: Plugin[];
-    /** A custom player class constructor. */
-    customPlayer?: Constructor<Player>;
-    /** A custom filter class constructor. */
-    customFilter?: Constructor<Filters>;
     /** Whether to automatically resume playback after a disconnect. */
     autoResume?: boolean;
     /** The library used for communication (e.g., 'discord.js', 'eris', etc.). */
@@ -115,8 +110,6 @@ export interface RuvyriasOptions {
     reconnectTimeout?: number | null;
     /** Number of reconnection attempts allowed before giving up. */
     reconnectTries?: number | null;
-    /** Whether to use custom filters for audio processing. */
-    useCustomFilters?: boolean;
     /** The name of the client using Ruvyrias. */
     clientName?: string;
     /** The client ID associated with the Ruvyrias instance. */
@@ -225,7 +218,7 @@ export declare class Ruvyrias extends EventEmitter {
      * @param {RuvyriasOptions} options RuvyriasOptions
      * @returns Ruvyrias
      */
-    constructor(client: any, nodes: NodeGroup[], options: Omit<RuvyriasOptions, 'clientName' | 'clientId' | 'clientVersion' | 'isActivated' | 'resumeTimeout' | 'useCustomFilters'>);
+    constructor(client: any, nodes: NodeGroup[], options: Omit<RuvyriasOptions, 'clientName' | 'clientId' | 'clientVersion' | 'isActivated' | 'resumeTimeout'>);
     /**
      * Initializes the Ruvyrias instance with the specified VoiceClient.
      * @param {any} client - VoiceClient for the Ruvyrias library to use to connect to the Lavalink node server (discord.js, eris, oceanic).
@@ -235,9 +228,9 @@ export declare class Ruvyrias extends EventEmitter {
     /**
      * Handles Voice State Update and Voice Server Update packets from the Discord API.
      * @param {Packet} packet Packet from Discord API.
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    packetUpdate(packet: Packet): void;
+    packetUpdate(packet: Packet): Promise<void>;
     /**
      * Adds a node to the Ruvyrias instance.
      * @param {NodeGroup} options - NodeGroup containing node configuration.
@@ -261,7 +254,7 @@ export declare class Ruvyrias extends EventEmitter {
      * @param {string} identifier - Node name. If set to 'auto', it returns the least used nodes.
      * @returns {Node | Node[]} A Node instance or an array of Node instances.
      */
-    getNode(identifier?: string): Node | Node[];
+    getNode(identifier?: string): Promise<Node | Node[]>;
     /**
      * Creates a player connection for the specified guild using the provided options.
      * @param {ConnectionOptions} options - Options for creating the player connection.
@@ -275,6 +268,11 @@ export declare class Ruvyrias extends EventEmitter {
      * @returns {Player} The created Player instance.
      */
     private createPlayer;
+    /**
+     * Creates a player instance for the specified guild using the provided node and options.
+     * @param {string} guildId - Options for creating the player.
+     */
+    destroyPlayer(guildId: string): Promise<void>;
     /**
      * Removes a player associated with the specified guild from Ruvyrias instance.
      * @param {string} guildId - The ID of the guild for which to remove the player.
@@ -328,7 +326,7 @@ export declare class Ruvyrias extends EventEmitter {
     /**
      * Get a player from Ruvyrias instance.
      * @param {string} guildId - Guild ID.
-     * @returns {Player | undefined} The player instance for the specified guild or undefined in case of nothing.
+     * @returns {Player | null} The player instance for the specified guild or undefined in case of nothing.
      */
-    get(guildId: string): Player | undefined;
+    get(guildId: string): Player | null;
 }

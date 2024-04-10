@@ -124,6 +124,13 @@ export interface FiltersOptions {
     channelMix?: ChannelMixOptions | null;
     lowPass?: LowPassOptions | null;
     timescale?: TimescaleOptions | null;
+    bassboost?: number | 0;
+    slowmode?: boolean | null;
+    nightcore?: boolean | null;
+    daycore?: boolean | null;
+    vaporwave?: boolean | null;
+    chimpmunk?: boolean | null;
+    _8d?: boolean | null;
 }
 /**
  * The lowPassOptions interface that is used to define the lowPass options to apply to the currently playing track
@@ -148,65 +155,144 @@ export declare class Filters {
     distortion: DistortionOptions | null;
     channelMix: ChannelMixOptions | null;
     lowPass: LowPassOptions | null;
+    bassboost: number | 0;
+    slowmode: boolean | null;
+    nightcore: boolean | null;
+    daycore: boolean | null;
+    vaporwave: boolean | null;
+    chipmunk: boolean | null;
+    _8d: boolean | null;
     constructor(player: Player, options?: FiltersOptions);
     /**
      * Sets the equalizer bands for the currently playing track.
      * @param {Band[]} bands - An array of bands to set the equalizer to.
      * @returns {Filters} - Returns the Filters instance for method chaining.
      */
-    setEqualizer(bands: Band[]): Filters;
+    setEqualizer(bands: Band[]): Promise<Filters>;
     /**
      * Changes the karaoke options applied to the currently playing track.
      * @param {KaraokeOptions} karaoke - An object that conforms to the KaraokeOptions type, defining a range of frequencies to mute.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
-    setKaraoke(karaoke?: KaraokeOptions): Filters;
+    setKaraoke(karaoke?: KaraokeOptions): Promise<Filters>;
     /**
      * Changes the timescale options applied to the currently playing track.
      * @param {TimescaleOptions | null} timescale - An object that conforms to the TimescaleOptions type, defining the timescale to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
-    setTimescale(timescale?: TimescaleOptions | null): Filters;
+    setTimescale(timescale?: TimescaleOptions | null): Promise<Filters>;
     /**
      * Changes the tremolo options applied to the currently playing track.
      * @param {TremoloOptions | null} tremolo - An object that conforms to the TremoloOptions type, defining the tremolo to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
-    setTremolo(tremolo?: TremoloOptions | null): Filters;
+    setTremolo(tremolo?: TremoloOptions | null): Promise<Filters>;
     /**
      * Changes the vibrato options applied to the currently playing track.
      * @param {VibratoOptions | null} vibrato - An object that conforms to the VibratoOptions type, defining the vibrato to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
-    setVibrato(vibrato?: VibratoOptions | null): Filters;
+    setVibrato(vibrato?: VibratoOptions | null): Promise<Filters>;
     /**
      * Changes the rotation options applied to the currently playing track.
      * @param {RotationOptions | null} rotation - An object that conforms to the RotationOptions type, defining the rotation to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
-    setRotation(rotation?: RotationOptions | null): Filters;
+    setRotation(rotation?: RotationOptions | null): Promise<Filters>;
     /**
      * Changes the distortion options applied to the currently playing track.
      * @param {DistortionOptions} distortion - An object that conforms to the DistortionOptions type, defining the distortion to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
-    setDistortion(distortion: DistortionOptions): Filters;
+    setDistortion(distortion: DistortionOptions): Promise<Filters>;
     /**
      * Changes the channel mix options applied to the currently playing track.
      * @param {ChannelMixOptions} mix - An object that conforms to the ChannelMixOptions type, defining the channel mix to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
-    setChannelMix(mix: ChannelMixOptions): Filters;
+    setChannelMix(mix: ChannelMixOptions): Promise<Filters>;
     /**
      * Changes the low pass options applied to the currently playing track.
      * @param {LowPassOptions} pass - An object that conforms to the LowPassOptions type, defining the low pass to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
-    setLowPass(pass: LowPassOptions): Filters;
+    setLowPass(pass: LowPassOptions): Promise<Filters>;
+    /**
+     * Sets the Bass boost value for the player.
+     * @param {number} value - The value of the Bass boost, it should be between 0 to 5.
+     * @returns {Filters} - Returns the current instance of the player or undefined if player is not available.
+     */
+    setBassboost(value: number): Promise<Filters>;
+    /**
+     * Sets the Slowmode filter for the player.
+     * @param {boolean} value - The value to enable or disable Slowmode.
+     * @param {object} [options] - Optional parameters.
+     * @returns {Filters} - Returns the current instance of the player or undefined if player is not available.
+     */
+    setSlowmode(value: boolean, options?: {
+        speed?: number;
+        pitch?: number;
+        rate?: number;
+    }): Promise<Filters>;
+    /**
+     * Sets the Nightcore filter for the player.
+     * @param {boolean} value - Boolean value indicating whether to enable or disable Nightcore.
+     * @param {object} [options] - Optional parameters.
+     * @returns {Filter} - Returns the current instance of the player or undefined if player is not available.
+     */
+    setNightcore(value: boolean, options?: {
+        speed?: number;
+        pitch?: number;
+        rate?: number;
+    }): Promise<Filters>;
+    /**
+     * Sets the Daycore filter for the player.
+     * @param {boolean} value - Boolean value indicating whether to enable or disable Daycore.
+     * @param {object} [options] - Optional parameters.
+     * @returns {Filter} - Returns the current instance of the player or undefined if player is not available.
+     */
+    setDaycore(value: boolean, options?: {
+        pitch?: number;
+        rate?: number;
+    }): Promise<Filters>;
+    /**
+     * Sets the Vaporwave filter for the player.
+     * @param {boolean} value - Boolean value indicating whether to enable or disable Vaporwave.
+     * @param {object} [options] - Optional parameters.
+     * @returns {Filters} - Returns nothing.
+     */
+    setVaporwave(value: boolean, options?: {
+        pitch?: number;
+    }): Promise<Filters>;
+    /**
+     * Sets the 8D filter for the player.
+     * @param {boolean} value - Boolean value indicating whether to enable or disable the 8D filter.
+     * @param {object} [options] - Optional parameters.
+     * @returns {Filters} - Returns nothing.
+     */
+    set8D(value: boolean, options?: {
+        rotationHz?: number;
+    }): Promise<Filters>;
+    /**
+     * Sets the Chipmunk filter for the player.
+     * @param {boolean} value - Boolean value indicating whether to enable or disable the Chipmunk filter.
+     * @param {object} [options] - Optional parameters.
+     * @returns {Filters} - Returns nothing.
+     */
+    setChipmunk(value: boolean, options?: {
+        speed?: number;
+        pitch?: number;
+        rate?: number;
+    }): Promise<Filters>;
+    /**
+     * Clear all filters for the player.
+     * @returns {Promise<Filters>} - Returns nothing.
+     */
+    clearFilters(): Promise<Filters>;
     /**
      * Updates the filters applied to the currently playing track on the lavalink node.
      * @returns {Filters} - Returns the current Filters instance with updated filters.
      */
-    updateFilters(): Filters;
+    updateFilters(): Promise<Filters>;
 }
 export {};

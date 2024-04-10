@@ -26,18 +26,6 @@ export interface NodeStats {
         lavalinkLoad: number;
     };
 }
-/**
- * This interface represents the LavaLink V4 Error Responses
- * @reference https://lavalink.dev/api/rest.html#error-responses
- */
-export interface ErrorResponses {
-    timestamp: number;
-    status: number;
-    error: string;
-    trace?: string;
-    message: string;
-    path: string;
-}
 export declare class Node {
     ruvyrias: Ruvyrias;
     readonly name: string;
@@ -120,15 +108,4 @@ export declare class Node {
      * @returns {void} void
      */
     private error;
-    /**
-     * This function will get the RoutePlanner status
-     * @returns {Promise<unknown>}
-     */
-    getRoutePlannerStatus(): Promise<unknown>;
-    /**
-     * This function will Unmark a failed address
-     * @param {string} address The address to unmark as failed. This address must be in the same ip block.
-     * @returns {ErrorResponses | unknown} This function will most likely error if you havn't enabled the route planner
-     */
-    unmarkFailedAddress(address: string): Promise<ErrorResponses | unknown>;
 }

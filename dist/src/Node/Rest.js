@@ -136,5 +136,20 @@ class Rest {
             return null;
         }
     }
+    /**
+     * This function will get the RoutePlanner status
+     * @returns {Promise<unknown>}
+     */
+    async getRoutePlannerStatus() {
+        return await this.get(`/v4/routeplanner/status`);
+    }
+    /**
+     * This function will Unmark a failed address
+     * @param {string} address The address to unmark as failed. This address must be in the same ip block.
+     * @returns {ErrorResponses | unknown} This function will most likely error if you havn't enabled the route planner
+     */
+    async unmarkFailedAddress(address) {
+        return this.post(`/v4/routeplanner/free/address`, { address });
+    }
 }
 exports.Rest = Rest;

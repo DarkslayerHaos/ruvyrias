@@ -69,9 +69,7 @@ class Ruvyrias extends events_1.EventEmitter {
                     if (guild)
                         guild.shard?.send(packet);
                 };
-                client.on('raw', async (packet) => {
-                    this.packetUpdate(packet);
-                });
+                client.on('raw', async (packet) => { await this.packetUpdate(packet); });
                 break;
             }
             case 'eris': {
@@ -80,9 +78,7 @@ class Ruvyrias extends events_1.EventEmitter {
                     if (guild)
                         guild.shard.sendWS(packet?.op, packet?.d);
                 };
-                client.on('rawWS', async (packet) => {
-                    this.packetUpdate(packet);
-                });
+                client.on('rawWS', async (packet) => { await this.packetUpdate(packet); });
                 break;
             }
             case 'oceanic': {
@@ -91,16 +87,14 @@ class Ruvyrias extends events_1.EventEmitter {
                     if (guild)
                         guild.shard.send(packet?.op, packet?.d);
                 };
-                client.on('packet', async (packet) => {
-                    this.packetUpdate(packet);
-                });
+                client.on('packet', async (packet) => { await this.packetUpdate(packet); });
                 break;
             }
             case 'other': {
                 if (!this.send) {
                     throw new Error('Send function is required in Ruvyrias Options');
                 }
-                this.send = this.options.send;
+                this.send = this.options.send ?? null;
                 break;
             }
         }
@@ -109,9 +103,9 @@ class Ruvyrias extends events_1.EventEmitter {
     /**
      * Handles Voice State Update and Voice Server Update packets from the Discord API.
      * @param {Packet} packet Packet from Discord API.
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    packetUpdate(packet) {
+    async packetUpdate(packet) {
         if (!['VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE'].includes(packet.t))
             return;
         const player = this.players.get(packet.d.guild_id);
@@ -174,9 +168,9 @@ class Ruvyrias extends events_1.EventEmitter {
      * @param {string} identifier - Node name. If set to 'auto', it returns the least used nodes.
      * @returns {Node | Node[]} A Node instance or an array of Node instances.
      */
-    getNode(identifier = 'auto') {
+    async getNode(identifier = 'auto') {
         if (!this.nodes.size) {
-            throw new Error(`No nodes available currently`);
+            throw new Error('No nodes available currently');
         }
         if (identifier === 'auto')
             return this.leastUsedNodes;
@@ -185,7 +179,7 @@ class Ruvyrias extends events_1.EventEmitter {
             throw new Error('The node identifier you specified doesn\'t exist');
         }
         if (!node.isConnected)
-            node.connect();
+            await node.connect();
         return node;
     }
     /**
@@ -195,7 +189,7 @@ class Ruvyrias extends events_1.EventEmitter {
      */
     createConnection(options) {
         if (!this.options.isActivated) {
-            throw new Error(`Ruvyrias must be initialized in your ready event.`);
+            throw new Error('Ruvyrias must be initialized in your ready event.');
         }
         const player = this.players.get(options.guildId);
         if (player)
@@ -223,16 +217,22 @@ class Ruvyrias extends events_1.EventEmitter {
      * @returns {Player} The created Player instance.
      */
     createPlayer(node, options) {
-        let player;
-        if (this.options.customPlayer) {
-            player = new this.options.customPlayer(this, node, options);
-        }
-        else {
-            player = new Player_1.Player(this, node, options);
-        }
+        const player = new Player_1.Player(this, node, options);
         this.players.set(options.guildId, player);
         player.connect(options);
         return player;
+    }
+    /**
+     * Creates a player instance for the specified guild using the provided node and options.
+     * @param {string} guildId - Options for creating the player.
+     */
+    async destroyPlayer(guildId) {
+        const player = this.players.get(guildId);
+        if (!player)
+            return;
+        await player.stop();
+        this.players.delete(guildId);
+        return;
     }
     /**
      * Removes a player associated with the specified guild from Ruvyrias instance.
@@ -240,7 +240,8 @@ class Ruvyrias extends events_1.EventEmitter {
      * @returns {Promise<boolean>} A promise that resolves to true if the player is successfully removed; otherwise, false.
      */
     async removeConnection(guildId) {
-        return await this.players.get(guildId)?.stop() ?? false;
+        await this.players.get(guildId)?.stop() ?? false;
+        return this.players.delete(guildId);
     }
     /**
      * Gets an array of least used nodes from the Ruvyrias instance.
@@ -330,10 +331,10 @@ class Ruvyrias extends events_1.EventEmitter {
     /**
      * Get a player from Ruvyrias instance.
      * @param {string} guildId - Guild ID.
-     * @returns {Player | undefined} The player instance for the specified guild or undefined in case of nothing.
+     * @returns {Player | null} The player instance for the specified guild or undefined in case of nothing.
      */
     get(guildId) {
-        return this.players.get(guildId);
+        return this.players.get(guildId) ?? null;
     }
 }
 exports.Ruvyrias = Ruvyrias;

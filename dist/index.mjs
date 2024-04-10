@@ -14,4 +14,3 @@ export const Rest = mod.Rest;
 export const Ruvyrias = mod.Ruvyrias;
 export const Spotify = mod.Spotify;
 export const Track = mod.Track;
-export const customFilter = mod.customFilter;

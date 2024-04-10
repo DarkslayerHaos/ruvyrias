@@ -116,6 +116,7 @@ class Node {
             return;
         this.ruvyrias.players.forEach(async (player) => {
             if (player.node == this) {
+                await this.ruvyrias.destroyPlayer(player.guildId);
                 await player.autoMoveNode();
             }
         });
@@ -219,21 +220,6 @@ class Node {
             return;
         this.ruvyrias.emit('nodeError', this, event);
         this.ruvyrias.emit('debug', `[Web Socket] Connection for Lavalink Node (${this.name}) has error code: ${event.code ?? event}`);
-    }
-    /**
-     * This function will get the RoutePlanner status
-     * @returns {Promise<unknown>}
-     */
-    async getRoutePlannerStatus() {
-        return await this.rest.get(`/v4/routeplanner/status`);
-    }
-    /**
-     * This function will Unmark a failed address
-     * @param {string} address The address to unmark as failed. This address must be in the same ip block.
-     * @returns {ErrorResponses | unknown} This function will most likely error if you havn't enabled the route planner
-     */
-    async unmarkFailedAddress(address) {
-        return this.rest.post(`/v4/routeplanner/free/address`, { address });
     }
 }
 exports.Node = Node;

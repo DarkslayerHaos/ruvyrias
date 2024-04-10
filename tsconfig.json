@@ -6,7 +6,7 @@
     "target": "ESNext",
     "outDir": "./dist",  
     "sourceMap": false,
-    "strict": false,
+    "strict": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,

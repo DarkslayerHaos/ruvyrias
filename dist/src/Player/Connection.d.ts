@@ -74,8 +74,8 @@ export declare class Connection {
     region: string | null;
     self_mute: boolean;
     self_deaf: boolean;
-    channel_id: string;
-    session_id: string;
+    channel_id: string | null;
+    session_id: string | null;
     /**
      * The connection class
      * @param player Player

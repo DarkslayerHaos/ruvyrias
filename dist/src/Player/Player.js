@@ -50,7 +50,7 @@ class Player extends events_1.EventEmitter {
         this.node = node;
         this.connection = new Connection_1.Connection(this);
         this.queue = new Queue_1.default();
-        this.filters = this.ruvyrias.options.customFilter ? new this.ruvyrias.options.customFilter(this) : new Filters_1.Filters(this);
+        this.filters = new Filters_1.Filters(this);
         this.guildId = options.guildId;
         this.voiceChannel = options.voiceChannel;
         this.textChannel = options.textChannel;
@@ -88,14 +88,12 @@ class Player extends events_1.EventEmitter {
      * @returns {Promise<Player>} - A promise that resolves to the player or the next track to play.
      */
     async play() {
-        if (!this.queue.length) {
-            return Promise.resolve(this);
-        }
+        if (!this.queue.length)
+            return this;
         this.currentTrack = this.queue.shift();
-        if (!this.currentTrack?.track) {
+        if (this.currentTrack && !this.currentTrack?.track)
             this.currentTrack = await this.resolveTrack(this.currentTrack);
-        }
-        if (this.currentTrack.track) {
+        if (this.currentTrack?.track) {
             await this.node.rest.updatePlayer({
                 guildId: this.guildId,
                 data: {
@@ -104,9 +102,6 @@ class Player extends events_1.EventEmitter {
             });
             this.isPlaying = true;
             this.position = 0;
-        }
-        else {
-            return this;
         }
     }
     /**
@@ -153,7 +148,7 @@ class Player extends events_1.EventEmitter {
      */
     async restart() {
         if (!this.currentTrack?.track && !this.queue.length)
-            Promise.resolve(this);
+            return this;
         if (!this.currentTrack)
             return this.play();
         await this.node.rest.updatePlayer({
@@ -184,11 +179,11 @@ class Player extends events_1.EventEmitter {
     }
     /**
      * Disconnects the player from the voice channel.
-     * @returns {Promise<Player | undefined>} A promise that resolves to the player instance if disconnection is successful.
+     * @returns {Promise<Player>} A promise that resolves to the player instance if disconnection is successful.
      */
     async disconnect() {
         if (!this.voiceChannel)
-            return;
+            return this;
         await this.pause(true);
         this.isConnected = false;
         this.voiceChannel = null;
@@ -406,7 +401,7 @@ class Player extends events_1.EventEmitter {
         const query = [track.info?.author, track.info?.title].filter((x) => !!x).join(' - ');
         const result = await this.resolve({ query, source: this.ruvyrias.options?.defaultPlatform ?? 'ytsearch', requester: track.info?.requester });
         if (!result ?? !result.tracks.length)
-            return;
+            return null;
         if (track.info?.author) {
             const author = [track.info.author, `${track.info.author} - Topic`];
             const officialAudio = result?.tracks?.find((track) => author.some((name) => new RegExp(`^${escapeRegExp(name)}$`, 'i').test(track?.info?.author)) ??
@@ -509,7 +504,7 @@ class Player extends events_1.EventEmitter {
     }
     /**
      * Sends data to the Ruvyrias instance.
-     * @param {Object} data - The data to be sent, including guild_id, channel_id, self_deaf, self_mute.
+     * @param {object} data - The data to be sent, including guild_id, channel_id, self_deaf, self_mute.
      * @returns {void} - void
      */
     send(data) {

@@ -214,14 +214,14 @@ export declare class Player extends EventEmitter {
     queue: Queue;
     filters: Filters;
     guildId: string;
-    voiceChannel: string;
-    textChannel: string;
-    currentTrack: Track;
-    previousTrack: Track;
+    voiceChannel: string | null;
+    textChannel: string | null;
+    currentTrack: Track | null;
+    previousTrack: Track | null;
     volume: number;
     position: number;
     ping: number;
-    timestamp: number;
+    timestamp: number | null;
     isPlaying: boolean;
     isPaused: boolean;
     isConnected: boolean;
@@ -235,7 +235,7 @@ export declare class Player extends EventEmitter {
      * Plays the current or next track in the queue.
      * @returns {Promise<Player>} - A promise that resolves to the player or the next track to play.
      */
-    play(): Promise<Player>;
+    play(): Promise<Player | void>;
     /**
      * Stops the player, disconnects from the voice channel, and destroys the player instance.
      * @returns {Promise<boolean>} - A promise that resolves to true once the player is destroyed.
@@ -256,7 +256,7 @@ export declare class Player extends EventEmitter {
      * This function will restart the player and play the current track
      * @returns {Promise<Player>} Returns a Player object
      */
-    restart(): Promise<Player>;
+    restart(): Promise<Player | void>;
     /**
      * Connects the player to a voice channel using the provided connection options.
      * If no options are specified, it uses the default values from the player.
@@ -266,9 +266,9 @@ export declare class Player extends EventEmitter {
     connect(options?: ConnectionOptions): void;
     /**
      * Disconnects the player from the voice channel.
-     * @returns {Promise<Player | undefined>} A promise that resolves to the player instance if disconnection is successful.
+     * @returns {Promise<Player>} A promise that resolves to the player instance if disconnection is successful.
      */
-    disconnect(): Promise<Player | undefined>;
+    disconnect(): Promise<Player>;
     /**
      * Seeks to the specified position in the currently playing track.
      * @param {number} position - The position to seek to.
@@ -334,7 +334,7 @@ export declare class Player extends EventEmitter {
      * @param {Player} player - The player instance.
      * @returns {Promise<Player>} - The updated player instance playing the new song.
      */
-    autoplay(player: Player): Promise<Player>;
+    autoplay(player: Player): Promise<Player | void>;
     /**
      * Resolves a track based on the provided Track instance.
      * @param {Track} track - The track to be resolved.
@@ -356,12 +356,12 @@ export declare class Player extends EventEmitter {
     resolve({ query, source, requester }: ResolveOptions): Promise<Response>;
     /**
      * Sends data to the Ruvyrias instance.
-     * @param {Object} data - The data to be sent, including guild_id, channel_id, self_deaf, self_mute.
+     * @param {object} data - The data to be sent, including guild_id, channel_id, self_deaf, self_mute.
      * @returns {void} - void
      */
     send(data: {
         guild_id: string;
-        channel_id: string;
+        channel_id: string | null;
         self_deaf: boolean;
         self_mute: boolean;
     }): void;

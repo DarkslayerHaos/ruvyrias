@@ -245,14 +245,14 @@ export class Player extends EventEmitter {
     public queue: Queue;
     public filters: Filters;
     public guildId: string;
-    public voiceChannel: string;
-    public textChannel: string;
-    public currentTrack: Track;
-    public previousTrack: Track;
+    public voiceChannel: string | null;
+    public textChannel: string | null;
+    public currentTrack: Track | null;
+    public previousTrack: Track | null;
     public volume: number;
     public position: number;
     public ping: number;
-    public timestamp: number;
+    public timestamp: number | null;
     public isPlaying: boolean;
     public isPaused: boolean;
     public isConnected: boolean;
@@ -269,7 +269,7 @@ export class Player extends EventEmitter {
         this.node = node;
         this.connection = new Connection(this);
         this.queue = new Queue();
-        this.filters = this.ruvyrias.options.customFilter ? new this.ruvyrias.options.customFilter(this) : new Filters(this);
+        this.filters = new Filters(this);
         this.guildId = options.guildId;
         this.voiceChannel = options.voiceChannel;
         this.textChannel = options.textChannel;
@@ -298,9 +298,10 @@ export class Player extends EventEmitter {
             this.ruvyrias.emit('playerUpdate', this);
 
             try {
-                this.currentTrack.info.position = this.position;
+                this.currentTrack!.info.position = this.position;
             } catch { }
         });
+        
         this.on('event', data => this.eventHandler(data));
     }
 
@@ -308,17 +309,13 @@ export class Player extends EventEmitter {
      * Plays the current or next track in the queue.
      * @returns {Promise<Player>} - A promise that resolves to the player or the next track to play.
      */
-    public async play(): Promise<Player> {
-        if (!this.queue.length) {
-            return Promise.resolve(this);
-        }
+    public async play(): Promise<Player | void> {
+        if (!this.queue.length) return this;
 
         this.currentTrack = this.queue.shift() as Track;
-        if (!this.currentTrack?.track) {
-            this.currentTrack = await this.resolveTrack(this.currentTrack) as Track;
-        }
+        if (this.currentTrack && !this.currentTrack?.track) this.currentTrack = await this.resolveTrack(this.currentTrack);
 
-        if (this.currentTrack.track) {
+        if (this.currentTrack?.track) {
             await this.node.rest.updatePlayer({
                 guildId: this.guildId,
                 data: {
@@ -328,8 +325,6 @@ export class Player extends EventEmitter {
 
             this.isPlaying = true;
             this.position = 0;
-        } else {
-            return this;
         }
     }
 
@@ -383,8 +378,8 @@ export class Player extends EventEmitter {
      * This function will restart the player and play the current track
      * @returns {Promise<Player>} Returns a Player object
      */
-    public async restart(): Promise<Player> {
-        if (!this.currentTrack?.track && !this.queue.length) Promise.resolve(this);
+    public async restart(): Promise<Player | void> {
+        if (!this.currentTrack?.track && !this.queue.length) return this;
         if (!this.currentTrack) return this.play();
 
         await this.node.rest.updatePlayer({
@@ -420,10 +415,10 @@ export class Player extends EventEmitter {
 
     /**
      * Disconnects the player from the voice channel.
-     * @returns {Promise<Player | undefined>} A promise that resolves to the player instance if disconnection is successful.
+     * @returns {Promise<Player>} A promise that resolves to the player instance if disconnection is successful.
      */
-    public async disconnect(): Promise<Player | undefined> {
-        if (!this.voiceChannel) return;
+    public async disconnect(): Promise<Player> {
+        if (!this.voiceChannel) return this;
         await this.pause(true);
         this.isConnected = false;
         this.voiceChannel = null;
@@ -548,7 +543,7 @@ export class Player extends EventEmitter {
      * @returns {Promise<Node | void>} - A Promise that resolves once the player has been successfully moved to the specified node.
      */
     public async moveNode(name: string): Promise<Node | void> {
-        const node = this.ruvyrias.nodes.get(name);
+        const node = this.ruvyrias.nodes.get(name) as Node;
 
         if (!node ?? (node && node.name === this.node.name)) return;
         if (!node.isConnected) {
@@ -607,7 +602,7 @@ export class Player extends EventEmitter {
      * @param {Player} player - The player instance.
      * @returns {Promise<Player>} - The updated player instance playing the new song.
      */
-    public async autoplay(player: Player): Promise<Player> {
+    public async autoplay(player: Player): Promise<Player | void> {
         if (!player ?? !player.isAutoPlay) {
             return this;
         }
@@ -669,10 +664,10 @@ export class Player extends EventEmitter {
      * @returns {Promise<Track>} - The resolved track.
      * @private
      */
-    private async resolveTrack(track: Track): Promise<Track> {
+    private async resolveTrack(track: Track): Promise<Track | null> {
         const query = [track.info?.author, track.info?.title].filter((x) => !!x).join(' - ');
         const result = await this.resolve({ query, source: this.ruvyrias.options?.defaultPlatform ?? 'ytsearch', requester: track.info?.requester });
-        if (!result ?? !result.tracks.length) return;
+        if (!result ?? !result.tracks.length) return null;
 
         if (track.info?.author) {
             const author = [track.info.author, `${track.info.author} - Topic`];
@@ -718,18 +713,18 @@ export class Player extends EventEmitter {
         switch (data.type) {
             case 'TrackStartEvent': {
                 this.isPlaying = true;
-                this.ruvyrias.emit('trackStart', this, this.currentTrack, data);
+                this.ruvyrias.emit('trackStart', this, this.currentTrack!, data);
                 break;
             }
             case 'TrackEndEvent': {
                 this.previousTrack = this.currentTrack;
                 if (this.loop === 'TRACK') {
-                    this.queue.unshift(this.previousTrack);
-                    this.ruvyrias.emit('trackEnd', this, this.currentTrack, data);
+                    this.queue.unshift(this.previousTrack!);
+                    this.ruvyrias.emit('trackEnd', this, this.currentTrack!, data);
                     return await this.play();
                 } else if (this.currentTrack && this.loop === 'QUEUE') {
-                    this.queue.push(this.previousTrack);
-                    this.ruvyrias.emit('trackEnd', this, this.currentTrack, data);
+                    this.queue.push(this.previousTrack!);
+                    this.ruvyrias.emit('trackEnd', this, this.currentTrack!, data);
                     return await this.play();
                 }
 
@@ -737,7 +732,7 @@ export class Player extends EventEmitter {
                     this.isPlaying = false;
                     return this.ruvyrias.emit('queueEnd', this);
                 } else if (this.queue.length > 0) {
-                    this.ruvyrias.emit('trackEnd', this, this.currentTrack, data);
+                    this.ruvyrias.emit('trackEnd', this, this.currentTrack!, data);
                     return await this.play();
                 }
 
@@ -748,7 +743,7 @@ export class Player extends EventEmitter {
 
             case 'TrackStuckEvent':
             case 'TrackExceptionEvent': {
-                this.ruvyrias.emit('trackError', this, this.currentTrack, data as TrackStuckEvent);
+                this.ruvyrias.emit('trackError', this, this.currentTrack!, data as TrackStuckEvent);
                 await this.skip();
                 break;
             }
@@ -756,12 +751,12 @@ export class Player extends EventEmitter {
                 if ([4015, 4009].includes(data.code)) {
                     this.send({
                         guild_id: data.guildId,
-                        channel_id: this.voiceChannel,
-                        self_mute: this.mute,
-                        self_deaf: this.deaf,
+                        channel_id: this.voiceChannel!,
+                        self_mute: this.mute!,
+                        self_deaf: this.deaf!,
                     });
                 }
-                this.ruvyrias.emit('socketClose', this, this.currentTrack, data);
+                this.ruvyrias.emit('socketClose', this, this.currentTrack!, data);
                 await this.pause(true);
                 this.ruvyrias.emit(
                     'debug',
@@ -789,10 +784,10 @@ export class Player extends EventEmitter {
 
     /**
      * Sends data to the Ruvyrias instance.
-     * @param {Object} data - The data to be sent, including guild_id, channel_id, self_deaf, self_mute.
+     * @param {object} data - The data to be sent, including guild_id, channel_id, self_deaf, self_mute.
      * @returns {void} - void
      */
-    public send(data: { guild_id: string; channel_id: string, self_deaf: boolean; self_mute: boolean; }): void {
-        this.ruvyrias.send({ op: 4, d: data });
+    public send(data: { guild_id: string; channel_id: string | null, self_deaf: boolean; self_mute: boolean; }): void {
+        (this.ruvyrias as any).send({ op: 4, d: data });
     }
 }

@@ -186,7 +186,7 @@ class Deezer extends Plugin_1.Plugin {
     /**
      * Decodes a Deezer share link to obtain the original URL.
      * @param {string} url - The Deezer share link to decode.
-     * @returns {Promise<string | undefined>} - A promise that resolves to the original URL after decoding the Deezer share link.
+     * @returns {Promise<string | null>} - A promise that resolves to the original URL after decoding the Deezer share link.
      */
     async decodeDeezerShareLink(url) {
         const req = await fetch(url, {
@@ -197,7 +197,7 @@ class Deezer extends Plugin_1.Plugin {
             const location = req.headers.get('location');
             return location;
         }
-        return undefined;
+        return null;
     }
     /**
      * Fetches data from the Deezer API based on the specified endpoint.

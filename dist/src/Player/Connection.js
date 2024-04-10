@@ -54,6 +54,9 @@ class Connection {
      */
     setStateUpdate(data) {
         const { session_id, channel_id, self_deaf, self_mute } = data;
+        if (channel_id == null) {
+            this.player.stop();
+        }
         if (this.player.voiceChannel && channel_id && this.player.voiceChannel !== channel_id) {
             this.player.voiceChannel = channel_id;
         }
