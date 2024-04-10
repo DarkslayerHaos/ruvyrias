@@ -9,6 +9,7 @@ export class customFilter extends Filters {
     public bassboost: number;
     public slowmode: boolean;
     public nightcore: boolean;
+    public daycore: boolean;
     public vaporwave: boolean;
     public _8d: boolean;
     /**
@@ -21,6 +22,7 @@ export class customFilter extends Filters {
         this.bassboost = 0;
         this.slowmode = null;
         this.nightcore = null;
+        this.daycore = null;
         this.vaporwave = null;
         this._8d = null;
     }
@@ -70,6 +72,7 @@ export class customFilter extends Filters {
 
         if (value) {
             this.vaporwave = false;
+            this.daycore = false;
         }
 
         this.setTimescale(value ? { speed: 1.165, pitch: 1.125, rate: 1.05 } : null);
@@ -83,10 +86,11 @@ export class customFilter extends Filters {
      */
     public setDaycore(value: boolean): Filters {
         if (!this.player) return this;
-        this.nightcore = value;
+        this.daycore = value;
 
         if (value) {
             this.vaporwave = false;
+            this.nightcore = false;
         }
 
         this.setEqualizer([
@@ -121,6 +125,7 @@ export class customFilter extends Filters {
 
         if (value) {
             this.nightcore = false;
+            this.daycore = false;
         }
 
         this.setTimescale(value ? { pitch: 0.5 } : null);

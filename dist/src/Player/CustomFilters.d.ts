@@ -8,6 +8,7 @@ export declare class customFilter extends Filters {
     bassboost: number;
     slowmode: boolean;
     nightcore: boolean;
+    daycore: boolean;
     vaporwave: boolean;
     _8d: boolean;
     /**
