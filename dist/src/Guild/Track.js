@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Track = void 0;
+/**
+ * Represents a track with its associated data.
+ */
 class Track {
     /** The base64 encoded track data */
     track;

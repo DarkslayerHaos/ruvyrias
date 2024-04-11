@@ -63,12 +63,8 @@ export interface SetStateUpdate {
     request_to_speak_timestamp?: TDateISO;
 }
 /**
- * The connection class
- * @class
- * @classdesc The connection class
- * @param {Player} player The player class
- * @hideconstructor
-*/
+ * Manages the connection between the player and an external source.
+ */
 export declare class Connection {
     player: Player;
     region: string | null;

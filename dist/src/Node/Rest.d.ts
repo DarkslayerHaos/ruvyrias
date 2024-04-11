@@ -44,6 +44,10 @@ export declare enum RequestMethod {
     'Patch' = "PATCH",
     'Put' = "PUT"
 }
+/**
+ * Provides a RESTful interface for making HTTP requests to interact with the Lavalink server.
+ * This class facilitates actions such as retrieving player information, updating player settings, and managing tracks.
+ */
 export declare class Rest {
     ruvyrias: Ruvyrias;
     url: string;

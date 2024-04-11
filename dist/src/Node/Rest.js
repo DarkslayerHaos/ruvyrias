@@ -10,6 +10,10 @@ var RequestMethod;
     RequestMethod["Patch"] = "PATCH";
     RequestMethod["Put"] = "PUT";
 })(RequestMethod || (exports.RequestMethod = RequestMethod = {}));
+/**
+ * Provides a RESTful interface for making HTTP requests to interact with the Lavalink server.
+ * This class facilitates actions such as retrieving player information, updating player settings, and managing tracks.
+ */
 class Rest {
     ruvyrias;
     url;

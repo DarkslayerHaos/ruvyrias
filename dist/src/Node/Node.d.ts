@@ -26,6 +26,9 @@ export interface NodeStats {
         lavalinkLoad: number;
     };
 }
+/**
+ * Represents a connection to a Lavalink node, allowing communication and control over audio playback.
+ */
 export declare class Node {
     ruvyrias: Ruvyrias;
     readonly name: string;

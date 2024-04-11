@@ -2,12 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Connection = void 0;
 /**
- * The connection class
- * @class
- * @classdesc The connection class
- * @param {Player} player The player class
- * @hideconstructor
-*/
+ * Manages the connection between the player and an external source.
+ */
 class Connection {
     player;
     region;

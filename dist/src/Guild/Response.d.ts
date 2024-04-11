@@ -98,6 +98,10 @@ export interface LoadTrackResponsePlaylist {
  * Represents a response during the loading of tracks. It can be of different types such as a single track, search results, an empty response, an error, or a playlist.
  */
 export type LoadTrackResponse = LoadTrackResponseTrack | LoadTrackResponseSearch | LoadTrackResponseEmpty | LoadTrackResponseError | LoadTrackResponsePlaylist;
+/**
+ * Represents a response handler for processing responses from Lavalink when loading tracks.
+ * This class encapsulates the loaded tracks and provides utility methods for accessing and handling them.
+ */
 export declare class Response {
     tracks: Track[];
     loadType: LoadType;

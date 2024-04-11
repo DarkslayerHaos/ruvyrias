@@ -1,5 +1,5 @@
 import { Ruvyrias, ResolveOptions } from '../Ruvyrias';
-import { Node, NodeStats } from '../Node/Node';
+import { Node } from '../Node/Node';
 import { Track, TrackData } from '../Guild/Track';
 import { Connection } from './Connection';
 import Queue from '../Guild/Queue';
@@ -105,130 +105,102 @@ export interface WebSocketClosedEvent extends PlayerEvent {
     reason: string;
 }
 
+/**
+ * Represents the events emitted by Ruvyrias.
+ */
 export interface RuvyriasEvents {
     /**
-     * Emitted when data useful for debugging is produced
-     * @eventProperty
-     * @param args
-     * @returns void
+     * Emitted when data useful for debugging is produced.
+     * @param {...any} args - The arguments emitted with the event.
      */
-    debug: (...args: any) => void;
+    debug: (...args: any[]) => void;
 
     /**
-     *
-     * @param topic from what section the event come
-     * @param args
-     * Emitted when a Response is come
-     * @eventProperty
+     * Emitted when a response is received.
+     * @param {string} topic - The section from which the event originates.
+     * @param {...unknown} args - The arguments emitted with the event.
      */
     raw: (topic: string, ...args: unknown[]) => void;
 
     /**
-     * Emitted when lavalink node is connected with Ruvyrias
-     * @eventProperty
-     * @param node
-     * @param event
-     * @returns void
+     * Emitted when a Lavalink node is connected to Ruvyrias.
+     * @param {Node} node - The connected Lavalink node.
      */
     nodeConnect: (node: Node) => void;
 
     /**
-     * Emitted when data useful for debugging is produced
-     * @eventProperty
-     * @param node
-     * @param event
-     * @returns void
+     * Emitted when a Lavalink node is disconnected from Ruvyrias.
+     * @param {Node} node - The disconnected Lavalink node.
+     * @param {unknown} [event] - Additional event data.
      */
     nodeDisconnect: (node: Node, event?: unknown) => void;
 
     /**
-     * Emitted when Ruvyrias try to reconnect with lavalink node while disconnected
-     * @eventProperty
-     * @param node
-     * @returns void
+     * Emitted when Ruvyrias attempts to reconnect with a disconnected Lavalink node.
+     * @param {Node} node - The Lavalink node being reconnected to.
      */
     nodeReconnect: (node: Node) => void;
 
     /**
-     * Emitted when lavalink nodes get an error
-     * @eventProperty
-     * @param node
-     * @param event
-     * @returns void
+     * Emitted when a Lavalink node encounters an error.
+     * @param {Node} node - The Lavalink node that encountered the error.
+     * @param {any} event - The error event.
      */
     nodeError: (node: Node, event: any) => void;
 
     /**
-     * Emitted whenever player start playing new track
-     * @eventProperty
-     * @param player
-     * @param track
-     * @returns void
-     * 
+     * Emitted whenever a player starts playing a new track.
+     * @param {Player} player - The player instance.
+     * @param {Track} track - The track being played.
+     * @param {TrackStartEvent} data - Additional data related to the track start event.
      */
     trackStart: (player: Player, track: Track, data: TrackStartEvent) => void;
 
     /**
-     * Emitted whenever track ends
-     * @eventProperty
-     * @param player
-     * @param track
-     * @param data
-     * @returns void
+     * Emitted whenever a track ends.
+     * @param {Player} player - The player instance.
+     * @param {Track} track - The track that ended.
+     * @param {TrackEndEvent} data - Additional data related to the track end event.
      */
     trackEnd: (player: Player, track: Track, data: TrackEndEvent) => void;
 
     /**
-     * Emitted when player's queue  is completed and going to disconnect
-     * @eventProperty
-     * @param player
-     * @returns void
-     * 
+     * Emitted when a player's queue is completed and going to disconnect.
+     * @param {Player} player - The player instance.
      */
     queueEnd: (player: Player) => void;
 
     /**
-     * Emitted when a track gets stuck while playing
-     * @eventProperty
-     * @param player
-     * @param track
-     * @param data
-     * @returns void
+     * Emitted when a track gets stuck while playing.
+     * @param {Player} player - The player instance.
+     * @param {Track} track - The track that got stuck.
+     * @param {TrackStuckEvent} data - Additional data related to the track stuck event.
      */
     trackError: (player: Player, track: Track, data: TrackStuckEvent) => void;
 
     /**
-     * Emitted when a player got updates
-     * @eventProperty
-     * @param player
-     * @returns void
+     * Emitted when a player is updated.
+     * @param {Player} player - The player instance.
      */
     playerUpdate: (player: Player) => void;
 
     /**
-     * Emitted when a player got created
-     * @eventProperty
-     * @param player
-     * @returns void
+     * Emitted when a player is created.
+     * @param {Player} player - The player instance.
      */
     playerCreate: (player: Player) => void;
 
     /**
-     * 
-     * Emitted when a player destroy
-     * @eventProperty
-     * @param player
-     * @returns void
+     * Emitted when a player is destroyed.
+     * @param {Player} player - The player instance.
      */
     playerDestroy: (player: Player) => void;
 
     /**
-     * Emitted when the websocket connection to Discord voice servers is closed
-     * @eventProperty
-     * @param player
-     * @param track
-     * @param data
-     * @returns void
+     * Emitted when the websocket connection to Discord voice servers is closed.
+     * @param {Player} player - The player instance.
+     * @param {Track} track - The track being played.
+     * @param {WebSocketClosedEvent} data - Additional data related to the socket close event.
      */
     socketClose: (player: Player, track: Track, data: WebSocketClosedEvent) => void;
 }

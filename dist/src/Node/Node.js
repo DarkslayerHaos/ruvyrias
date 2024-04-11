@@ -7,6 +7,9 @@ exports.Node = void 0;
 const ws_1 = __importDefault(require("ws"));
 const Config_1 = require("../Config");
 const Rest_1 = require("./Rest");
+/**
+ * Represents a connection to a Lavalink node, allowing communication and control over audio playback.
+ */
 class Node {
     ruvyrias;
     name;

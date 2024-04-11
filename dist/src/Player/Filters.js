@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Filters = void 0;
 /**
- * The Filters class that is used to apply filters to the currently playing track
+ * The Filters class that is used to apply filters to the currently player
  */
 class Filters {
     player;
@@ -16,8 +16,8 @@ class Filters {
     distortion;
     channelMix;
     lowPass;
-    bassboost;
-    slowmode;
+    bassBoost;
+    slowMode;
     nightcore;
     daycore;
     vaporwave;
@@ -35,16 +35,16 @@ class Filters {
         this.distortion = options?.distortion ?? null;
         this.channelMix = options?.channelMix ?? null;
         this.lowPass = options?.lowPass ?? null;
-        this.bassboost = options?.bassboost ?? 0;
-        this.slowmode = options?.slowmode ?? null;
+        this.bassBoost = options?.bassBoost ?? 0;
+        this.slowMode = options?.slowMode ?? null;
         this.nightcore = options?.nightcore ?? null;
         this.daycore = options?.daycore ?? null;
         this.vaporwave = options?.vaporwave ?? null;
-        this.chipmunk = options?.chimpmunk ?? null;
+        this.chipmunk = options?.chipmunk ?? null;
         this._8d = options?._8d ?? null;
     }
     /**
-     * Sets the equalizer bands for the currently playing track.
+     * Sets the equalizer bands for the currently player.
      * @param {Band[]} bands - An array of bands to set the equalizer to.
      * @returns {Filters} - Returns the Filters instance for method chaining.
      */
@@ -54,7 +54,7 @@ class Filters {
         return this;
     }
     /**
-     * Changes the karaoke options applied to the currently playing track.
+     * Changes the karaoke options applied to the currently player.
      * @param {KaraokeOptions} karaoke - An object that conforms to the KaraokeOptions type, defining a range of frequencies to mute.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
@@ -64,7 +64,7 @@ class Filters {
         return this;
     }
     /**
-     * Changes the timescale options applied to the currently playing track.
+     * Changes the timescale options applied to the currently player.
      * @param {TimescaleOptions | null} timescale - An object that conforms to the TimescaleOptions type, defining the timescale to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
@@ -74,7 +74,7 @@ class Filters {
         return this;
     }
     /**
-     * Changes the tremolo options applied to the currently playing track.
+     * Changes the tremolo options applied to the currently player.
      * @param {TremoloOptions | null} tremolo - An object that conforms to the TremoloOptions type, defining the tremolo to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
@@ -84,7 +84,7 @@ class Filters {
         return this;
     }
     /**
-     * Changes the vibrato options applied to the currently playing track.
+     * Changes the vibrato options applied to the currently player.
      * @param {VibratoOptions | null} vibrato - An object that conforms to the VibratoOptions type, defining the vibrato to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
@@ -94,7 +94,7 @@ class Filters {
         return this;
     }
     /**
-     * Changes the rotation options applied to the currently playing track.
+     * Changes the rotation options applied to the currently player.
      * @param {RotationOptions | null} rotation - An object that conforms to the RotationOptions type, defining the rotation to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
@@ -104,7 +104,7 @@ class Filters {
         return this;
     }
     /**
-     * Changes the distortion options applied to the currently playing track.
+     * Changes the distortion options applied to the currently player.
      * @param {DistortionOptions} distortion - An object that conforms to the DistortionOptions type, defining the distortion to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
@@ -114,7 +114,7 @@ class Filters {
         return this;
     }
     /**
-     * Changes the channel mix options applied to the currently playing track.
+     * Changes the channel mix options applied to the currently player.
      * @param {ChannelMixOptions} mix - An object that conforms to the ChannelMixOptions type, defining the channel mix to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
@@ -124,7 +124,7 @@ class Filters {
         return this;
     }
     /**
-     * Changes the low pass options applied to the currently playing track.
+     * Changes the low pass options applied to the currently player.
      * @param {LowPassOptions} pass - An object that conforms to the LowPassOptions type, defining the low pass to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
@@ -144,7 +144,7 @@ class Filters {
         if (value < 0 && value > 6) {
             throw Error('Bassboost value must be between 0 to 5');
         }
-        this.bassboost = value;
+        this.bassBoost = value;
         const num = (value - 1) * (1.25 / 9) - 0.25;
         await this.setEqualizer(Array(13).fill(0).map((n, i) => ({
             band: i,
@@ -155,20 +155,20 @@ class Filters {
     /**
      * Sets the Slowmode filter for the player.
      * @param {boolean} value - The value to enable or disable Slowmode.
-     * @param {object} [options] - Optional parameters.
+     * @param {TimescaleOptions} [options] - Optional custom parameters.
      * @returns {Filters} - Returns the current instance of the player or undefined if player is not available.
      */
     async setSlowmode(value, options) {
         if (!this.player)
             return this;
-        this.slowmode = value;
+        this.slowMode = value;
         await this.setTimescale(value ? { speed: options?.speed ?? 0.5, pitch: options?.pitch ?? 1.0, rate: options?.rate ?? 0.8, } : null);
         return this;
     }
     /**
      * Sets the Nightcore filter for the player.
      * @param {boolean} value - Boolean value indicating whether to enable or disable Nightcore.
-     * @param {object} [options] - Optional parameters.
+     * @param {TimescaleOptions} [options] - Optional custom parameters.
      * @returns {Filter} - Returns the current instance of the player or undefined if player is not available.
      */
     async setNightcore(value, options) {
@@ -186,7 +186,7 @@ class Filters {
     /**
      * Sets the Daycore filter for the player.
      * @param {boolean} value - Boolean value indicating whether to enable or disable Daycore.
-     * @param {object} [options] - Optional parameters.
+     * @param {TimescaleOptions} [options] - Optional custom parameters.
      * @returns {Filter} - Returns the current instance of the player or undefined if player is not available.
      */
     async setDaycore(value, options) {
@@ -220,7 +220,7 @@ class Filters {
     /**
      * Sets the Vaporwave filter for the player.
      * @param {boolean} value - Boolean value indicating whether to enable or disable Vaporwave.
-     * @param {object} [options] - Optional parameters.
+     * @param {TimescaleOptions} [options] - Optional custom parameters.
      * @returns {Filters} - Returns nothing.
      */
     async setVaporwave(value, options) {
@@ -238,7 +238,7 @@ class Filters {
     /**
      * Sets the 8D filter for the player.
      * @param {boolean} value - Boolean value indicating whether to enable or disable the 8D filter.
-     * @param {object} [options] - Optional parameters.
+     * @param {RotationOptions} [options] - Optional custom parameters.
      * @returns {Filters} - Returns nothing.
      */
     async set8D(value, options) {
@@ -251,7 +251,7 @@ class Filters {
     /**
      * Sets the Chipmunk filter for the player.
      * @param {boolean} value - Boolean value indicating whether to enable or disable the Chipmunk filter.
-     * @param {object} [options] - Optional parameters.
+     * @param {TimescaleOptions} [options] - Optional custom parameters.
      * @returns {Filters} - Returns nothing.
      */
     async setChipmunk(value, options) {
@@ -273,7 +273,7 @@ class Filters {
         return this;
     }
     /**
-     * Updates the filters applied to the currently playing track on the lavalink node.
+     * Updates the filters applied to the currently player on the lavalink node.
      * @returns {Filters} - Returns the current Filters instance with updated filters.
      */
     async updateFilters() {

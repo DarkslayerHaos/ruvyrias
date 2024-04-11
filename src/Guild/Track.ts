@@ -78,6 +78,9 @@ export interface PluginInfo {
     clientData?: { [key: string]: any };
 }
 
+/**
+ * Represents a track with its associated data.
+ */
 export class Track {
     /** The base64 encoded track data */
     public track: string | null;

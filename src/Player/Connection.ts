@@ -67,12 +67,8 @@ export interface SetStateUpdate {
 }
 
 /**
- * The connection class
- * @class
- * @classdesc The connection class
- * @param {Player} player The player class
- * @hideconstructor
-*/
+ * Manages the connection between the player and an external source.
+ */
 export class Connection {
     public player: Player;
     public region: string | null;

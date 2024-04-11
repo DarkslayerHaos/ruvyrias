@@ -114,6 +114,10 @@ export type LoadTrackResponse =
     | LoadTrackResponseError
     | LoadTrackResponsePlaylist;
 
+/**
+ * Represents a response handler for processing responses from Lavalink when loading tracks.
+ * This class encapsulates the loaded tracks and provides utility methods for accessing and handling them.
+ */
 export class Response {
     public tracks: Track[];
     public loadType: LoadType;

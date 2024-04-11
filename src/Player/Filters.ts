@@ -1,159 +1,157 @@
 import { Player } from './Player';
 
 /**
- * The Band interface that is used to define the band and gain of an equalizer band
- * @interface
- * @property {number} band The band to set the gain of
- * @property {number} gain The gain to set the band to
+ * Represents a band and its gain in an equalizer.
  */
 interface Band {
+    /** The band to set the gain of. */
     band: number;
+    /** The gain to set the band to. */
     gain: number;
 }
 
 /**
- * The karaokeOptions interface that is used to define the karaoke options to apply to the currently playing track
- * @interface
- * @property {number} level The level of the karaoke effect to apply
- * @property {number} monoLevel The mono level of the karaoke effect to apply
- * @property {number} filterBand The filter band of the karaoke effect to apply
- * @property {number} filterWidth The filter width of the karaoke effect to apply
+ * Represents the options for applying karaoke effects to the currently player.
  */
 interface KaraokeOptions {
+    /** The level of the karaoke effect to apply. */
     level: number;
+    /** The mono level of the karaoke effect to apply. */
     monoLevel: number;
+    /** The filter band of the karaoke effect to apply. */
     filterBand: number;
+    /** The filter width of the karaoke effect to apply. */
     filterWidth: number;
 }
 
 /**
- * The timescaleOptions interface that is used to define the timescale options to apply to the currently playing track
- * @interface
- * @property {number} speed The speed of the timescale effect to apply
- * @property {number} pitch The pitch of the timescale effect to apply
- * @property {number} rate The rate of the timescale effect to apply
+ * Represents the options for applying timescale effects to the currently player.
  */
 interface TimescaleOptions {
+    /** The speed of the timescale effect to apply. */
     speed?: number;
+    /** The pitch of the timescale effect to apply. */
     pitch?: number;
+    /** The rate of the timescale effect to apply. */
     rate?: number;
 }
 
 /**
- * The tremoloOptions interface that is used to define the tremolo options to apply to the currently playing track
- * @interface
- * @property {number} frequency The frequency of the tremolo effect to apply
- * @property {number} depth The depth of the tremolo effect to apply
- */
-interface TremoloOptions {
-    frequency: number;
-    depth: number;
-}
-
-/**
- * The vibratoOptions interface that is used to define the vibrato options to apply to the currently playing track
- * @interface
- * @property {number} frequency The frequency of the vibrato effect to apply
- * @property {number} depth The depth of the vibrato effect to apply
- */
-interface VibratoOptions {
-    frequency: number;
-    depth: number;
-}
-
-/**
- * The rotationOptions interface that is used to define the rotation options to apply to the currently playing track
- * @interface
- * @property {number} rotationHz The rotation hz of the rotation effect to apply
- */
-interface RotationOptions {
-    rotationHz: number;
-}
-
-/**
- * The distortionOptions interface that is used to define the distortion options to apply to the currently playing track
- * @interface
- * @property {number} sinOffset The sin offset of the distortion effect to apply
- * @property {number} sinScale The sin scale of the distortion effect to apply
- * @property {number} cosOffset The cos offset of the distortion effect to apply
- * @property {number} cosScale The cos scale of the distortion effect to apply
- * @property {number} tanOffset The tan offset of the distortion effect to apply
- * @property {number} tanScale The tan scale of the distortion effect to apply
- * @property {number} offset The offset of the distortion effect to apply
- * @property {number} scale The scale of the distortion effect to apply
- */
-interface DistortionOptions {
-    sinOffset?: number;
-    sinScale?: number;
-    cosOffset?: number;
-    cosScale?: number;
-    tanOffset?: number;
-    tanScale?: number;
-    offset?: number;
-    scale?: number;
-}
-
-/**
- * The ChannelMixOptions interface that is used to define the channelMix options to apply to the currently playing track
- * @interface
- * @property {number} leftToLeft The left to left of the channelMix effect to apply
- * @property {number} leftToRight The left to right of the channelMix effect to apply
- * @property {number} rightToLeft The right to left of the channelMix effect to apply
- * @property {number} rightToRight The right to right of the channelMix effect to apply
- */
-export interface ChannelMixOptions {
-    leftToLeft?: number;
-    leftToRight?: number;
-    rightToLeft?: number;
-    rightToRight?: number;
-}
-
-/**
- * The FiltersOptions interface that is used to define the filters options to apply to the currently playing track
- * @interface
- * @property {number} volume The volume of the filters effect to apply
- * @property {Band[]} equalizer The equalizer of the filters effect to apply
- * @property {karaokeOptions} karaoke The karaoke of the filters effect to apply
- * @property {tremoloOptions} tremolo The tremolo of the filters effect to apply
- * @property {vibratoOptions} vibrato The vibrato of the filters effect to apply
- * @property {rotationOptions} rotation The rotation of the filters effect to apply
- * @property {distortionOptions} distortion The distortion of the filters effect to apply
- * @property {ChannelMixOptions} channelMix The channelMix of the filters effect to apply
- * @property {lowPassOptions} lowPass The lowPass of the filters effect to apply
- * @property {timescaleOptions} timescale The timescale of the filters effect to apply
- */
-export interface FiltersOptions {
-    volume?: number;
-    equalizer?: Band[] | null;
-    karaoke?: KaraokeOptions | null;
-    tremolo?: TremoloOptions | null;
-    vibrato?: VibratoOptions | null;
-    rotation?: RotationOptions | null;
-    distortion?: DistortionOptions | null;
-    channelMix?: ChannelMixOptions | null;
-    lowPass?: LowPassOptions | null;
-    timescale?: TimescaleOptions | null;
-    bassboost?: number | 0;
-    slowmode?: boolean | null;
-    nightcore?: boolean | null;
-    daycore?: boolean | null;
-    vaporwave?: boolean | null;
-    chimpmunk?: boolean | null;
-    _8d?: boolean | null;
-}
-
-/**
- * The lowPassOptions interface that is used to define the lowPass options to apply to the currently playing track
- * @interface
- * @property {number} smoothing The smoothing of the lowPass effect to apply
+ * Represents the options for applying a low-pass filter to the currently player
  */
 interface LowPassOptions {
+    /** The smoothing of the low-pass effect to apply. */
     smoothing: number;
 }
 
 
 /**
- * The Filters class that is used to apply filters to the currently playing track
+ * Represents the options for applying tremolo effects to the currently player.
+ */
+interface TremoloOptions {
+    /** The frequency of the tremolo effect to apply. */
+    frequency: number;
+    /** The depth of the tremolo effect to apply. */
+    depth: number;
+}
+
+/**
+ * Represents the options for applying vibrato effects to the currently player.
+ */
+interface VibratoOptions {
+    /** The frequency of the vibrato effect to apply. */
+    frequency: number;
+    /** The depth of the vibrato effect to apply. */
+    depth: number;
+}
+
+/**
+ * Represents the options for applying rotation effects to the currently player.
+ */
+interface RotationOptions {
+    /** The rotation hertz of the rotation effect to apply. */
+    rotationHz: number;
+}
+
+/**
+ * Represents the options for applying distortion effects to the currently player
+ */
+interface DistortionOptions {
+    /** The sin offset of the distortion effect to apply. */
+    sinOffset?: number;
+    /** The sin scale of the distortion effect to apply. */
+    sinScale?: number;
+    /** The cos offset of the distortion effect to apply. */
+    cosOffset?: number;
+    /** The cos scale of the distortion effect to apply. */
+    cosScale?: number;
+    /** The tan offset of the distortion effect to apply. */
+    tanOffset?: number;
+    /** The tan scale of the distortion effect to apply. */
+    tanScale?: number;
+    /** The offset of the distortion effect to apply. */
+    offset?: number;
+    /** The scale of the distortion effect to apply. */
+    scale?: number;
+}
+
+/**
+ * Represents the options for applying channel mix effects to the currently player
+ */
+interface ChannelMixOptions {
+    /** The left to left of the channelMix effect to apply. */
+    leftToLeft?: number;
+    /** The left to right of the channelMix effect to apply. */
+    leftToRight?: number;
+    /** The right to left of the channelMix effect to apply. */
+    rightToLeft?: number;
+    /** The right to right of the channelMix effect to apply. */
+    rightToRight?: number;
+}
+
+
+/**
+ * Represents the options for applying various filters to the currently player
+ */
+interface FiltersOptions {
+    /** The volume of the filters effect to apply. */
+    volume?: number;
+    /** The equalizer of the filters effect to apply. */
+    equalizer?: Band[] | null;
+    /** The karaoke of the filters effect to apply. */
+    karaoke?: KaraokeOptions | null;
+    /** The tremolo of the filters effect to apply. */
+    tremolo?: TremoloOptions | null;
+    /** The vibrato of the filters effect to apply. */
+    vibrato?: VibratoOptions | null;
+    /** The rotation of the filters effect to apply. */
+    rotation?: RotationOptions | null;
+    /** The distortion of the filters effect to apply. */
+    distortion?: DistortionOptions | null;
+    /** The channel mix of the filters effect to apply. */
+    channelMix?: ChannelMixOptions | null;
+    /** The low-pass filter options to apply. */
+    lowPass?: LowPassOptions | null;
+    /** The time-scale options to apply. */
+    timescale?: TimescaleOptions | null;
+    /** The bass boost level. */
+    bassBoost?: number | 0;
+    /** Whether to apply slow mode. */
+    slowMode?: boolean | null;
+    /** Whether to apply nightcore effect. */
+    nightcore?: boolean | null;
+    /** Whether to apply daycore effect. */
+    daycore?: boolean | null;
+    /** Whether to apply vaporwave effect. */
+    vaporwave?: boolean | null;
+    /** Whether to apply chipmunk effect. */
+    chipmunk?: boolean | null;
+    /** Whether to apply 8D effect. */
+    _8d?: boolean | null;
+}
+
+/**
+ * The Filters class that is used to apply filters to the currently player
  */
 export class Filters {
     public player: Player;
@@ -167,8 +165,8 @@ export class Filters {
     public distortion: DistortionOptions | null;
     public channelMix: ChannelMixOptions | null;
     public lowPass: LowPassOptions | null;
-    public bassboost: number | 0;
-    public slowmode: boolean | null;
+    public bassBoost: number | 0;
+    public slowMode: boolean | null;
     public nightcore: boolean | null;
     public daycore: boolean | null;
     public vaporwave: boolean | null;
@@ -187,17 +185,17 @@ export class Filters {
         this.distortion = options?.distortion ?? null;
         this.channelMix = options?.channelMix ?? null;
         this.lowPass = options?.lowPass ?? null;
-        this.bassboost = options?.bassboost ?? 0;
-        this.slowmode = options?.slowmode ?? null;
+        this.bassBoost = options?.bassBoost ?? 0;
+        this.slowMode = options?.slowMode ?? null;
         this.nightcore = options?.nightcore ?? null;
         this.daycore = options?.daycore ?? null;
         this.vaporwave = options?.vaporwave ?? null;
-        this.chipmunk = options?.chimpmunk ?? null;
+        this.chipmunk = options?.chipmunk ?? null;
         this._8d = options?._8d ?? null;
     }
 
     /**
-     * Sets the equalizer bands for the currently playing track.
+     * Sets the equalizer bands for the currently player.
      * @param {Band[]} bands - An array of bands to set the equalizer to.
      * @returns {Filters} - Returns the Filters instance for method chaining.
      */
@@ -209,7 +207,7 @@ export class Filters {
     }
 
     /**
-     * Changes the karaoke options applied to the currently playing track.
+     * Changes the karaoke options applied to the currently player.
      * @param {KaraokeOptions} karaoke - An object that conforms to the KaraokeOptions type, defining a range of frequencies to mute.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
@@ -221,7 +219,7 @@ export class Filters {
     }
 
     /**
-     * Changes the timescale options applied to the currently playing track.
+     * Changes the timescale options applied to the currently player.
      * @param {TimescaleOptions | null} timescale - An object that conforms to the TimescaleOptions type, defining the timescale to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
@@ -233,7 +231,7 @@ export class Filters {
     }
 
     /**
-     * Changes the tremolo options applied to the currently playing track.
+     * Changes the tremolo options applied to the currently player.
      * @param {TremoloOptions | null} tremolo - An object that conforms to the TremoloOptions type, defining the tremolo to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
@@ -245,7 +243,7 @@ export class Filters {
     }
 
     /**
-     * Changes the vibrato options applied to the currently playing track.
+     * Changes the vibrato options applied to the currently player.
      * @param {VibratoOptions | null} vibrato - An object that conforms to the VibratoOptions type, defining the vibrato to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
@@ -257,7 +255,7 @@ export class Filters {
     }
 
     /**
-     * Changes the rotation options applied to the currently playing track.
+     * Changes the rotation options applied to the currently player.
      * @param {RotationOptions | null} rotation - An object that conforms to the RotationOptions type, defining the rotation to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
@@ -269,7 +267,7 @@ export class Filters {
     }
 
     /**
-     * Changes the distortion options applied to the currently playing track.
+     * Changes the distortion options applied to the currently player.
      * @param {DistortionOptions} distortion - An object that conforms to the DistortionOptions type, defining the distortion to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
@@ -281,7 +279,7 @@ export class Filters {
     }
 
     /**
-     * Changes the channel mix options applied to the currently playing track.
+     * Changes the channel mix options applied to the currently player.
      * @param {ChannelMixOptions} mix - An object that conforms to the ChannelMixOptions type, defining the channel mix to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
@@ -293,7 +291,7 @@ export class Filters {
     }
 
     /**
-     * Changes the low pass options applied to the currently playing track.
+     * Changes the low pass options applied to the currently player.
      * @param {LowPassOptions} pass - An object that conforms to the LowPassOptions type, defining the low pass to apply.
      * @returns {Filters} - Returns the current Filters instance for method chaining.
      */
@@ -315,7 +313,7 @@ export class Filters {
             throw Error('Bassboost value must be between 0 to 5');
         }
 
-        this.bassboost = value;
+        this.bassBoost = value;
 
         const num = (value - 1) * (1.25 / 9) - 0.25;
         await this.setEqualizer(Array(13).fill(0).map((n, i) => ({
@@ -329,12 +327,12 @@ export class Filters {
     /**
      * Sets the Slowmode filter for the player.
      * @param {boolean} value - The value to enable or disable Slowmode.
-     * @param {object} [options] - Optional parameters.
+     * @param {TimescaleOptions} [options] - Optional custom parameters.
      * @returns {Filters} - Returns the current instance of the player or undefined if player is not available.
      */
-    public async setSlowmode(value: boolean, options?: { speed?: number, pitch?: number, rate?: number }): Promise<Filters> {
+    public async setSlowmode(value: boolean, options?: TimescaleOptions): Promise<Filters> {
         if (!this.player) return this;
-        this.slowmode = value;
+        this.slowMode = value;
 
         await this.setTimescale(value ? { speed: options?.speed ?? 0.5, pitch: options?.pitch ?? 1.0, rate: options?.rate ?? 0.8, } : null);
         return this;
@@ -343,10 +341,10 @@ export class Filters {
     /**
      * Sets the Nightcore filter for the player.
      * @param {boolean} value - Boolean value indicating whether to enable or disable Nightcore.
-     * @param {object} [options] - Optional parameters.
+     * @param {TimescaleOptions} [options] - Optional custom parameters.
      * @returns {Filter} - Returns the current instance of the player or undefined if player is not available.
      */
-    public async setNightcore(value: boolean, options?: { speed?: number, pitch?: number, rate?: number }): Promise<Filters> {
+    public async setNightcore(value: boolean, options?: TimescaleOptions): Promise<Filters> {
         if (!this.player) return this;
         this.nightcore = value;
 
@@ -363,10 +361,10 @@ export class Filters {
     /**
      * Sets the Daycore filter for the player.
      * @param {boolean} value - Boolean value indicating whether to enable or disable Daycore.
-     * @param {object} [options] - Optional parameters.
+     * @param {TimescaleOptions} [options] - Optional custom parameters.
      * @returns {Filter} - Returns the current instance of the player or undefined if player is not available.
      */
-    public async setDaycore(value: boolean, options?: { pitch?: number, rate?: number }): Promise<Filters> {
+    public async setDaycore(value: boolean, options?: Omit<TimescaleOptions, 'speed'>): Promise<Filters> {
         if (!this.player) return this;
         this.daycore = value;
 
@@ -400,10 +398,10 @@ export class Filters {
     /**
      * Sets the Vaporwave filter for the player.
      * @param {boolean} value - Boolean value indicating whether to enable or disable Vaporwave.
-     * @param {object} [options] - Optional parameters.
+     * @param {TimescaleOptions} [options] - Optional custom parameters.
      * @returns {Filters} - Returns nothing.
      */
-    public async setVaporwave(value: boolean, options?: { pitch?: number }): Promise<Filters> {
+    public async setVaporwave(value: boolean, options?: TimescaleOptions): Promise<Filters> {
         if (!this.player) return this;
         this.vaporwave = value;
 
@@ -420,10 +418,10 @@ export class Filters {
     /**
      * Sets the 8D filter for the player.
      * @param {boolean} value - Boolean value indicating whether to enable or disable the 8D filter.
-     * @param {object} [options] - Optional parameters.
+     * @param {RotationOptions} [options] - Optional custom parameters.
      * @returns {Filters} - Returns nothing.
      */
-    public async set8D(value: boolean, options?: { rotationHz?: number }): Promise<Filters> {
+    public async set8D(value: boolean, options?: RotationOptions): Promise<Filters> {
         if (!this.player) return this;
         this._8d = value;
 
@@ -434,10 +432,10 @@ export class Filters {
     /**
      * Sets the Chipmunk filter for the player.
      * @param {boolean} value - Boolean value indicating whether to enable or disable the Chipmunk filter.
-     * @param {object} [options] - Optional parameters.
+     * @param {TimescaleOptions} [options] - Optional custom parameters.
      * @returns {Filters} - Returns nothing.
      */
-    public async setChipmunk(value: boolean, options?: { speed?: number, pitch?: number, rate?: number }): Promise<Filters> {
+    public async setChipmunk(value: boolean, options?: TimescaleOptions): Promise<Filters> {
         if (!this.player) return this;
         this.chipmunk = value;
 
@@ -459,7 +457,7 @@ export class Filters {
     }
 
     /**
-     * Updates the filters applied to the currently playing track on the lavalink node.
+     * Updates the filters applied to the currently player on the lavalink node.
      * @returns {Filters} - Returns the current Filters instance with updated filters.
      */
     public async updateFilters(): Promise<Filters> {

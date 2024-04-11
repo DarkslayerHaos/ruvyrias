@@ -77,6 +77,9 @@ export interface PluginInfo {
         [key: string]: any;
     };
 }
+/**
+ * Represents a track with its associated data.
+ */
 export declare class Track {
     /** The base64 encoded track data */
     track: string | null;
