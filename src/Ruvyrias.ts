@@ -1,11 +1,10 @@
 import { Node, NodeStats } from './Node/Node';
-import { Player, RuvyriasEvents } from './Player/Player';
+import { Player, TrackEndEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from './Player/Player';
 import { EventEmitter } from 'events';
 import { Config } from './Config';
 import { LoadTrackResponse, Response } from './Guild/Response';
 import { Plugin } from './Plugin';
 import { Track, TrackData } from './Guild/Track';
-import { Filters } from './Player/Filters';
 import { Deezer } from '../plugins/deezer';
 import { Spotify } from '../plugins/spotify';
 import { AppleMusic } from '../plugins/applemusic';
@@ -195,25 +194,141 @@ export interface NodeInfoResponse {
 export type NodeStatsResponse = Omit<NodeStats, 'frameStats'>;
 
 /**
- * @extends EventEmitter
- * @interface Ruvyrias
- * @param {RuvyriasOptions} options
- * @param {NodeGroup[]} nodes
- * @param {string} clientId
- * @param {string} clientVersion
- * @param {boolean} isActivated
- * @param {Function} send
- * @param {Map<string, Node>} nodes
- * @param {Map<string, Player>} players
- * @returns Ruvyrias
+ * Represents the events emitted by Ruvyrias.
  */
-export declare interface Ruvyrias {
+export interface RuvyriasEvents {
+    /**
+     * Emitted when data useful for debugging is produced.
+     * @param {...any} args - The arguments emitted with the event.
+     */
+    debug: (...args: any[]) => void;
+
+    /**
+     * Emitted when a response is received.
+     * @param {string} topic - The section from which the event originates.
+     * @param {...unknown} args - The arguments emitted with the event.
+     */
+    raw: (topic: string, ...args: unknown[]) => void;
+
+    /**
+     * Emitted when a Lavalink node is connected to Ruvyrias.
+     * @param {Node} node - The connected Lavalink node.
+     */
+    nodeConnect: (node: Node) => void;
+
+    /**
+     * Emitted when a Lavalink node is disconnected from Ruvyrias.
+     * @param {Node} node - The disconnected Lavalink node.
+     * @param {unknown} [event] - Additional event data.
+     */
+    nodeDisconnect: (node: Node, event?: unknown) => void;
+
+    /**
+     * Emitted when Ruvyrias attempts to reconnect with a disconnected Lavalink node.
+     * @param {Node} node - The Lavalink node being reconnected to.
+     */
+    nodeReconnect: (node: Node) => void;
+
+    /**
+     * Emitted when a Lavalink node encounters an error.
+     * @param {Node} node - The Lavalink node that encountered the error.
+     * @param {any} event - The error event.
+     */
+    nodeError: (node: Node, event: any) => void;
+
+    /**
+     * Emitted whenever a player starts playing a new track.
+     * @param {Player} player - The player instance.
+     * @param {Track} track - The track being played.
+     * @param {TrackStartEvent} data - Additional data related to the track start event.
+     */
+    trackStart: (player: Player, track: Track, data: TrackStartEvent) => void;
+
+    /**
+     * Emitted whenever a track ends.
+     * @param {Player} player - The player instance.
+     * @param {Track} track - The track that ended.
+     * @param {TrackEndEvent} data - Additional data related to the track end event.
+     */
+    trackEnd: (player: Player, track: Track, data: TrackEndEvent) => void;
+
+    /**
+     * Emitted when a player's queue is completed and going to disconnect.
+     * @param {Player} player - The player instance.
+     */
+    queueEnd: (player: Player) => void;
+
+    /**
+     * Emitted when a track gets stuck while playing.
+     * @param {Player} player - The player instance.
+     * @param {Track} track - The track that got stuck.
+     * @param {TrackStuckEvent} data - Additional data related to the track stuck event.
+     */
+    trackError: (player: Player, track: Track, data: TrackStuckEvent) => void;
+
+    /**
+     * Emitted when a player is updated.
+     * @param {Player} player - The player instance.
+     */
+    playerUpdate: (player: Player) => void;
+
+    /**
+     * Emitted when a player is created.
+     * @param {Player} player - The player instance.
+     */
+    playerCreate: (player: Player) => void;
+
+    /**
+     * Emitted when a player is destroyed.
+     * @param {Player} player - The player instance.
+     */
+    playerDestroy: (player: Player) => void;
+
+    /**
+     * Emitted when the websocket connection to Discord voice servers is closed.
+     * @param {Player} player - The player instance.
+     * @param {Track} track - The track being played.
+     * @param {WebSocketClosedEvent} data - Additional data related to the socket close event.
+     */
+    socketClose: (player: Player, track: Track, data: WebSocketClosedEvent) => void;
+}
+
+/**
+ * Represents the Ruvyrias instance.
+ * This interface defines methods for event handling.
+ */
+export interface Ruvyrias {
+    /**
+     * Adds a listener function to the specified event.
+     * @param {K} event - The event name.
+     * @param {RuvyriasEvents[K]} listener - The listener function to be called when the event is emitted.
+     * @returns {this} - The Ruvyrias instance.
+     */
     on<K extends keyof RuvyriasEvents>(event: K, listener: RuvyriasEvents[K]): this;
+
+    /**
+     * Adds a one-time listener function to the specified event.
+     * The listener will be removed after it is invoked once.
+     * @param {K} event - The event name.
+     * @param {RuvyriasEvents[K]} listener - The listener function to be called when the event is emitted.
+     * @returns {this} - The Ruvyrias instance.
+     */
     once<K extends keyof RuvyriasEvents>(event: K, listener: RuvyriasEvents[K]): this;
-    emit<K extends keyof RuvyriasEvents>(
-        event: K,
-        ...args: Parameters<RuvyriasEvents[K]>
-    ): boolean;
+
+    /**
+     * Emits the specified event with the provided arguments.
+     * @param {K} event - The event name to emit.
+     * @param {...Parameters<RuvyriasEvents[K]>} args - The arguments to pass to the event listeners.
+     * @returns {boolean} - Returns true if event had listeners, false otherwise.
+     */
+    emit<K extends keyof RuvyriasEvents>(event: K, ...args: Parameters<RuvyriasEvents[K]>): boolean;
+
+    /**
+     * Removes the specified listener from the event.
+     * @param {K} event - The event name.
+     * @param {RuvyriasEvents[K]} listener - The listener function to remove.
+     * @returns {this} - The Ruvyrias instance.
+     */
     off<K extends keyof RuvyriasEvents>(event: K, listener: RuvyriasEvents[K]): this;
 }
 
