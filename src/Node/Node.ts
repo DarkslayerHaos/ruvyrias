@@ -2,6 +2,7 @@ import { Ruvyrias, RuvyriasOptions, NodeGroup } from '../Ruvyrias';
 import WebSocket from 'ws';
 import { Config } from '../Config';
 import { Rest } from './Rest';
+import { PlayerEventType } from '../Player/Player';
 
 /**
  * Represents statistics and information about a Lavalink node.
@@ -27,6 +28,46 @@ export interface NodeStats {
         lavalinkLoad: number;
     };
 }
+
+/**
+ * Dispatched when you successfully connect to the Lavalink node
+ */
+interface LavalinkReadyPacket {
+    op: 'ready';
+    resumed: boolean;
+    sessionId: string;
+};
+
+/**
+ * Dispatched every x seconds with the latest player state
+ */
+interface LavalinkPlayerUpdatePacket {
+    op: 'playerUpdate';
+    guildId: string;
+    state: {
+        time: number;
+        position: number;
+        connected: true;
+        ping: number;
+    };
+};
+
+/**
+ * Dispatched when the node sends stats once per minute
+ */
+interface LavalinkNodeStatsPacket extends NodeStats {
+    op: 'stats';
+};
+
+/**
+ * Dispatched when player or voice events occur
+ */
+type LavalinkEventPacket = { op: 'event' } & PlayerEventType;
+
+/**
+ * Represents the various types of packets that can be dispatched by Lavalink.
+ */
+type LavalinkPackets = LavalinkReadyPacket | LavalinkPlayerUpdatePacket | LavalinkNodeStatsPacket | LavalinkEventPacket;
 
 /**
  * Represents a connection to a Lavalink node, allowing communication and control over audio playback.
@@ -89,12 +130,19 @@ export class Node {
         if (!this.ruvyrias.nodes.get(this.name)) {
             this.ruvyrias.nodes.set(this.name, this)
         }
-        const headers: any = {
+
+        if (!this.ruvyrias.options.clientId) {
+            throw new Error('[Ruvyrias Error] No user id found in the Ruvyrias instance. Consider using a supported library.');
+        }
+
+        const headers: { [key: string]: string } = {
             'Authorization': this.password,
             'User-Id': this.ruvyrias.options.clientId,
             'Client-Name': `${Config.clientName}/${Config.clientVersion}`,
         };
+
         if (this.sessionId) headers['Session-Id'] = this.sessionId;
+
         this.ws = new WebSocket(`${this.socketURL}`, { headers });
         this.ws.on('open', this.open.bind(this));
         this.ws.on('error', this.error.bind(this));
@@ -108,6 +156,10 @@ export class Node {
      * @returns {void}
      */
     public send(payload: any): void {
+        if (!this?.isConnected ?? !this?.ws) {
+            throw new Error('[Ruvyrias Error] The node is not connected.');
+        }
+
         const data = JSON.stringify(payload);
         this.ws?.send(data, (error: any) => {
             if (error) return error;
@@ -122,7 +174,7 @@ export class Node {
     public async reconnect(): Promise<void> {
         this.reconnectAttempt = setTimeout(async () => {
             if (this.attempt > this.reconnectTries) {
-                throw new Error(`[Ruvyrias Websocket] Unable to connect with ${this.name} node after ${this.reconnectTries} tries`);
+                throw new Error(`[Ruvyrias Websocket] Unable to connect with ${this.name} node after ${this.reconnectTries} tries.`);
             }
             this.isConnected = false;
             this.ws?.removeAllListeners();
@@ -142,7 +194,6 @@ export class Node {
 
         this.ruvyrias.players.forEach(async (player) => {
             if (player.node == this) {
-                await this.ruvyrias.destroyPlayer(player.guildId);
                 await player.autoMoveNode();
             }
         });
@@ -159,9 +210,9 @@ export class Node {
      * Gets the penalties associated with the current node.
      * @returns {number} The total amount of penalties.
      */
-    get penalties(): number {
+    public get penalties(): number {
         let penalties = 0;
-        if (!this.isConnected) return penalties;
+        if (!this?.isConnected ?? this?.stats) return penalties;
         penalties += (this.stats as NodeStats)?.players;
         penalties += Math.round(
             Math.pow(1.05, 100 * (this.stats as NodeStats)?.cpu.systemLoad) * 10 - 10
@@ -178,61 +229,75 @@ export class Node {
      * @returns {Promise<void>} The void
      */
     private async open(): Promise<void> {
-        if (this.reconnectAttempt) {
-            clearTimeout(this.reconnectAttempt);
-            this.reconnectAttempt = null;
-        }
+        try {
+            if (this.reconnectAttempt) {
+                clearTimeout(this.reconnectAttempt);
+                this.reconnectAttempt = null;
+            }
 
-        this.ruvyrias.emit('nodeConnect', this);
-        this.isConnected = true;
-        this.ruvyrias.emit('debug', this.name, `[Web Socket] Connection ready ${this.socketURL}`);
+            this.ruvyrias.emit('nodeConnect', this);
+            this.isConnected = true;
+            this.ruvyrias.emit('debug', this.name, `[Web Socket] Connection ready: ${this.socketURL}.`);
 
-        if (this.autoResume) {
-            for (const player of this.ruvyrias.players.values()) {
-                if (player.node === this) {
-                    await player.restart();
+            if (this.autoResume) {
+                for (const player of this.ruvyrias.players.values()) {
+                    if (player.node === this) {
+                        await player.restart();
+                    }
                 }
             }
+        } catch (error) {
+            this.ruvyrias.emit('debug', `[Web Socket] Error while opening the connection with the node ${this.name}.`, error)
         }
-    }
-
-    /**
-     * This function will set the stats accordingly from the NodeStats
-     * @param {NodeStats} packet The NodeStats
-     * @returns {void} void 
-     */
-    private setStats(packet: NodeStats): void {
-        this.stats = packet;
     }
 
     /**
      * This will send a message to the node
-     * @param {any} payload any 
-     * @returns {Promise<void>} void
+     * @param {string} payload The sent payload we recieved in stringified form
+     * @returns {Promise<void>} Return void
      */
     private async message(payload: any): Promise<void> {
-        const packet = JSON.parse(payload);
-        if (!packet?.op) return;
+        try {
+            const packet = JSON.parse(payload) as LavalinkPackets;
+            if (!packet?.op) return;
 
-        this.ruvyrias.emit('raw', 'Node', packet)
-        this.ruvyrias.emit('debug', this.name, `[Web Socket] Lavalink Node Update : ${JSON.stringify(packet)} `);
+            this.ruvyrias.emit('raw', 'Node', packet)
+            this.ruvyrias.emit('debug', this.name, `[Web Socket] Lavalink Node Update: ${JSON.stringify(packet)}.`);
 
-        if (packet.op === 'stats') {
-            delete packet.op;
-            this.setStats(packet);
-        }
-        if (packet.op === 'ready') {
-            this.rest.setSessionId(packet.sessionId);
-            this.sessionId = packet.sessionId;
-            this.ruvyrias.emit('debug', this.name, `[Web Socket] Ready Payload received ${JSON.stringify(packet)}`)
-            if (this.options.resume) {
-                await this.rest.patch(`/v4/sessions/${this.sessionId}`, { resuming: this.options.resume, timeout: this.resumeTimeout })
-                this.ruvyrias.emit('debug', this.name, `[Lavalink Rest] Resuming configured on Lavalink`);
+            switch (packet.op) {
+                case 'ready': {
+                    this.rest.setSessionId(packet.sessionId);
+                    this.sessionId = packet.sessionId;
+                    this.ruvyrias.emit('debug', this.name, `[Web Socket] Ready Payload received: ${JSON.stringify(packet)}.`);
+
+                    // If resume is enabled, try resuming the player
+                    if (this.options.resume) {
+                        await this.rest.patch(`/v4/sessions/${this.sessionId}`, { resuming: this.options.resume, timeout: this.resumeTimeout });
+                        this.ruvyrias.emit('debug', this.name, `[Lavalink Rest] Resuming configured on Lavalink...`);
+                    }
+
+                    break;
+                }
+
+                // If the packet has stats about the node in it update them on the Node's class
+                case 'stats': {
+                    this.stats = packet;
+                    break;
+                }
+
+                // If the packet is an event or playerUpdate emit the event to the player
+                case 'event':
+                case 'playerUpdate': {
+                    const player = this.ruvyrias.players.get((packet as LavalinkPlayerUpdatePacket).guildId);
+                    if ((packet as LavalinkPlayerUpdatePacket).guildId && player) player.emit(packet.op, packet);
+                    break;
+                }
+
+                default: break;
             }
-
+        } catch (error) {
+            this.ruvyrias.emit('debug', '[Web Socket] Error while parsing the payload.', error);
         }
-        const player = this.ruvyrias.players.get(packet.guildId);
-        if (packet.guildId && player) player.emit(packet.op, packet);
     }
 
     /**
@@ -241,10 +306,14 @@ export class Node {
      * @returns {Promise<void>} void
      */
     private async close(event: any): Promise<void> {
-        await this.disconnect();
-        this.ruvyrias.emit('nodeDisconnect', this, event);
-        this.ruvyrias.emit('debug', this.name, `[Web Socket] Connection closed with Error code : ${event ?? 'Unknown code'}`);
-        if (event !== 1000) await this.reconnect();
+        try {
+            await this.disconnect();
+            this.ruvyrias.emit('nodeDisconnect', this, event);
+            this.ruvyrias.emit('debug', this.name, `[Web Socket] Connection closed with Error code: ${event ?? 'Unknown code'}.`);
+            if (event !== 1000) await this.reconnect();
+        } catch (error) {
+            this.ruvyrias.emit('debug', '[Web Socket] Error while closing the connection with the node.', error);
+        }
     }
 
     /**
@@ -255,6 +324,6 @@ export class Node {
     private error(event: any): void {
         if (!event) return;
         this.ruvyrias.emit('nodeError', this, event);
-        this.ruvyrias.emit('debug', `[Web Socket] Connection for Lavalink Node (${this.name}) has error code: ${event.code ?? event}`);
+        this.ruvyrias.emit('debug', `[Web Socket] Connection for Lavalink Node (${this?.name}) has error code: ${event?.code ?? event}.`);
     }
 }

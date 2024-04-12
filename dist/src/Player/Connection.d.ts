@@ -81,11 +81,11 @@ export declare class Connection {
      * Set the voice server update
      * @param {IVoiceServer} data The data from the voice server update
      */
-    setServersUpdate(data: IVoiceServer): void;
+    setServersUpdate(data: IVoiceServer): Promise<void>;
     /**
      * Set the state update
      * @param {SetStateUpdate} data The data from the state update
      */
-    setStateUpdate(data: SetStateUpdate): void;
+    setStateUpdate(data: SetStateUpdate): Promise<void>;
 }
 export {};

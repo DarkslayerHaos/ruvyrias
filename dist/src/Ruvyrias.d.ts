@@ -371,10 +371,11 @@ export declare class Ruvyrias extends EventEmitter {
      */
     private createPlayer;
     /**
-     * Creates a player instance for the specified guild using the provided node and options.
-     * @param {string} guildId - Options for creating the player.
+     * Destroys the player instance for the specified guild using the provided guild ID.
+     * @param {string} guildId - The ID of the guild associated with the player instance.
+     * @returns {boolean|null} A Promise that resolves with a boolean indicating success or null if no specific value is needed.
      */
-    destroyPlayer(guildId: string): Promise<void>;
+    destroyPlayer(guildId: string): boolean | null;
     /**
      * Removes a player associated with the specified guild from Ruvyrias instance.
      * @param {string} guildId - The ID of the guild for which to remove the player.

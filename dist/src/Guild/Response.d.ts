@@ -21,10 +21,15 @@ export interface LavalinkResponse {
  * Represents information about a playlist, including its name and the index of the selected track.
  */
 interface PlaylistInfo {
+    /** The type of the playlist, such as "playlist" or "noPlaylist". */
+    type: 'playlist';
     /** The name of the playlist. */
     name: string;
     /** The index of the selected track within the playlist. */
     selectedTrack: number;
+}
+interface NoPlaylistInfo {
+    type: 'noPlaylist';
 }
 /**
  * Represents a response indicating that a single track has been loaded.
@@ -105,7 +110,7 @@ export type LoadTrackResponse = LoadTrackResponseTrack | LoadTrackResponseSearch
 export declare class Response {
     tracks: Track[];
     loadType: LoadType;
-    playlistInfo?: PlaylistInfo;
+    playlistInfo?: PlaylistInfo | NoPlaylistInfo;
     constructor(response: LoadTrackResponse, requester: any);
     /**
      * Helper function to handle tracks in the Response class.

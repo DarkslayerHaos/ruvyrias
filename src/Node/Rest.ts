@@ -3,6 +3,8 @@ import { NodeInfoResponse, NodeStatsResponse, Ruvyrias } from '../Ruvyrias';
 import { Track } from '../Guild/Track';
 import { Player } from '../Player/Player';
 import { LoadTrackResponse, LoadType } from '../Guild/Response';
+import { FiltersOptions } from '../Player/Filters';
+import { IVoiceServer } from '../Player/Connection';
 
 /**
  * This interface represents the LavaLink V4 Error Responses
@@ -23,20 +25,28 @@ export interface ErrorResponses {
 export interface PlayOptions {
     guildId: string;
     data: {
-        track?: any;
+        track?: {
+            encoded?: string | null;
+            identifier?: string;
+            userData?: object;
+            requester?: any;
+        };
         identifier?: string;
         startTime?: number;
         endTime?: number;
         volume?: number;
         position?: number;
-        paused?: Boolean;
-        filters?: Object;
-        voice?: any;
+        paused?: boolean;
+        filters?: Partial<FiltersOptions>;
+        voice?: IVoiceServer | PartialNull<IVoiceServer> | null;
     };
 }
 
 /** Represents a route path string in the format `/${string}`. */
 export type RouteLike = `/${string}`;
+
+/** Represents a partial type with nullable properties. */
+export type PartialNull<T> = { [P in keyof T]: T[P] | null };
 
 /** Represents a type that can be used for HTTP GET methods with various response types. */
 export type RestMethodGet =
@@ -64,7 +74,7 @@ export enum RequestMethod {
 export class Rest {
     public ruvyrias: Ruvyrias;
     public url: string;
-    private sessionId: string;
+    private sessionId: string | null;
     private password: string;
 
     constructor(ruvyrias: Ruvyrias, node: Node) {
@@ -85,27 +95,27 @@ export class Rest {
 
     /**
      * Gets information about all players in the session.
-     * @returns {Promise<Player[]>} A Promise that resolves to the information about all players.
+     * @returns {Promise<Player[] | ErrorResponses | null>} A Promise that resolves to the information about all players.
      */
-    public async getAllPlayers(): Promise<Player[]> {
+    public async getAllPlayers(): Promise<Player[] | ErrorResponses | null> {
         return await this.get(`/v4/sessions/${this.sessionId}/players`) as Player[];
     }
 
     /**
      * Updates a player with the specified options.
      * @param {PlayOptions} options - The options to update the player.
-     * @returns {Promise<Player>} A Promise that resolves when the player is updated.
+     * @returns {Promise<Player | ErrorResponses | null>} A Promise that resolves when the player is updated.
      */
-    public async updatePlayer(options: PlayOptions): Promise<Player> {
+    public async updatePlayer(options: PlayOptions): Promise<Player | ErrorResponses | null> {
         return await this.patch(`/v4/sessions/${this.sessionId}/players/${options.guildId}?noReplace=false`, options.data) as Player;
     }
 
     /**
     * Destroys a player for the specified guild.
     * @param {string} guildId - The ID of the guild for which to destroy the player.
-    * @returns {Promise<unknown>} A Promise that resolves when the player is destroyed.
+    * @returns {Promise<null>} A Promise that resolves when the player is destroyed.
     */
-    public async destroyPlayer(guildId: string): Promise<unknown> {
+    public async destroyPlayer(guildId: string): Promise<null> {
         return await this.delete(`/v4/sessions/${this.sessionId}/players/${guildId}`);
     }
 
@@ -125,7 +135,7 @@ export class Rest {
             });
             return req.headers.get('content-type') === 'application/json' ? await req.json() as RestMethodGet : await req.text() as RestMethodGet;
         } catch (e) {
-            throw new Error('Failed to patch data');
+            throw new Error('Failed to get data');
         }
     }
 
@@ -133,9 +143,9 @@ export class Rest {
      * Performs an HTTP PATCH request to the specified endpoint with the provided body.
      * @param {RouteLike} endpoint - The endpoint to make the PATCH request.
      * @param {any} body - The data to include in the PATCH request body.
-     * @returns {Promise<Player>} A Promise that resolves with the response data.
+     * @returns {Promise<Player | null>} A Promise that resolves with the response data.
      */
-    public async patch(endpoint: RouteLike, body: any): Promise<Player> {
+    public async patch(endpoint: RouteLike, body: any): Promise<Player | null> {
         try {
             const req = await fetch(this.url + endpoint, {
                 method: RequestMethod.Patch,

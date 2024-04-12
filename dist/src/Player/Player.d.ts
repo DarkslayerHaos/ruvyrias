@@ -124,9 +124,9 @@ export declare class Player extends EventEmitter {
     play(): Promise<Player | void>;
     /**
      * Stops the player, disconnects from the voice channel, and destroys the player instance.
-     * @returns {Promise<boolean>} - A promise that resolves to true once the player is destroyed.
+     * @returns {Promise<boolean|null>} - A promise that resolves to true once the player is destroyed.
      */
-    stop(): Promise<boolean>;
+    stop(): Promise<boolean | null>;
     /**
      * Skips the current track.
      * @returns {Promise<Player>} - The player instance after skipping the track.
@@ -140,7 +140,7 @@ export declare class Player extends EventEmitter {
     pause(toggle?: boolean): Promise<Player>;
     /**
      * This function will restart the player and play the current track
-     * @returns {Promise<Player>} Returns a Player object
+     * @returns {Promise<Player|void>} Returns a Player object
      */
     restart(): Promise<Player | void>;
     /**
@@ -198,9 +198,9 @@ export declare class Player extends EventEmitter {
     moveNode(name: string): Promise<Node | void>;
     /**
      * Automatically moves the player to the least used Lavalink node.
-     * @returns {Promise<Node | boolean | void>} Resolves with the moved Node or false, or if an error occurred.
+     * @returns {Promise<Node | boolean | void | null>} Resolves with the moved Node or false, or if an error occurred.
      */
-    autoMoveNode(): Promise<Node | boolean | void>;
+    autoMoveNode(): Promise<Node | boolean | void | null>;
     /**
      * Sets the provided value for the given key.
      * @param {string} key - The key to set the value.

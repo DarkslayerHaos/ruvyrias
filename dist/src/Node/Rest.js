@@ -35,7 +35,7 @@ class Rest {
     }
     /**
      * Gets information about all players in the session.
-     * @returns {Promise<Player[]>} A Promise that resolves to the information about all players.
+     * @returns {Promise<Player[] | ErrorResponses | null>} A Promise that resolves to the information about all players.
      */
     async getAllPlayers() {
         return await this.get(`/v4/sessions/${this.sessionId}/players`);
@@ -43,7 +43,7 @@ class Rest {
     /**
      * Updates a player with the specified options.
      * @param {PlayOptions} options - The options to update the player.
-     * @returns {Promise<Player>} A Promise that resolves when the player is updated.
+     * @returns {Promise<Player | ErrorResponses | null>} A Promise that resolves when the player is updated.
      */
     async updatePlayer(options) {
         return await this.patch(`/v4/sessions/${this.sessionId}/players/${options.guildId}?noReplace=false`, options.data);
@@ -51,7 +51,7 @@ class Rest {
     /**
     * Destroys a player for the specified guild.
     * @param {string} guildId - The ID of the guild for which to destroy the player.
-    * @returns {Promise<unknown>} A Promise that resolves when the player is destroyed.
+    * @returns {Promise<null>} A Promise that resolves when the player is destroyed.
     */
     async destroyPlayer(guildId) {
         return await this.delete(`/v4/sessions/${this.sessionId}/players/${guildId}`);
@@ -73,14 +73,14 @@ class Rest {
             return req.headers.get('content-type') === 'application/json' ? await req.json() : await req.text();
         }
         catch (e) {
-            throw new Error('Failed to patch data');
+            throw new Error('Failed to get data');
         }
     }
     /**
      * Performs an HTTP PATCH request to the specified endpoint with the provided body.
      * @param {RouteLike} endpoint - The endpoint to make the PATCH request.
      * @param {any} body - The data to include in the PATCH request body.
-     * @returns {Promise<Player>} A Promise that resolves with the response data.
+     * @returns {Promise<Player | null>} A Promise that resolves with the response data.
      */
     async patch(endpoint, body) {
         try {

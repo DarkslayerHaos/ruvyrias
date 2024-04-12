@@ -3,6 +3,8 @@ import { NodeInfoResponse, NodeStatsResponse, Ruvyrias } from '../Ruvyrias';
 import { Track } from '../Guild/Track';
 import { Player } from '../Player/Player';
 import { LoadTrackResponse, LoadType } from '../Guild/Response';
+import { FiltersOptions } from '../Player/Filters';
+import { IVoiceServer } from '../Player/Connection';
 /**
  * This interface represents the LavaLink V4 Error Responses
  * @reference https://lavalink.dev/api/rest.html#error-responses
@@ -21,19 +23,28 @@ export interface ErrorResponses {
 export interface PlayOptions {
     guildId: string;
     data: {
-        track?: any;
+        track?: {
+            encoded?: string | null;
+            identifier?: string;
+            userData?: object;
+            requester?: any;
+        };
         identifier?: string;
         startTime?: number;
         endTime?: number;
         volume?: number;
         position?: number;
-        paused?: Boolean;
-        filters?: Object;
-        voice?: any;
+        paused?: boolean;
+        filters?: Partial<FiltersOptions>;
+        voice?: IVoiceServer | PartialNull<IVoiceServer> | null;
     };
 }
 /** Represents a route path string in the format `/${string}`. */
 export type RouteLike = `/${string}`;
+/** Represents a partial type with nullable properties. */
+export type PartialNull<T> = {
+    [P in keyof T]: T[P] | null;
+};
 /** Represents a type that can be used for HTTP GET methods with various response types. */
 export type RestMethodGet = LoadType | Track | Player | NodeInfoResponse | LoadTrackResponse | NodeStatsResponse | Player[];
 /** Represents the HTTP request method types. */
@@ -62,21 +73,21 @@ export declare class Rest {
     setSessionId(sessionId: string): void;
     /**
      * Gets information about all players in the session.
-     * @returns {Promise<Player[]>} A Promise that resolves to the information about all players.
+     * @returns {Promise<Player[] | ErrorResponses | null>} A Promise that resolves to the information about all players.
      */
-    getAllPlayers(): Promise<Player[]>;
+    getAllPlayers(): Promise<Player[] | ErrorResponses | null>;
     /**
      * Updates a player with the specified options.
      * @param {PlayOptions} options - The options to update the player.
-     * @returns {Promise<Player>} A Promise that resolves when the player is updated.
+     * @returns {Promise<Player | ErrorResponses | null>} A Promise that resolves when the player is updated.
      */
-    updatePlayer(options: PlayOptions): Promise<Player>;
+    updatePlayer(options: PlayOptions): Promise<Player | ErrorResponses | null>;
     /**
     * Destroys a player for the specified guild.
     * @param {string} guildId - The ID of the guild for which to destroy the player.
-    * @returns {Promise<unknown>} A Promise that resolves when the player is destroyed.
+    * @returns {Promise<null>} A Promise that resolves when the player is destroyed.
     */
-    destroyPlayer(guildId: string): Promise<unknown>;
+    destroyPlayer(guildId: string): Promise<null>;
     /**
      * Performs an HTTP GET request to the specified path.
      * @param {RouteLike} path - The path to make the GET request.
@@ -87,9 +98,9 @@ export declare class Rest {
      * Performs an HTTP PATCH request to the specified endpoint with the provided body.
      * @param {RouteLike} endpoint - The endpoint to make the PATCH request.
      * @param {any} body - The data to include in the PATCH request body.
-     * @returns {Promise<Player>} A Promise that resolves with the response data.
+     * @returns {Promise<Player | null>} A Promise that resolves with the response data.
      */
-    patch(endpoint: RouteLike, body: any): Promise<Player>;
+    patch(endpoint: RouteLike, body: any): Promise<Player | null>;
     /**
      * Performs an HTTP POST request to the specified endpoint with the provided body.
      * @param {RouteLike} endpoint - The endpoint to make the POST request.

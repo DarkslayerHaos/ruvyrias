@@ -24,11 +24,17 @@ export interface LavalinkResponse {
  * Represents information about a playlist, including its name and the index of the selected track.
  */
 interface PlaylistInfo {
+    /** The type of the playlist, such as "playlist" or "noPlaylist". */
+    type: 'playlist';
     /** The name of the playlist. */
     name: string;
     /** The index of the selected track within the playlist. */
     selectedTrack: number;
 }
+
+interface NoPlaylistInfo {
+    type: 'noPlaylist',
+};
 
 /**
  * Represents a response indicating that a single track has been loaded.
@@ -121,28 +127,44 @@ export type LoadTrackResponse =
 export class Response {
     public tracks: Track[];
     public loadType: LoadType;
-    public playlistInfo?: PlaylistInfo;
+    public playlistInfo?: PlaylistInfo | NoPlaylistInfo;
 
     constructor(response: LoadTrackResponse, requester: any) {
         switch (response.loadType) {
             case 'playlist': {
-                this.tracks = response.data.tracks.map((track) => new Track(track, requester));
-                this.playlistInfo = response.data.info;
+                this.tracks = this.handleTracks(response.data.tracks, requester);
+                this.playlistInfo = {
+                    ...response.data.info,
+                    type: 'playlist',
+                };
+
                 break;
             }
 
             case 'track': {
                 this.tracks = this.handleTracks(response.data, requester);
+                this.playlistInfo = {
+                    type: 'noPlaylist'
+                };
+
                 break;
             }
 
             case 'search': {
                 this.tracks = this.handleTracks(response.data, requester);
+                this.playlistInfo = {
+                    type: 'noPlaylist'
+                };
+
                 break;
             }
 
             default: {
                 this.tracks = [];
+                this.playlistInfo = {
+                    type: 'noPlaylist'
+                };
+
                 break;
             }
         }

@@ -88,15 +88,9 @@ export declare class Node {
      */
     private open;
     /**
-     * This function will set the stats accordingly from the NodeStats
-     * @param {NodeStats} packet The NodeStats
-     * @returns {void} void
-     */
-    private setStats;
-    /**
      * This will send a message to the node
-     * @param {any} payload any
-     * @returns {Promise<void>} void
+     * @param {string} payload The sent payload we recieved in stringified form
+     * @returns {Promise<void>} Return void
      */
     private message;
     /**

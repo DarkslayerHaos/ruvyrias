@@ -68,7 +68,6 @@ class Player extends events_1.EventEmitter {
         this.deaf = options.deaf ?? false;
         this.mute = options.mute ?? false;
         this.loop = 'NONE';
-        this.ruvyrias.emit('playerCreate', this);
         this.on('playerUpdate', (packet) => {
             this.isConnected = packet.state.connected;
             this.position = packet.state.position;
@@ -106,14 +105,12 @@ class Player extends events_1.EventEmitter {
     }
     /**
      * Stops the player, disconnects from the voice channel, and destroys the player instance.
-     * @returns {Promise<boolean>} - A promise that resolves to true once the player is destroyed.
+     * @returns {Promise<boolean|null>} - A promise that resolves to true once the player is destroyed.
      */
     async stop() {
         await this.disconnect();
-        this.node.rest.destroyPlayer(this.guildId);
-        this.ruvyrias.emit('debug', this.guildId, `[Ruvyrias Player] destroyed the player`);
-        this.ruvyrias.emit('playerDestroy', this);
-        return this.ruvyrias.players.delete(this.guildId);
+        await this.node.rest.destroyPlayer(this.guildId);
+        return this.ruvyrias.destroyPlayer(this.guildId);
     }
     /**
      * Skips the current track.
@@ -144,7 +141,7 @@ class Player extends events_1.EventEmitter {
     }
     /**
      * This function will restart the player and play the current track
-     * @returns {Promise<Player>} Returns a Player object
+     * @returns {Promise<Player|void>} Returns a Player object
      */
     async restart() {
         if (!this.currentTrack?.track && !this.queue.length)
@@ -155,7 +152,7 @@ class Player extends events_1.EventEmitter {
             guildId: this.guildId,
             data: {
                 position: this.position,
-                track: this.currentTrack,
+                track: { encoded: this.currentTrack?.track }
             },
         });
         return this;
@@ -175,7 +172,7 @@ class Player extends events_1.EventEmitter {
             self_mute: mute ?? false,
         });
         this.isConnected = true;
-        this.ruvyrias.emit('debug', this.guildId, `[Ruvyrias Player] Player has been connected`);
+        this.ruvyrias.emit('debug', this.guildId, `[Ruvyrias Player] Player has been connected.`);
     }
     /**
      * Disconnects the player from the voice channel.
@@ -213,7 +210,7 @@ class Player extends events_1.EventEmitter {
      */
     async setVolume(volume) {
         if (volume < 0 ?? volume > 1000) {
-            throw new Error('[Ruvyrias Exception] Volume must be between 0 to 1000');
+            throw new Error('[Ruvyrias Exception] Volume must be between 0 to 1000.');
         }
         await this.node.rest.updatePlayer({ guildId: this.guildId, data: { volume } });
         this.volume = volume;
@@ -226,10 +223,10 @@ class Player extends events_1.EventEmitter {
      */
     setLoop(mode) {
         if (!mode) {
-            throw new Error(`[Ruvyrias Player] You must have to provide loop mode as argument of setLoop`);
+            throw new Error(`[Ruvyrias Error] You must have to provide loop mode as argument of setLoop.`);
         }
         if (!['NONE', 'TRACK', 'QUEUE'].includes(mode))
-            throw new Error(`[Ruvyrias Player] setLoop arguments are NONE,TRACK AND QUEUE`);
+            throw new Error(`[Ruvyrias Exception] setLoop arguments are NONE, TRACK and QUEUE.`);
         switch (mode) {
             case 'NONE': {
                 this.loop = 'NONE';
@@ -268,7 +265,7 @@ class Player extends events_1.EventEmitter {
      */
     setVoiceChannel(channel, options) {
         if (this.isConnected && channel == this.voiceChannel) {
-            throw new ReferenceError(`Player is already connected to ${channel}`);
+            throw new ReferenceError(`[Ruvyrias Exception] Player is already connected to ${channel}`);
         }
         this.voiceChannel = channel;
         if (options) {
@@ -276,10 +273,10 @@ class Player extends events_1.EventEmitter {
             this.deaf = options.deaf ?? this.deaf ?? false;
         }
         this.connect({
-            deaf: this.deaf,
             guildId: this.guildId,
             voiceChannel: this.voiceChannel,
             textChannel: this.textChannel,
+            deaf: this.deaf,
             mute: this.mute,
         });
         return this;
@@ -290,17 +287,16 @@ class Player extends events_1.EventEmitter {
      * @returns {Promise<Node | void>} - A Promise that resolves once the player has been successfully moved to the specified node.
      */
     async moveNode(name) {
-        const node = this.ruvyrias.nodes.get(name);
-        if (!node ?? (node && node.name === this.node.name))
-            return;
-        if (!node.isConnected) {
-            throw new Error('Provided Node is not connected');
+        const availableNodes = Array.from(this.ruvyrias.nodes.values()).filter(node => node.name !== this.node.name && node.isConnected);
+        if (availableNodes.length === 0) {
+            throw new Error('[Ruvyrias Error] No other connected nodes available to move to.');
         }
+        const randomNode = availableNodes[Math.floor(Math.random() * availableNodes.length)];
         try {
             await this.node.rest.destroyPlayer(this.guildId);
-            this.ruvyrias.players.delete(this.guildId);
-            this.node = node;
-            this.ruvyrias.players.set(this.guildId, this);
+            //this.ruvyrias.destroyPlayer(this.guildId);
+            this.node = randomNode;
+            //this.ruvyrias.players.set(this.guildId, this);
             await this.restart();
         }
         catch (e) {
@@ -310,13 +306,13 @@ class Player extends events_1.EventEmitter {
     }
     /**
      * Automatically moves the player to the least used Lavalink node.
-     * @returns {Promise<Node | boolean | void>} Resolves with the moved Node or false, or if an error occurred.
+     * @returns {Promise<Node | boolean | void | null>} Resolves with the moved Node or false, or if an error occurred.
      */
     async autoMoveNode() {
         if (!this.ruvyrias.leastUsedNodes.length) {
-            throw new Error('[Ruvyrias Error] No nodes are available');
+            throw new Error('[Ruvyrias Error] No nodes are available.');
         }
-        const node = this.ruvyrias.nodes.get(this.ruvyrias.leastUsedNodes[0].name);
+        const node = this.ruvyrias.nodes.get(this.ruvyrias.leastUsedNodes[0]?.name);
         if (!node)
             return await this.stop();
         return await this.moveNode(node.name);
@@ -369,7 +365,7 @@ class Player extends events_1.EventEmitter {
         }
         else if (trackSource === 'spotify') {
             try {
-                const data = await fetch("https://open.spotify.com/get_access_token?reason=transport&productType=embed");
+                const data = await fetch('https://open.spotify.com/get_access_token?reason=transport&productType=embed');
                 const body = await data.json();
                 const res = await fetch(`https://api.spotify.com/v1/recommendations?limit=10&seed_tracks=${trackIdentifier}`, {
                     headers: {
@@ -484,11 +480,11 @@ class Player extends events_1.EventEmitter {
                 }
                 this.ruvyrias.emit('socketClose', this, this.currentTrack, data);
                 await this.pause(true);
-                this.ruvyrias.emit('debug', `Player -> ${this.guildId}`, 'Player paused Cause Channel deleted Or Client was kicked');
+                this.ruvyrias.emit('debug', `Player -> ${this.guildId}`, 'Player paused Cause Channel deleted Or Client was kicked.');
                 break;
             }
             default: {
-                throw new Error(`An unknown event: ${data}`);
+                throw new Error(`An unknown event: ${data}.`);
             }
         }
     }
@@ -508,6 +504,9 @@ class Player extends events_1.EventEmitter {
      * @returns {void} - void
      */
     send(data) {
+        if (!this.ruvyrias.send) {
+            throw new Error('[Ruvyrias Error] Please provide a send function in the Ruvyrias options or use one of the supported libraries.');
+        }
         this.ruvyrias.send({ op: 4, d: data });
     }
 }

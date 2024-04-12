@@ -112,12 +112,12 @@ class Ruvyrias extends events_1.EventEmitter {
         if (!player)
             return;
         if (packet.t === 'VOICE_SERVER_UPDATE') {
-            player.connection.setServersUpdate(packet.d);
+            await player.connection.setServersUpdate(packet.d);
         }
         if (packet.t === 'VOICE_STATE_UPDATE') {
             if (packet.d.user_id !== this.options.clientId)
                 return;
-            player.connection.setStateUpdate(packet.d);
+            await player.connection.setStateUpdate(packet.d);
         }
     }
     /**
@@ -170,13 +170,13 @@ class Ruvyrias extends events_1.EventEmitter {
      */
     async getNode(identifier = 'auto') {
         if (!this.nodes.size) {
-            throw new Error('No nodes available currently');
+            throw new Error('[Ruvyrias Error] No nodes available currently');
         }
         if (identifier === 'auto')
             return this.leastUsedNodes;
         const node = this.nodes.get(identifier);
         if (!node) {
-            throw new Error('The node identifier you specified doesn\'t exist');
+            throw new Error('[Ruvyrias Error] The node identifier you specified doesn\'t exist');
         }
         if (!node.isConnected)
             await node.connect();
@@ -189,7 +189,7 @@ class Ruvyrias extends events_1.EventEmitter {
      */
     createConnection(options) {
         if (!this.options.isActivated) {
-            throw new Error('Ruvyrias must be initialized in your ready event.');
+            throw new Error('[Ruvyrias Error] Ruvyrias must be initialized in your ready event.');
         }
         const player = this.players.get(options.guildId);
         if (player)
@@ -200,10 +200,10 @@ class Ruvyrias extends events_1.EventEmitter {
         let node;
         if (options.region) {
             const regionNode = this.getNodeByRegion(options.region)[0];
-            node = this.nodes.get(regionNode.name ?? this.leastUsedNodes[0].name);
+            node = this.nodes.get(regionNode.name ?? this.leastUsedNodes[0]?.name);
         }
         else {
-            node = this.nodes.get(this.leastUsedNodes[0].name);
+            node = this.nodes.get(this.leastUsedNodes[0]?.name);
         }
         if (!node) {
             throw new Error('[Ruvyrias Error] No nodes are available.');
@@ -220,19 +220,23 @@ class Ruvyrias extends events_1.EventEmitter {
         const player = new Player_1.Player(this, node, options);
         this.players.set(options.guildId, player);
         player.connect(options);
+        this.emit('playerCreate', player);
+        this.emit('debug', options.guildId, '[Ruvyrias Player] Created a new player.');
         return player;
     }
     /**
-     * Creates a player instance for the specified guild using the provided node and options.
-     * @param {string} guildId - Options for creating the player.
+     * Destroys the player instance for the specified guild using the provided guild ID.
+     * @param {string} guildId - The ID of the guild associated with the player instance.
+     * @returns {boolean|null} A Promise that resolves with a boolean indicating success or null if no specific value is needed.
      */
-    async destroyPlayer(guildId) {
+    destroyPlayer(guildId) {
         const player = this.players.get(guildId);
         if (!player)
-            return;
-        await player.stop();
+            return null;
         this.players.delete(guildId);
-        return;
+        this.emit('playerDestroy', player);
+        this.emit('debug', guildId, '[Ruvyrias Player] Destroyed the player.');
+        return true;
     }
     /**
      * Removes a player associated with the specified guild from Ruvyrias instance.
@@ -260,10 +264,10 @@ class Ruvyrias extends events_1.EventEmitter {
      */
     async resolve({ query, source, requester }, node) {
         if (!this.options.isActivated) {
-            throw new Error(`Ruvyrias must be initialized in your ready event.`);
+            throw new Error('[Ruvyrias Error] Ruvyrias must be initialized in your ready event.');
         }
         if (this.leastUsedNodes.length === 0) {
-            throw new Error('No nodes are available.');
+            throw new Error('[Ruvyrias Error] No nodes are available.');
         }
         node = node ?? this.leastUsedNodes[0];
         const trackIdentifier = /^https?:\/\//.test(query) ? query : `${source ?? 'ytsearch'}:${query}`;
@@ -300,7 +304,7 @@ class Ruvyrias extends events_1.EventEmitter {
     async getLavalinkInfo(name) {
         const node = this.nodes.get(name);
         if (!node) {
-            throw new Error('Node not found!');
+            throw new Error('[Ruvyrias Error] Node not found!');
         }
         return await node.rest.get(`/v4/info`);
     }
@@ -312,7 +316,7 @@ class Ruvyrias extends events_1.EventEmitter {
     async getLavalinkStatus(name) {
         const node = this.nodes.get(name);
         if (!node) {
-            throw new Error('Node not found!');
+            throw new Error('[Ruvyrias Error] Node not found!');
         }
         return await node.rest.get(`/v4/stats`);
     }
@@ -324,7 +328,7 @@ class Ruvyrias extends events_1.EventEmitter {
     async getLavalinkVersion(name) {
         const node = this.nodes.get(name);
         if (!node) {
-            throw new Error('Node not found!');
+            throw new Error('[Ruvyrias Error] Node not found!');
         }
         return await node.rest.get(`/version`);
     }

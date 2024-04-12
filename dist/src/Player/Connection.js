@@ -27,12 +27,12 @@ class Connection {
      * Set the voice server update
      * @param {IVoiceServer} data The data from the voice server update
      */
-    setServersUpdate(data) {
+    async setServersUpdate(data) {
         if (!data.endpoint) {
-            throw new Error('No Session id found');
+            throw new Error('[Ruvyrias Error] No Session ID found.');
         }
         this.region = data.endpoint.split('.').shift()?.replace(/[0-9]/g, '') ?? null;
-        this.player.node.rest.updatePlayer({
+        await this.player.node.rest.updatePlayer({
             guildId: this.player.guildId,
             data: {
                 voice: {
@@ -42,25 +42,26 @@ class Connection {
                 }
             },
         });
-        this.player.ruvyrias.emit('debug', this.player.node.name, `[Voice] <- [Discord] : Voice Server Update | Server: ${this.region} Guild: ${this.player.guildId}`);
+        this.player.ruvyrias.emit('debug', this.player.node.name, `[Voice] <- [Discord]: Voice Server Update | Server: ${this.region} Guild: ${this.player.guildId}.`);
     }
     /**
      * Set the state update
      * @param {SetStateUpdate} data The data from the state update
      */
-    setStateUpdate(data) {
+    async setStateUpdate(data) {
         const { session_id, channel_id, self_deaf, self_mute } = data;
         if (channel_id == null) {
             this.player.stop();
         }
-        if (this.player.voiceChannel && channel_id && this.player.voiceChannel !== channel_id) {
+        if (this.player.voiceChannel &&
+            channel_id &&
+            this.player.voiceChannel !== channel_id) {
             this.player.voiceChannel = channel_id;
         }
         this.channel_id = channel_id;
         this.session_id = session_id;
         this.self_deaf = self_deaf;
         this.self_mute = self_mute;
-        //  this.player.ruvyrias.emit('debug', this.player.node.name, `[Voice] <- [Discord] : State Update Received | Channel: ${this.player.voiceChannel} Session ID: ${session_id} Guild: ${this.player.guildId}`);
     }
 }
 exports.Connection = Connection;
