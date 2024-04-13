@@ -140,29 +140,11 @@ class Player extends events_1.EventEmitter {
         return this;
     }
     /**
-     * This function will restart the player and play the current track
-     * @returns {Promise<Player|void>} Returns a Player object
-     */
-    async restart() {
-        if (!this.currentTrack?.track && !this.queue.length)
-            return this;
-        if (!this.currentTrack)
-            return this.play();
-        await this.node.rest.updatePlayer({
-            guildId: this.guildId,
-            data: {
-                position: this.position,
-                track: { encoded: this.currentTrack?.track }
-            },
-        });
-        return this;
-    }
-    /**
      * Connects the player to a voice channel using the provided connection options.
      * If no options are specified, it uses the default values from the player.
      * @param {ConnectionOptions} options - The connection options, including guildId, voiceChannel, deaf, and mute settings.
      * @returns {void}
-     */
+    */
     connect(options = this) {
         const { guildId, voiceChannel, deaf, mute } = options;
         this.send({
@@ -193,10 +175,64 @@ class Player extends events_1.EventEmitter {
         return this;
     }
     /**
+     * This function will restart the player and play the current track
+     * @returns {Promise<Player|void>} Returns a Player object
+     */
+    async restart() {
+        if (!this.currentTrack?.track && !this.queue.length)
+            return this;
+        if (!this.currentTrack)
+            return this.play();
+        await this.node.rest.updatePlayer({
+            guildId: this.guildId,
+            data: {
+                position: this.position,
+                track: { encoded: this.currentTrack?.track }
+            },
+        });
+        return this;
+    }
+    /**
+     * Moves the player to a different lavalink node.
+     * @param {string} name - The name of the node to move to.
+     * @returns {Promise<Node | void>} - A Promise that resolves once the player has been successfully moved to the specified node.
+     */
+    async moveNode(name) {
+        const availableNodes = Array.from(this.ruvyrias.nodes.values()).filter(node => node.name !== name && node.isConnected);
+        if (availableNodes.length === 0) {
+            throw new Error('[Ruvyrias Error] No other connected nodes available to move to.');
+        }
+        const randomNode = availableNodes[Math.floor(Math.random() * availableNodes.length)];
+        try {
+            await this.node.rest.destroyPlayer(this.guildId);
+            this.ruvyrias.destroyPlayer(this.guildId);
+            this.node = randomNode;
+            this.ruvyrias.players.set(this.guildId, this);
+            await this.restart();
+        }
+        catch (e) {
+            await this.stop();
+            throw e;
+        }
+    }
+    /**
+     * Automatically moves the player to the least used Lavalink node.
+     * @returns {Promise<Node | boolean | void | null>} Resolves with the moved Node or false, or if an error occurred.
+     */
+    async autoMoveNode() {
+        if (!this.ruvyrias.leastUsedNodes.length) {
+            throw new Error('[Ruvyrias Error] No nodes are available.');
+        }
+        const node = this.ruvyrias.nodes.get(this.ruvyrias.leastUsedNodes[0]?.name);
+        if (!node)
+            return await this.stop();
+        return await this.moveNode(node.name);
+    }
+    /**
      * Seeks to the specified position in the currently playing track.
      * @param {number} position - The position to seek to.
      * @returns {Promise<Player>} A promise that resolves once the seek operation is complete.
-     */
+    */
     async seekTo(position) {
         if (this.position + position >= this.currentTrack.info.length) {
             position = this.currentTrack.info.length;
@@ -280,42 +316,6 @@ class Player extends events_1.EventEmitter {
             mute: this.mute,
         });
         return this;
-    }
-    /**
-     * Moves the player to a different lavalink node.
-     * @param {string} name - The name of the node to move to.
-     * @returns {Promise<Node | void>} - A Promise that resolves once the player has been successfully moved to the specified node.
-     */
-    async moveNode(name) {
-        const availableNodes = Array.from(this.ruvyrias.nodes.values()).filter(node => node.name !== this.node.name && node.isConnected);
-        if (availableNodes.length === 0) {
-            throw new Error('[Ruvyrias Error] No other connected nodes available to move to.');
-        }
-        const randomNode = availableNodes[Math.floor(Math.random() * availableNodes.length)];
-        try {
-            await this.node.rest.destroyPlayer(this.guildId);
-            //this.ruvyrias.destroyPlayer(this.guildId);
-            this.node = randomNode;
-            //this.ruvyrias.players.set(this.guildId, this);
-            await this.restart();
-        }
-        catch (e) {
-            await this.stop();
-            throw e;
-        }
-    }
-    /**
-     * Automatically moves the player to the least used Lavalink node.
-     * @returns {Promise<Node | boolean | void | null>} Resolves with the moved Node or false, or if an error occurred.
-     */
-    async autoMoveNode() {
-        if (!this.ruvyrias.leastUsedNodes.length) {
-            throw new Error('[Ruvyrias Error] No nodes are available.');
-        }
-        const node = this.ruvyrias.nodes.get(this.ruvyrias.leastUsedNodes[0]?.name);
-        if (!node)
-            return await this.stop();
-        return await this.moveNode(node.name);
     }
     /**
      * Sets the provided value for the given key.

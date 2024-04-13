@@ -197,7 +197,7 @@ export class Filters {
     /**
      * Sets the equalizer bands for the currently player.
      * @param {Band[]} bands - An array of bands to set the equalizer to.
-     * @returns {Filters} - Returns the Filters instance for method chaining.
+     * @returns {Promise<Filters>} - Returns the Filters instance for method chaining.
      */
     public async setEqualizer(bands: Band[]): Promise<Filters> {
         this.equalizer = bands;
@@ -209,7 +209,7 @@ export class Filters {
     /**
      * Changes the karaoke options applied to the currently player.
      * @param {KaraokeOptions} karaoke - An object that conforms to the KaraokeOptions type, defining a range of frequencies to mute.
-     * @returns {Filters} - Returns the current Filters instance for method chaining.
+     * @returns {Promise<Filters>} - Returns the current Filters instance for method chaining.
      */
     public async setKaraoke(karaoke?: KaraokeOptions): Promise<Filters> {
         this.karaoke = karaoke ?? null;
@@ -221,7 +221,7 @@ export class Filters {
     /**
      * Changes the timescale options applied to the currently player.
      * @param {TimescaleOptions | null} timescale - An object that conforms to the TimescaleOptions type, defining the timescale to apply.
-     * @returns {Filters} - Returns the current Filters instance for method chaining.
+     * @returns {Promise<Filters>} - Returns the current Filters instance for method chaining.
      */
     public async setTimescale(timescale?: TimescaleOptions | null): Promise<Filters> {
         this.timescale = timescale ?? null;
@@ -233,7 +233,7 @@ export class Filters {
     /**
      * Changes the tremolo options applied to the currently player.
      * @param {TremoloOptions | null} tremolo - An object that conforms to the TremoloOptions type, defining the tremolo to apply.
-     * @returns {Filters} - Returns the current Filters instance for method chaining.
+     * @returns {Promise<Filters>} - Returns the current Filters instance for method chaining.
      */
     public async setTremolo(tremolo?: TremoloOptions | null): Promise<Filters> {
         this.tremolo = tremolo ?? null;
@@ -245,7 +245,7 @@ export class Filters {
     /**
      * Changes the vibrato options applied to the currently player.
      * @param {VibratoOptions | null} vibrato - An object that conforms to the VibratoOptions type, defining the vibrato to apply.
-     * @returns {Filters} - Returns the current Filters instance for method chaining.
+     * @returns {Promise<Filters>} - Returns the current Filters instance for method chaining.
      */
     public async setVibrato(vibrato?: VibratoOptions | null): Promise<Filters> {
         this.vibrato = vibrato ?? null;
@@ -257,7 +257,7 @@ export class Filters {
     /**
      * Changes the rotation options applied to the currently player.
      * @param {RotationOptions | null} rotation - An object that conforms to the RotationOptions type, defining the rotation to apply.
-     * @returns {Filters} - Returns the current Filters instance for method chaining.
+     * @returns {Promise<Filters>} - Returns the current Filters instance for method chaining.
      */
     public async setRotation(rotation?: RotationOptions | null): Promise<Filters> {
         this.rotation = rotation ?? null;
@@ -269,7 +269,7 @@ export class Filters {
     /**
      * Changes the distortion options applied to the currently player.
      * @param {DistortionOptions} distortion - An object that conforms to the DistortionOptions type, defining the distortion to apply.
-     * @returns {Filters} - Returns the current Filters instance for method chaining.
+     * @returns {Promise<Filters>} - Returns the current Filters instance for method chaining.
      */
     public async setDistortion(distortion: DistortionOptions): Promise<Filters> {
         this.distortion = distortion ?? null;
@@ -281,7 +281,7 @@ export class Filters {
     /**
      * Changes the channel mix options applied to the currently player.
      * @param {ChannelMixOptions} mix - An object that conforms to the ChannelMixOptions type, defining the channel mix to apply.
-     * @returns {Filters} - Returns the current Filters instance for method chaining.
+     * @returns {Promise<Filters>} - Returns the current Filters instance for method chaining.
      */
     public async setChannelMix(mix: ChannelMixOptions): Promise<Filters> {
         this.channelMix = mix ?? null;
@@ -293,7 +293,7 @@ export class Filters {
     /**
      * Changes the low pass options applied to the currently player.
      * @param {LowPassOptions} pass - An object that conforms to the LowPassOptions type, defining the low pass to apply.
-     * @returns {Filters} - Returns the current Filters instance for method chaining.
+     * @returns {Promise<Filters>} - Returns the current Filters instance for method chaining.
      */
     public async setLowPass(pass: LowPassOptions): Promise<Filters> {
         this.lowPass = pass ?? null;
@@ -305,7 +305,7 @@ export class Filters {
     /**
      * Sets the Bass boost value for the player.
      * @param {number} value - The value of the Bass boost, it should be between 0 to 5.
-     * @returns {Filters} - Returns the current instance of the player or undefined if player is not available.
+     * @returns {Promise<Filters>} - Returns the current instance of the filters.
      */
     public async setBassboost(value: number): Promise<Filters> {
         if (!this.player) return this;
@@ -328,7 +328,7 @@ export class Filters {
      * Sets the Slowmode filter for the player.
      * @param {boolean} value - The value to enable or disable Slowmode.
      * @param {TimescaleOptions} [options] - Optional custom parameters.
-     * @returns {Filters} - Returns the current instance of the player or undefined if player is not available.
+     * @returns {Promise<Filters>} - Returns the current instance of the filters.
      */
     public async setSlowmode(value: boolean, options?: TimescaleOptions): Promise<Filters> {
         if (!this.player) return this;
@@ -342,7 +342,7 @@ export class Filters {
      * Sets the Nightcore filter for the player.
      * @param {boolean} value - Boolean value indicating whether to enable or disable Nightcore.
      * @param {TimescaleOptions} [options] - Optional custom parameters.
-     * @returns {Filter} - Returns the current instance of the player or undefined if player is not available.
+     * @returns {Promise<Filters>} - Returns the current instance of the filters.
      */
     public async setNightcore(value: boolean, options?: TimescaleOptions): Promise<Filters> {
         if (!this.player) return this;
@@ -362,7 +362,7 @@ export class Filters {
      * Sets the Daycore filter for the player.
      * @param {boolean} value - Boolean value indicating whether to enable or disable Daycore.
      * @param {TimescaleOptions} [options] - Optional custom parameters.
-     * @returns {Filter} - Returns the current instance of the player or undefined if player is not available.
+     * @returns {Promise<Filters>} - Returns the current instance of the filters.
      */
     public async setDaycore(value: boolean, options?: Omit<TimescaleOptions, 'speed'>): Promise<Filters> {
         if (!this.player) return this;
@@ -399,7 +399,7 @@ export class Filters {
      * Sets the Vaporwave filter for the player.
      * @param {boolean} value - Boolean value indicating whether to enable or disable Vaporwave.
      * @param {TimescaleOptions} [options] - Optional custom parameters.
-     * @returns {Filters} - Returns nothing.
+     * @returns {Promise<Filters>} - Returns the current instance of the filters.
      */
     public async setVaporwave(value: boolean, options?: TimescaleOptions): Promise<Filters> {
         if (!this.player) return this;
@@ -419,7 +419,7 @@ export class Filters {
      * Sets the 8D filter for the player.
      * @param {boolean} value - Boolean value indicating whether to enable or disable the 8D filter.
      * @param {RotationOptions} [options] - Optional custom parameters.
-     * @returns {Filters} - Returns nothing.
+     * @returns {Promise<Filters>} - Returns the current instance of the filters.
      */
     public async set8D(value: boolean, options?: RotationOptions): Promise<Filters> {
         if (!this.player) return this;
@@ -433,7 +433,7 @@ export class Filters {
      * Sets the Chipmunk filter for the player.
      * @param {boolean} value - Boolean value indicating whether to enable or disable the Chipmunk filter.
      * @param {TimescaleOptions} [options] - Optional custom parameters.
-     * @returns {Filters} - Returns nothing.
+     * @returns {Promise<Filters>} - Returns the current instance of the filters.
      */
     public async setChipmunk(value: boolean, options?: TimescaleOptions): Promise<Filters> {
         if (!this.player) return this;
@@ -445,7 +445,7 @@ export class Filters {
 
     /**
      * Clear all filters for the player.
-     * @returns {Promise<Filters>} - Returns nothing.
+     * @returns {Promise<Filters>} - Returns the current instance of the filters.
      */
     public async clearFilters(): Promise<Filters> {
         await this.player.node.rest.updatePlayer({
@@ -458,7 +458,7 @@ export class Filters {
 
     /**
      * Updates the filters applied to the currently player on the lavalink node.
-     * @returns {Filters} - Returns the current Filters instance with updated filters.
+     * @returns {Promise<Filters>} - Returns the current Filters instance with updated filters.
      */
     public async updateFilters(): Promise<Filters> {
         const { equalizer, karaoke, timescale, tremolo, vibrato, rotation, distortion, channelMix, lowPass, volume } = this;

@@ -281,6 +281,8 @@ export class Node {
 
                 // If the packet has stats about the node in it update them on the Node's class
                 case 'stats': {
+                    delete (packet as NodeStats & { op: string | undefined}).op;
+
                     this.stats = packet;
                     break;
                 }

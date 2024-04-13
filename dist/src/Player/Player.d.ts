@@ -139,16 +139,11 @@ export declare class Player extends EventEmitter {
      */
     pause(toggle?: boolean): Promise<Player>;
     /**
-     * This function will restart the player and play the current track
-     * @returns {Promise<Player|void>} Returns a Player object
-     */
-    restart(): Promise<Player | void>;
-    /**
      * Connects the player to a voice channel using the provided connection options.
      * If no options are specified, it uses the default values from the player.
      * @param {ConnectionOptions} options - The connection options, including guildId, voiceChannel, deaf, and mute settings.
      * @returns {void}
-     */
+    */
     connect(options?: ConnectionOptions): void;
     /**
      * Disconnects the player from the voice channel.
@@ -156,10 +151,26 @@ export declare class Player extends EventEmitter {
      */
     disconnect(): Promise<Player>;
     /**
+     * This function will restart the player and play the current track
+     * @returns {Promise<Player|void>} Returns a Player object
+     */
+    restart(): Promise<Player | void>;
+    /**
+     * Moves the player to a different lavalink node.
+     * @param {string} name - The name of the node to move to.
+     * @returns {Promise<Node | void>} - A Promise that resolves once the player has been successfully moved to the specified node.
+     */
+    moveNode(name: string): Promise<Node | void>;
+    /**
+     * Automatically moves the player to the least used Lavalink node.
+     * @returns {Promise<Node | boolean | void | null>} Resolves with the moved Node or false, or if an error occurred.
+     */
+    autoMoveNode(): Promise<Node | boolean | void | null>;
+    /**
      * Seeks to the specified position in the currently playing track.
      * @param {number} position - The position to seek to.
      * @returns {Promise<Player>} A promise that resolves once the seek operation is complete.
-     */
+    */
     seekTo(position: number): Promise<Player>;
     /**
      * @param volume Number to set the volume
@@ -190,17 +201,6 @@ export declare class Player extends EventEmitter {
         mute: boolean;
         deaf: boolean;
     }): Player;
-    /**
-     * Moves the player to a different lavalink node.
-     * @param {string} name - The name of the node to move to.
-     * @returns {Promise<Node | void>} - A Promise that resolves once the player has been successfully moved to the specified node.
-     */
-    moveNode(name: string): Promise<Node | void>;
-    /**
-     * Automatically moves the player to the least used Lavalink node.
-     * @returns {Promise<Node | boolean | void | null>} Resolves with the moved Node or false, or if an error occurred.
-     */
-    autoMoveNode(): Promise<Node | boolean | void | null>;
     /**
      * Sets the provided value for the given key.
      * @param {string} key - The key to set the value.

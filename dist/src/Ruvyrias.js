@@ -233,9 +233,9 @@ class Ruvyrias extends events_1.EventEmitter {
         const player = this.players.get(guildId);
         if (!player)
             return null;
-        this.players.delete(guildId);
         this.emit('playerDestroy', player);
         this.emit('debug', guildId, '[Ruvyrias Player] Destroyed the player.');
+        this.players.delete(guildId);
         return true;
     }
     /**

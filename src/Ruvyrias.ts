@@ -581,9 +581,9 @@ export class Ruvyrias extends EventEmitter {
         const player = this.players.get(guildId);
         if (!player) return null;
 
-        this.players.delete(guildId);
         this.emit('playerDestroy', player);
         this.emit('debug', guildId, '[Ruvyrias Player] Destroyed the player.');
+        this.players.delete(guildId);
 
         return true;
     }
@@ -602,7 +602,7 @@ export class Ruvyrias extends EventEmitter {
      * Gets an array of least used nodes from the Ruvyrias instance.
      * @returns {Node[]} An array of least used nodes.
      */
-    get leastUsedNodes(): Node[] {
+    public get leastUsedNodes(): Node[] {
         return [...this.nodes.values()]
             .filter((node) => node.isConnected)
             .sort((a, b) => a.penalties - b.penalties);
