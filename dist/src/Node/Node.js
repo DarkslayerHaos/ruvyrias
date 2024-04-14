@@ -166,13 +166,6 @@ class Node {
             this.ruvyrias.emit('nodeConnect', this);
             this.isConnected = true;
             this.ruvyrias.emit('debug', this.name, `[Web Socket] Connection ready: ${this.socketURL}.`);
-            if (this.autoResume) {
-                for (const player of this.ruvyrias.players.values()) {
-                    if (player.node === this) {
-                        await player.restart();
-                    }
-                }
-            }
         }
         catch (error) {
             this.ruvyrias.emit('debug', `[Web Socket] Error while opening the connection with the node ${this.name}.`, error);
@@ -195,6 +188,14 @@ class Node {
                     this.rest.setSessionId(packet.sessionId);
                     this.sessionId = packet.sessionId;
                     this.ruvyrias.emit('debug', this.name, `[Web Socket] Ready Payload received: ${JSON.stringify(packet)}.`);
+                    // If autooResume is enabled, try reconnecting to the node
+                    if (this.autoResume) {
+                        for (const player of this.ruvyrias.players.values()) {
+                            if (player.node === this) {
+                                await player.restart();
+                            }
+                        }
+                    }
                     // If resume is enabled, try resuming the player
                     if (this.options.resume) {
                         await this.rest.patch(`/v4/sessions/${this.sessionId}`, { resuming: this.options.resume, timeout: this.resumeTimeout });

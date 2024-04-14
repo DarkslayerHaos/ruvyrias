@@ -187,7 +187,12 @@ class Player extends events_1.EventEmitter {
             guildId: this.guildId,
             data: {
                 position: this.position,
-                track: { encoded: this.currentTrack?.track }
+                track: { encoded: this.currentTrack?.track },
+                voice: {
+                    sessionId: this.connection.session_id,
+                    token: this.connection.token,
+                    endpoint: this.connection.endpoint,
+                }
             },
         });
         return this;

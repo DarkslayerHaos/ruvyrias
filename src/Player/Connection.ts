@@ -76,6 +76,8 @@ export class Connection {
     public self_deaf: boolean;
     public channel_id: string | null;
     public session_id: string | null;
+    public token: string | null;
+    public endpoint: string | null;
 
     /**
      * The connection class
@@ -88,6 +90,8 @@ export class Connection {
         this.session_id = null;
         this.self_mute = false;
         this.self_deaf = false;
+        this.token = null;
+        this.endpoint = null;
     }
 
     /**
@@ -100,14 +104,16 @@ export class Connection {
         }
 
         this.region = data.endpoint.split('.').shift()?.replace(/[0-9]/g, '') ?? null;
+        this.token = data.token;
+        this.endpoint = data.endpoint;
 
         await this.player.node.rest.updatePlayer({
             guildId: this.player.guildId,
             data: {
                 voice: {
                     sessionId: this.session_id,
-                    token: data.token,
-                    endpoint: data.endpoint,
+                    token: this.token,
+                    endpoint: this.endpoint,
                 }
             },
         });

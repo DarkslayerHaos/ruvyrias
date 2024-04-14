@@ -72,6 +72,8 @@ export declare class Connection {
     self_deaf: boolean;
     channel_id: string | null;
     session_id: string | null;
+    token: string | null;
+    endpoint: string | null;
     /**
      * The connection class
      * @param player Player

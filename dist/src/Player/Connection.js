@@ -11,6 +11,8 @@ class Connection {
     self_deaf;
     channel_id;
     session_id;
+    token;
+    endpoint;
     /**
      * The connection class
      * @param player Player
@@ -22,6 +24,8 @@ class Connection {
         this.session_id = null;
         this.self_mute = false;
         this.self_deaf = false;
+        this.token = null;
+        this.endpoint = null;
     }
     /**
      * Set the voice server update
@@ -32,13 +36,15 @@ class Connection {
             throw new Error('[Ruvyrias Error] No Session ID found.');
         }
         this.region = data.endpoint.split('.').shift()?.replace(/[0-9]/g, '') ?? null;
+        this.token = data.token;
+        this.endpoint = data.endpoint;
         await this.player.node.rest.updatePlayer({
             guildId: this.player.guildId,
             data: {
                 voice: {
                     sessionId: this.session_id,
-                    token: data.token,
-                    endpoint: data.endpoint,
+                    token: this.token,
+                    endpoint: this.endpoint,
                 }
             },
         });
