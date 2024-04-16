@@ -24,7 +24,7 @@ class Ruvyrias extends events_1.EventEmitter {
     send;
     /**
      * This is the main class of Ruvyrias
-     * @param {Client | any} client VoiceClient for Ruvyrias library to use to connect to lavalink node server (discord.js, eris, oceanic)
+     * @param {any} client VoiceClient for Ruvyrias library to use to connect to lavalink node server (discord.js, eris, oceanic)
      * @param {NodeGroup[]} nodes Node
      * @param {RuvyriasOptions} options RuvyriasOptions
      * @returns Ruvyrias
@@ -152,7 +152,7 @@ class Ruvyrias extends events_1.EventEmitter {
      */
     getNodeByRegion(region) {
         return [...this.nodes.values()]
-            .filter((node) => node.isConnected && node.regions?.includes(region?.toLowerCase()))
+            .filter((node) => node.extras.isConnected && node.options.region?.includes(region?.toLowerCase()))
             .sort((a, b) => {
             const aLoad = a.stats?.cpu
                 ? (a.stats.cpu.systemLoad / a.stats.cpu.cores) * 100
@@ -178,7 +178,7 @@ class Ruvyrias extends events_1.EventEmitter {
         if (!node) {
             throw new Error('[Ruvyrias Error] The node identifier you specified doesn\'t exist');
         }
-        if (!node.isConnected)
+        if (!node.extras.isConnected)
             await node.connect();
         return node;
     }
@@ -200,10 +200,10 @@ class Ruvyrias extends events_1.EventEmitter {
         let node;
         if (options.region) {
             const regionNode = this.getNodeByRegion(options.region)[0];
-            node = this.nodes.get(regionNode.name ?? this.leastUsedNodes[0]?.name);
+            node = this.nodes.get(regionNode.options?.name ?? this.leastUsedNodes[0].options?.name);
         }
         else {
-            node = this.nodes.get(this.leastUsedNodes[0]?.name);
+            node = this.nodes.get(this.leastUsedNodes[0]?.options?.name);
         }
         if (!node) {
             throw new Error('[Ruvyrias Error] No nodes are available.');
@@ -253,7 +253,7 @@ class Ruvyrias extends events_1.EventEmitter {
      */
     get leastUsedNodes() {
         return [...this.nodes.values()]
-            .filter((node) => node.isConnected)
+            .filter((node) => node.extras.isConnected)
             .sort((a, b) => a.penalties - b.penalties);
     }
     /**

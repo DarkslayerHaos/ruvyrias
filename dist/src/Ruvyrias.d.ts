@@ -34,7 +34,7 @@ export interface NodeGroup {
     /** Whether to use a secure connection (HTTPS) with the Lavalink node. */
     secure?: boolean;
     /** An array of region identifiers supported by the node for voice connections. */
-    region?: string[];
+    region?: string[] | null;
 }
 /**
  * Represents a packet sent over a communication channel, which can be one of several types.
@@ -315,7 +315,7 @@ export declare class Ruvyrias extends EventEmitter {
     send: Function | null;
     /**
      * This is the main class of Ruvyrias
-     * @param {Client | any} client VoiceClient for Ruvyrias library to use to connect to lavalink node server (discord.js, eris, oceanic)
+     * @param {any} client VoiceClient for Ruvyrias library to use to connect to lavalink node server (discord.js, eris, oceanic)
      * @param {NodeGroup[]} nodes Node
      * @param {RuvyriasOptions} options RuvyriasOptions
      * @returns Ruvyrias

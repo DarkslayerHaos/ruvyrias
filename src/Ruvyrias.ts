@@ -37,7 +37,7 @@ export interface NodeGroup {
     /** Whether to use a secure connection (HTTPS) with the Lavalink node. */
     secure?: boolean;
     /** An array of region identifiers supported by the node for voice connections. */
-    region?: string[];
+    region?: string[] | null;
 }
 
 /**
@@ -345,7 +345,7 @@ export class Ruvyrias extends EventEmitter {
 
     /**
      * This is the main class of Ruvyrias
-     * @param {Client | any} client VoiceClient for Ruvyrias library to use to connect to lavalink node server (discord.js, eris, oceanic)
+     * @param {any} client VoiceClient for Ruvyrias library to use to connect to lavalink node server (discord.js, eris, oceanic)
      * @param {NodeGroup[]} nodes Node
      * @param {RuvyriasOptions} options RuvyriasOptions
      * @returns Ruvyrias
@@ -488,7 +488,7 @@ export class Ruvyrias extends EventEmitter {
         return [...this.nodes.values()]
             .filter(
                 (node) =>
-                    node.isConnected && node.regions?.includes(region?.toLowerCase())
+                    node.extras.isConnected && node.options.region?.includes(region?.toLowerCase())
             )
             .sort((a, b) => {
                 const aLoad = a.stats?.cpu
@@ -518,7 +518,7 @@ export class Ruvyrias extends EventEmitter {
             throw new Error('[Ruvyrias Error] The node identifier you specified doesn\'t exist');
         }
 
-        if (!node.isConnected) await node.connect();
+        if (!node.extras.isConnected) await node.connect();
         return node;
     }
 
@@ -543,9 +543,9 @@ export class Ruvyrias extends EventEmitter {
 
         if (options.region) {
             const regionNode = this.getNodeByRegion(options.region)[0];
-            node = this.nodes.get(regionNode.name ?? this.leastUsedNodes[0]?.name) as Node;
+            node = this.nodes.get(regionNode.options?.name ?? this.leastUsedNodes[0].options?.name) as Node;
         } else {
-            node = this.nodes.get(this.leastUsedNodes[0]?.name) as Node;
+            node = this.nodes.get(this.leastUsedNodes[0]?.options?.name) as Node;
         }
 
         if (!node) {
@@ -604,7 +604,7 @@ export class Ruvyrias extends EventEmitter {
      */
     public get leastUsedNodes(): Node[] {
         return [...this.nodes.values()]
-            .filter((node) => node.isConnected)
+            .filter((node) => node.extras.isConnected)
             .sort((a, b) => a.penalties - b.penalties);
     }
 

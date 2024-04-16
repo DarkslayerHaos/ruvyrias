@@ -76,7 +76,7 @@ export declare class Connection {
     endpoint: string | null;
     /**
      * The connection class
-     * @param player Player
+     * @param {Player} player
      */
     constructor(player: Player);
     /**

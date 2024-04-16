@@ -74,14 +74,14 @@ export enum RequestMethod {
 export class Rest {
     public ruvyrias: Ruvyrias;
     public url: string;
-    private sessionId: string | null;
     private password: string;
+    public sessionId: string | null;
 
     constructor(ruvyrias: Ruvyrias, node: Node) {
         this.ruvyrias = ruvyrias;
-        this.url = `http${node.secure ? 's' : ''}://${node.options.host}:${node.options.port}`;
-        this.sessionId = node.sessionId as string;
-        this.password = node.password;
+        this.url = `http${node.options.secure ? 's' : ''}://${node.options.host}:${node.options.port}`;
+        this.password = node.options.password;
+        this.sessionId = null;
     }
 
     /**

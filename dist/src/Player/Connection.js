@@ -15,7 +15,7 @@ class Connection {
     endpoint;
     /**
      * The connection class
-     * @param player Player
+     * @param {Player} player
      */
     constructor(player) {
         this.player = player;
@@ -48,7 +48,7 @@ class Connection {
                 }
             },
         });
-        this.player.ruvyrias.emit('debug', this.player.node.name, `[Voice] <- [Discord]: Voice Server Update | Server: ${this.region} Guild: ${this.player.guildId}.`);
+        this.player.ruvyrias.emit('debug', this.player.node.options.name, `[Voice] <- [Discord]: Voice Server Update | Server: ${this.region} Guild: ${this.player.guildId}.`);
     }
     /**
      * Set the state update

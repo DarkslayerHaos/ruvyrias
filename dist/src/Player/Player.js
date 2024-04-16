@@ -203,7 +203,7 @@ class Player extends events_1.EventEmitter {
      * @returns {Promise<Node | void>} - A Promise that resolves once the player has been successfully moved to the specified node.
      */
     async moveNode(name) {
-        const availableNodes = Array.from(this.ruvyrias.nodes.values()).filter(node => node.name !== name && node.isConnected);
+        const availableNodes = Array.from(this.ruvyrias.nodes.values()).filter(node => node.options.name !== name && node.extras.isConnected);
         if (availableNodes.length === 0) {
             throw new Error('[Ruvyrias Error] No other connected nodes available to move to.');
         }
@@ -228,10 +228,10 @@ class Player extends events_1.EventEmitter {
         if (!this.ruvyrias.leastUsedNodes.length) {
             throw new Error('[Ruvyrias Error] No nodes are available.');
         }
-        const node = this.ruvyrias.nodes.get(this.ruvyrias.leastUsedNodes[0]?.name);
+        const node = this.ruvyrias.nodes.get(this.ruvyrias.leastUsedNodes[0].options?.name);
         if (!node)
             return await this.stop();
-        return await this.moveNode(node.name);
+        return await this.moveNode(node.options.name);
     }
     /**
      * Seeks to the specified position in the currently playing track.

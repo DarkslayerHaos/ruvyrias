@@ -312,7 +312,7 @@ export class Player extends EventEmitter {
      * @returns {Promise<Node | void>} - A Promise that resolves once the player has been successfully moved to the specified node.
      */
     public async moveNode(name: string): Promise<Node | void> {
-        const availableNodes = Array.from(this.ruvyrias.nodes.values()).filter(node => node.name !== name && node.isConnected);
+        const availableNodes = Array.from(this.ruvyrias.nodes.values()).filter(node => node.options.name !== name && node.extras.isConnected);
 
         if (availableNodes.length === 0) {
             throw new Error('[Ruvyrias Error] No other connected nodes available to move to.');
@@ -341,10 +341,10 @@ export class Player extends EventEmitter {
             throw new Error('[Ruvyrias Error] No nodes are available.');
         }
 
-        const node = this.ruvyrias.nodes.get(this.ruvyrias.leastUsedNodes[0]?.name);
+        const node = this.ruvyrias.nodes.get(this.ruvyrias.leastUsedNodes[0].options?.name);
         if (!node) return await this.stop();
 
-        return await this.moveNode(node.name);
+        return await this.moveNode(node.options.name);
     }
 
     /**

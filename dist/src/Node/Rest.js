@@ -17,13 +17,13 @@ var RequestMethod;
 class Rest {
     ruvyrias;
     url;
-    sessionId;
     password;
+    sessionId;
     constructor(ruvyrias, node) {
         this.ruvyrias = ruvyrias;
-        this.url = `http${node.secure ? 's' : ''}://${node.options.host}:${node.options.port}`;
-        this.sessionId = node.sessionId;
-        this.password = node.password;
+        this.url = `http${node.options.secure ? 's' : ''}://${node.options.host}:${node.options.port}`;
+        this.password = node.options.password;
+        this.sessionId = null;
     }
     /**
      * Sets the session ID for the REST instance.

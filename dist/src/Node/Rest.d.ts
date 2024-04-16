@@ -62,8 +62,8 @@ export declare enum RequestMethod {
 export declare class Rest {
     ruvyrias: Ruvyrias;
     url: string;
-    private sessionId;
     private password;
+    sessionId: string | null;
     constructor(ruvyrias: Ruvyrias, node: Node);
     /**
      * Sets the session ID for the REST instance.

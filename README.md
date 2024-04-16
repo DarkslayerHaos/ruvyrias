@@ -74,6 +74,8 @@ const nodes = [
         host: 'localhost',
         port: 2333,
         password: 'youshallnotpass',
+        secure: false,
+        resume: true,
     },
 ];
 
@@ -81,6 +83,7 @@ const nodes = [
 const RuvyriasOptions = {
     library: 'discord.js',
     defaultPlatform: 'ytsearch',
+    autoResume: true,
     reconnectTries: Infinity,
     reconnectTimeout: 1000 * 10,
 };
@@ -157,7 +160,7 @@ client.on('messageCreate', async (message) => {
 
 // Runs when a Lavalink Node is successfully connected.
 client.ruvyrias.on('nodeConnect', node => {
-    console.log(`[+] Node ${node.name} connected.`)
+    console.log(`[+] Node ${node.options.name} connected.`)
 });
 
 // Runs when a new track starts playing in the music player.

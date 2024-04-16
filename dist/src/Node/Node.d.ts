@@ -27,33 +27,30 @@ export interface NodeStats {
     };
 }
 /**
+ * Represents an combo of additional options to node, directly brought from RuvyriasOptions
+ */
+interface Extras extends RuvyriasOptions {
+    reconnectAttempt: NodeJS.Timeout | null;
+    currentAttempt: number;
+    isConnected: boolean;
+}
+/**
  * Represents a connection to a Lavalink node, allowing communication and control over audio playback.
  */
 export declare class Node {
     ruvyrias: Ruvyrias;
-    readonly name: string;
-    readonly password: string;
-    readonly secure: boolean;
-    readonly regions: Array<string> | null;
-    sessionId: string | null;
-    readonly socketURL: string;
-    readonly restURL: string;
-    readonly rest: Rest;
     ws: WebSocket | null;
-    readonly autoResume: boolean;
-    readonly resumeTimeout: number;
-    readonly reconnectTimeout: number;
-    readonly reconnectTries: number;
-    reconnectAttempt: NodeJS.Timeout | null;
-    attempt: number;
+    readonly restURL: string;
+    readonly socketURL: string;
+    readonly rest: Rest;
     stats: NodeStats | null;
-    isConnected: boolean;
     readonly options: NodeGroup;
+    readonly extras: Omit<Extras, 'library'>;
     /**
      * The Node class that is used to connect to a lavalink node
-     * @param ruvyrias Ruvyrias
-     * @param node NodeGroup
-     * @param options RuvyriasOptions
+     * @param {Ruvyrias} ruvyrias
+     * @param {NodeGroup} node
+     * @param {RuvyriasOptions} options
      */
     constructor(ruvyrias: Ruvyrias, node: NodeGroup, options: RuvyriasOptions);
     /**
@@ -61,12 +58,6 @@ export declare class Node {
      * @returns {Promise<void>}
      */
     connect(): Promise<void>;
-    /**
-     * Sends a payload to the Lavalink node.
-     * @param {any} payload The payload to be sent.
-     * @returns {void}
-     */
-    send(payload: any): void;
     /**
      * Initiates a reconnection attempt to the Lavalink node.
      * @returns {Promise<void>}
@@ -77,6 +68,17 @@ export declare class Node {
      * @returns {Promise<void>} void
      */
     disconnect(): Promise<void>;
+    /**
+      * Sends a payload to the Lavalink node.
+      * @param {any} payload The payload to be sent.
+      * @returns {void}
+      */
+    send(payload: any): void;
+    /**
+     * Returns the name of the node.
+     * @returns {string} The name of the node.
+     */
+    get name(): string;
     /**
      * Gets the penalties associated with the current node.
      * @returns {number} The total amount of penalties.
@@ -106,3 +108,4 @@ export declare class Node {
      */
     private error;
 }
+export {};
