@@ -105,6 +105,7 @@ export class Node {
             host: node.host,
             port: node.port,
             password: node.password,
+            resume: node.resume ?? false,
             secure: node.secure ?? false,
             region: node.region ?? null,
         };
