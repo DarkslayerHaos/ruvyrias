@@ -2,7 +2,7 @@ import { Ruvyrias, ResolveOptions } from '../../src/Ruvyrias';
 import { Track } from '../../src/Guild/Track';
 import { Plugin } from '../../src/Plugin';
 import { SpotifyManager } from './SpotifyManager';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 
 const spotifyPattern =
     /^(?:https:\/\/open\.spotify\.com\/(?:intl-\w+\/)?(?:user\/[A-Za-z0-9]+\/)?|spotify:)(album|playlist|track|artist)(?:[/:])([A-Za-z0-9]+).*$/;

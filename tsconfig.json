@@ -16,5 +16,4 @@
         "strictPropertyInitialization": false,
         "declaration": true
     },
-    "include": ["src/**/*.ts", ".eslintrc.js"]
 }
