@@ -1,7 +1,8 @@
 import { RestManager } from './RestManager';
 import { SpotifyOptions } from './Spotify';
 
-const errorMessage: string = '[Ruvyrias Spotify] your all spotify clientID are ratelimited try to add more clientID due to you have high usage'
+const errorMessage: string =
+    '[Ruvyrias Spotify] your all spotify clientID are ratelimited try to add more clientID due to you have high usage';
 
 /**
  * Manages interactions with the Spotify API, handling single or multiple client configurations.
@@ -14,12 +15,14 @@ export class SpotifyManager {
      * @param {SpotifyOptions} data - The Spotify client configuration data.
      */
     public constructor(data: SpotifyOptions) {
-        this.manager = []
+        this.manager = [];
         if (data.clients?.length) {
             for (const client of data.clients) this.manager?.push(new RestManager(client));
             this.mode = 'multiple';
         } else {
-            this.manager.push(new RestManager({ clientID: data.clientID, clientSecret: data.clientSecret }));
+            this.manager.push(
+                new RestManager({ clientID: data.clientID, clientSecret: data.clientSecret })
+            );
         }
     }
 
@@ -64,7 +67,7 @@ export class SpotifyManager {
      * @returns {RestManager | undefined} - The least used request manager, or undefined if all are rate limited.
      */
     protected getLeastUsedRequest(): RestManager | undefined {
-        const manager = this.manager.filter((request) => !request.stats.isRateLimited);
+        const manager = this.manager.filter(request => !request.stats.isRateLimited);
         if (!manager.length) return undefined;
 
         return manager.sort((a, b) => a.stats.requests - b.stats.requests)[0];

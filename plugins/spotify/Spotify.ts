@@ -4,7 +4,8 @@ import { Plugin } from '../../src/Plugin';
 import { SpotifyManager } from './SpotifyManager';
 import cheerio from 'cheerio';
 
-const spotifyPattern = /^(?:https:\/\/open\.spotify\.com\/(?:intl-\w+\/)?(?:user\/[A-Za-z0-9]+\/)?|spotify:)(album|playlist|track|artist)(?:[/:])([A-Za-z0-9]+).*$/;
+const spotifyPattern =
+    /^(?:https:\/\/open\.spotify\.com\/(?:intl-\w+\/)?(?:user\/[A-Za-z0-9]+\/)?|spotify:)(album|playlist|track|artist)(?:[/:])([A-Za-z0-9]+).*$/;
 const SHORT_LINK_PATTERN = 'https://spotify.link';
 
 /**
@@ -44,12 +45,7 @@ export interface SpotifyAccessTokenAPIResult {
 /**
  * Types for the different load scenarios in the Spotify plugin.
  */
-export type loadType =
-    | 'track'
-    | 'playlist'
-    | 'search'
-    | 'empty'
-    | 'error';
+export type loadType = 'track' | 'playlist' | 'search' | 'empty' | 'error';
 
 /**
  * Represents the number of followers for a Spotify entity.
@@ -103,10 +99,7 @@ export interface SpotifySearchTrack {
 export interface SpotifyTrack {
     album: spotifyAlbum & {
         album_group?: string;
-        artists: Omit<
-            SpotifyArtist,
-            'followers' | 'images' | 'genres' | 'popularity'
-        >;
+        artists: Omit<SpotifyArtist, 'followers' | 'images' | 'genres' | 'popularity'>;
     };
     artists: SpotifyArtist[];
     available_markets: string[];
@@ -144,8 +137,7 @@ export interface SpotifyTrack {
 /**
  * Represents a Spotify artist.
  */
-export interface SpotifyArtist
-    extends Omit<SpotifyUser, 'display_name' | 'type'> {
+export interface SpotifyArtist extends Omit<SpotifyUser, 'display_name' | 'type'> {
     name: string;
     genres: string[];
     popularity: number;
@@ -228,7 +220,6 @@ export interface SpotifyPublicCredentials {
     isAnonymous: boolean;
 }
 
-
 export interface Seed {
     initialPoolSize: number;
     afterFilteringSize: number;
@@ -262,9 +253,11 @@ export class Spotify extends Plugin {
             searchMarket: options.searchMarket,
             clientID: options.clientID,
             clientSecret: options.clientSecret,
-            authorization: Buffer.from(`${options.clientID}:${options.clientSecret}`).toString('base64'),
+            authorization: Buffer.from(`${options.clientID}:${options.clientSecret}`).toString(
+                'base64'
+            ),
             token: '',
-            interval: 0
+            interval: 0,
         };
     }
 
@@ -298,7 +291,7 @@ export class Spotify extends Plugin {
                 {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Basic ${this.options.authorization}`,
+                        Authorization: `Basic ${this.options.authorization}`,
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
                 }
@@ -358,8 +351,12 @@ export class Spotify extends Plugin {
      * @param {ResolveOptions} options - The resolve options including query, source, and requester.
      * @returns {Promise<any>} - The resolved data from the Spotify API.
      */
-    private async decodeSpotifyShortLink({ query, source, requester }: ResolveOptions): Promise<any> {
-        let res = await fetch(query, { method: 'GET' });
+    private async decodeSpotifyShortLink({
+        query,
+        source,
+        requester,
+    }: ResolveOptions): Promise<any> {
+        const res = await fetch(query, { method: 'GET' });
         const text = await res.text();
         const $ = cheerio.load(text);
         const spotifyLink = $('a.secondary-action');
@@ -385,13 +382,13 @@ export class Spotify extends Plugin {
                 ? playlist.tracks?.items.slice(0, this.options.playlistLimit)
                 : playlist.tracks?.items;
 
-            const unresolvedPlaylistTracks = await Promise.all((limitedTracks as object[]).map((x: any) => this.buildUnresolved(x.track, requester)));
-
-            return this.buildResponse(
-                'playlist',
-                unresolvedPlaylistTracks,
-                playlist.name
+            const unresolvedPlaylistTracks = await Promise.all(
+                (limitedTracks as object[]).map((x: any) =>
+                    this.buildUnresolved(x.track, requester)
+                )
             );
+
+            return this.buildResponse('playlist', unresolvedPlaylistTracks, playlist.name);
         } catch (e: any) {
             return this.buildResponse(
                 e.status === 404 ? 'empty' : 'error',
@@ -410,9 +407,7 @@ export class Spotify extends Plugin {
      */
     private async fetchAlbum(id: string, requester: any): Promise<any> {
         try {
-            const album = (await this.spotifyManager.send(
-                `/albums/${id}`
-            )) as spotifyAlbum;
+            const album = (await this.spotifyManager.send(`/albums/${id}`)) as spotifyAlbum;
 
             const limitedTracks = this.options.albumLimit
                 ? album.tracks.items.slice(0, this.options.albumLimit * 100)
@@ -421,11 +416,7 @@ export class Spotify extends Plugin {
             const unresolvedPlaylistTracks = await Promise.all(
                 limitedTracks.map((x: any) => this.buildUnresolved(x, requester))
             );
-            return this.buildResponse(
-                'playlist',
-                unresolvedPlaylistTracks,
-                album.name
-            );
+            return this.buildResponse('playlist', unresolvedPlaylistTracks, album.name);
         } catch (e: any) {
             return this.buildResponse(
                 e.body?.error.message === 'invalid id' ? 'empty' : 'empty',
@@ -444,9 +435,7 @@ export class Spotify extends Plugin {
      */
     private async fetchArtist(id: string, requester: any): Promise<any> {
         try {
-            const artist = (await this.spotifyManager.send(
-                `/artists/${id}`
-            )) as SpotifyArtist;
+            const artist = (await this.spotifyManager.send(`/artists/${id}`)) as SpotifyArtist;
 
             const data = (await this.spotifyManager.send(
                 `/artists/${id}/top-tracks?market=${this.options.searchMarket ?? 'US'}`
@@ -456,11 +445,7 @@ export class Spotify extends Plugin {
                 data.tracks.map((x: any) => this.buildUnresolved(x, requester))
             );
 
-            return this.buildResponse(
-                'playlist',
-                unresolvedPlaylistTracks,
-                artist.name
-            );
+            return this.buildResponse('playlist', unresolvedPlaylistTracks, artist.name);
         } catch (e: any) {
             return this.buildResponse(
                 e.body?.error.message === 'invalid id' ? 'empty' : 'error',
@@ -509,8 +494,12 @@ export class Spotify extends Plugin {
                     requester,
                 });
 
-            const data = await this.spotifyManager.send(`/search/?q='${query}'&type=artist,album,track&market=${this.options.searchMarket ?? 'US'}`);
-            const unresolvedTracks = await Promise.all((data as any).tracks.items.map((x: any) => this.buildUnresolved(x, requester)));
+            const data = await this.spotifyManager.send(
+                `/search/?q='${query}'&type=artist,album,track&market=${this.options.searchMarket ?? 'US'}`
+            );
+            const unresolvedTracks = await Promise.all(
+                (data as any).tracks.items.map((x: any) => this.buildUnresolved(x, requester))
+            );
 
             return this.buildResponse('track', unresolvedTracks);
         } catch (e: any) {
@@ -553,24 +542,27 @@ export class Spotify extends Plugin {
             throw new ReferenceError('The Spotify track object was not provided');
         }
 
-        return new Track({
-            encoded: '',
-            info: {
-                sourceName: 'spotify',
-                identifier: track.id,
-                title: track.name,
-                author: track.artists[0]?.name ?? 'Unknown Artist',
-                album: track.album.name ?? 'Unkown Album',
-                uri: `https://open.spotify.com/track/${track.id}`,
-                artworkUrl: track.album?.images[0]?.url,
-                isrc: track.external_ids.isrc,
-                length: track.duration_ms,
-                isSeekable: true,
-                isStream: false,
+        return new Track(
+            {
+                encoded: '',
+                info: {
+                    sourceName: 'spotify',
+                    identifier: track.id,
+                    title: track.name,
+                    author: track.artists[0]?.name ?? 'Unknown Artist',
+                    album: track.album.name ?? 'Unkown Album',
+                    uri: `https://open.spotify.com/track/${track.id}`,
+                    artworkUrl: track.album?.images[0]?.url,
+                    isrc: track.external_ids.isrc,
+                    length: track.duration_ms,
+                    isSeekable: true,
+                    isStream: false,
+                },
+                pluginInfo: null,
+                userData: {},
             },
-            pluginInfo: null,
-            userData: {}
-        }, requester);
+            requester
+        );
     }
 
     /**
@@ -593,9 +585,7 @@ export class Spotify extends Plugin {
                 tracks,
                 playlistInfo: playlistName ? { name: playlistName } : {},
             },
-            exceptionMsg
-                ? { exception: { message: exceptionMsg, severity: 'COMMON' } }
-                : {}
+            exceptionMsg ? { exception: { message: exceptionMsg, severity: 'COMMON' } } : {}
         );
     }
 }

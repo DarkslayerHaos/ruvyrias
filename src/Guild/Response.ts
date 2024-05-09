@@ -17,7 +17,7 @@ export interface LavalinkResponse {
         selectedTrack?: number;
     };
     /** An array of tracks loaded in the response. */
-    tracks: Track[]
+    tracks: Track[];
 }
 
 /**
@@ -123,7 +123,7 @@ export type LoadTrackResponse =
 export class Response {
     public tracks: Track[];
     public loadType: LoadType;
-    public playlistInfo?: PlaylistInfo
+    public playlistInfo?: PlaylistInfo;
 
     constructor(response: LoadTrackResponse, requester: any) {
         switch (response.loadType) {
@@ -163,7 +163,7 @@ export class Response {
      */
     private handleTracks(data: TrackData | TrackData[], requester: any): Track[] {
         if (Array.isArray(data)) {
-            return data.map((track) => new Track(track, requester));
+            return data.map(track => new Track(track, requester));
         } else {
             return [new Track(data, requester)];
         }

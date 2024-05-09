@@ -1,60 +1,67 @@
 {
-  "name": "ruvyrias",
-  "version": "1.3.7",
-  "description": "A stable and powerful Lavalink client for NodeJS.",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+    "name": "ruvyrias",
+    "version": "1.3.7",
+    "description": "A stable and powerful Lavalink client for NodeJS.",
+    "main": "dist/index.js",
+    "module": "dist/index.mjs",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "scripts": {
+        "build": "npx tsc && npm run build:esm",
+        "build:esm": "gen-esm-wrapper dist/index.js dist/index.mjs",
+        "build:docs": "npx typedoc --plugin typedoc-plugin-markdown --out docs index.ts",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+        "lint:fix": "eslint . --fix --ext .js,.jsx,.ts,.tsx",
+        "format": "prettier --check .",
+        "format:fix": "prettier --write ."
+    },
+    "homepage": "https://ruvyrias-lock.vercel.app/",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/DarkslayerHaos/ruvyrias.git"
+    },
+    "author": {
+        "name": "DarkslayerHaos",
+        "url": "https://github.com/DarkslayerHaos"
+    },
+    "license": "MIT",
+    "keywords": [
+        "ruvyrias",
+        "lavalink",
+        "lavalink-client",
+        "discordjs",
+        "djs",
+        "eris",
+        "music-bot",
+        "wrapper",
+        "library",
+        "javascript",
+        "typescript",
+        "nodejs"
+    ],
+    "engines": {
+        "node": ">=16.9.0"
+    },
+    "dependencies": {
+        "cheerio": "^1.0.0-rc.12",
+        "ws": "^8.17.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.12.11",
+        "@types/ws": "^8.5.10",
+        "gen-esm-wrapper": "^1.1.3",
+        "typedoc": "^0.25.13",
+        "typedoc-plugin-markdown": "^4.0.1",
+        "typescript": "^5.4.5",
+        "@typescript-eslint/eslint-plugin": "^7.8.0",
+        "@typescript-eslint/parser": "^7.8.0",
+        "eslint": "^8.57.0",
+        "prettier": "^3.2.5"
     }
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npx tsc && npm run build:esm",
-    "build:esm": "gen-esm-wrapper dist/index.js dist/index.mjs",
-    "build:docs": "npx typedoc --plugin typedoc-plugin-markdown --out docs index.ts"
-  },
-  "homepage": "https://ruvyrias-lock.vercel.app/",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/DarkslayerHaos/ruvyrias.git"
-  },
-  "author": {
-    "name": "DarkslayerHaos",
-    "url": "https://github.com/DarkslayerHaos"
-  },
-  "license": "MIT",
-  "keywords": [
-    "ruvyrias",
-    "lavalink",
-    "lavalink-client",
-    "discordjs",
-    "djs",
-    "eris",
-    "music-bot",
-    "wrapper",
-    "library",
-    "javascript",
-    "typescript",
-    "nodejs"
-  ],
-  "engines": {
-    "node": ">=16.9.0"
-  },
-  "dependencies": {
-    "cheerio": "^1.0.0-rc.12",
-    "ws": "^8.17.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20.12.11",
-    "@types/ws": "^8.5.10",
-    "gen-esm-wrapper": "^1.1.3",
-    "typedoc": "^0.25.13",
-    "typedoc-plugin-markdown": "^4.0.1",
-    "typescript": "^5.4.5"
-  }
 }
