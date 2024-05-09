@@ -45,7 +45,7 @@ class Connection {
                     sessionId: this.session_id,
                     token: this.token,
                     endpoint: this.endpoint,
-                }
+                },
             },
         });
         this.player.ruvyrias.emit('debug', this.player.node.options.name, `[Voice] <- [Discord]: Voice Server Update | Server: ${this.region} Guild: ${this.player.guildId}.`);
@@ -59,9 +59,7 @@ class Connection {
         if (channel_id == null) {
             this.player.stop();
         }
-        if (this.player.voiceChannel &&
-            channel_id &&
-            this.player.voiceChannel !== channel_id) {
+        if (this.player.voiceChannel && channel_id && this.player.voiceChannel !== channel_id) {
             this.player.voiceChannel = channel_id;
         }
         this.channel_id = channel_id;

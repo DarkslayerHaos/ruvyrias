@@ -266,7 +266,6 @@ export class Deezer extends Plugin {
      */
     private async getArtistTracks(deezerArtist: any): Promise<void> {
         let nextPage = deezerArtist.next;
-        let pageLoaded = 1;
         while (nextPage) {
             if (!nextPage) break;
             const req = await fetch(nextPage);
@@ -275,7 +274,6 @@ export class Deezer extends Plugin {
             deezerArtist.data.push(...json.data);
 
             nextPage = json.next;
-            pageLoaded++;
         }
     }
 

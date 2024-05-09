@@ -69,10 +69,10 @@ export declare class Node {
      */
     disconnect(): Promise<void>;
     /**
-      * Sends a payload to the Lavalink node.
-      * @param {any} payload The payload to be sent.
-      * @returns {void}
-      */
+     * Sends a payload to the Lavalink node.
+     * @param {any} payload The payload to be sent.
+     * @returns {void}
+     */
     send(payload: any): void;
     /**
      * Returns the name of the node.

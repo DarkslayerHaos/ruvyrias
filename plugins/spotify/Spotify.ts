@@ -519,7 +519,6 @@ export class Spotify extends Plugin {
      */
     private async fetchPlaylistTracks(spotifyPlaylist: SpotifyPlaylist): Promise<void> {
         let nextPage = spotifyPlaylist.tracks?.next;
-        let pageLoaded = 1;
         while (nextPage) {
             if (!nextPage) break;
             const body: any = await this.spotifyManager.getData(nextPage);
@@ -527,7 +526,6 @@ export class Spotify extends Plugin {
             spotifyPlaylist.tracks?.items.push(...body.items);
 
             nextPage = body.next;
-            pageLoaded++;
         }
     }
 

@@ -6,7 +6,11 @@ const SPOTIFY_API_URL = 'https://api.spotify.com/v1';
  * Manages RESTful requests to the Spotify API using client credentials for authentication.
  */
 class RestManager {
-    stats = { requests: 0, isRateLimited: false, nextRenew: 0 };
+    stats = {
+        requests: 0,
+        isRateLimited: false,
+        nextRenew: 0,
+    };
     options;
     /**
      * @param {Omit<RestManagerOptions, 'token' | 'authorization'>} options - The REST manager configuration options.
@@ -24,7 +28,7 @@ class RestManager {
     async request(endpoint) {
         await this.renew();
         const req = await fetch(`${SPOTIFY_API_URL}${endpoint}`, {
-            headers: { 'Authorization': this.options.token },
+            headers: { Authorization: this.options.token },
         });
         const data = (await req.json());
         if (req.headers.get('x-ratelimit-remaining') === '0') {
@@ -42,7 +46,7 @@ class RestManager {
     async getData(url) {
         await this.renew();
         const req = await fetch(url, {
-            headers: { 'Authorization': this.options.token },
+            headers: { Authorization: this.options.token },
         });
         const data = (await req.json());
         if (req.headers.get('x-ratelimit-remaining') === '0') {

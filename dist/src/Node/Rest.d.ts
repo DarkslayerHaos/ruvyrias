@@ -83,10 +83,10 @@ export declare class Rest {
      */
     updatePlayer(options: PlayOptions): Promise<Player | ErrorResponses | null>;
     /**
-    * Destroys a player for the specified guild.
-    * @param {string} guildId - The ID of the guild for which to destroy the player.
-    * @returns {Promise<null>} A Promise that resolves when the player is destroyed.
-    */
+     * Destroys a player for the specified guild.
+     * @param {string} guildId - The ID of the guild for which to destroy the player.
+     * @returns {Promise<null>} A Promise that resolves when the player is destroyed.
+     */
     destroyPlayer(guildId: string): Promise<null>;
     /**
      * Performs an HTTP GET request to the specified path.

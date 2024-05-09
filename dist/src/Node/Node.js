@@ -7,10 +7,6 @@ exports.Node = void 0;
 const ws_1 = __importDefault(require("ws"));
 const Config_1 = require("../Config");
 const Rest_1 = require("./Rest");
-;
-;
-;
-;
 /**
  * Represents a connection to a Lavalink node, allowing communication and control over audio playback.
  */
@@ -72,7 +68,7 @@ class Node {
                 sent: 0,
                 nulled: 0,
                 deficit: 0,
-            }
+            },
         };
     }
     /**
@@ -89,7 +85,7 @@ class Node {
             throw new Error('[Ruvyrias Error] No user id found in the Ruvyrias instance. Consider using a supported library.');
         }
         const headers = {
-            'Authorization': this.options.password,
+            Authorization: this.options.password,
             'User-Id': this.ruvyrias.options.clientId,
             'Client-Name': `${Config_1.Config.clientName}/${Config_1.Config.clientVersion}`,
         };
@@ -137,10 +133,10 @@ class Node {
         this.ruvyrias.emit('nodeDisconnect', this);
     }
     /**
-      * Sends a payload to the Lavalink node.
-      * @param {any} payload The payload to be sent.
-      * @returns {void}
-      */
+     * Sends a payload to the Lavalink node.
+     * @param {any} payload The payload to be sent.
+     * @returns {void}
+     */
     send(payload) {
         if (!this?.extras.isConnected ?? !this?.ws) {
             throw new Error('[Ruvyrias Error] The node is not connected.');
@@ -219,7 +215,10 @@ class Node {
                     }
                     // If resume is enabled, try resuming the player
                     if (this.options.resume) {
-                        await this.rest.patch(`/v4/sessions/${this.rest.sessionId}`, { resuming: this.options.resume, timeout: this.extras.resumeTimeout });
+                        await this.rest.patch(`/v4/sessions/${this.rest.sessionId}`, {
+                            resuming: this.options.resume,
+                            timeout: this.extras.resumeTimeout,
+                        });
                         this.ruvyrias.emit('debug', this.options.name, `[Lavalink Rest] Resuming configured on Lavalink...`);
                     }
                     break;
@@ -238,7 +237,8 @@ class Node {
                         player.emit(packet.op, packet);
                     break;
                 }
-                default: break;
+                default:
+                    break;
             }
         }
         catch (error) {

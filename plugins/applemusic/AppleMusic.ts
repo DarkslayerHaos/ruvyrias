@@ -79,7 +79,6 @@ export interface AppleMusicTrack {
  * Represents the Apple Music class, extending the base Plugin class.
  */
 export class AppleMusic extends Plugin {
-    private baseURL: 'https://api.music.apple.com/v1/';
     private ruvyrias: Ruvyrias;
     private options: AppleMusicOptions;
     private _resolve!: ({ query, source, requester }: ResolveOptions) => any;

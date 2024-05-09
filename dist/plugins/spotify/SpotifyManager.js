@@ -60,7 +60,7 @@ class SpotifyManager {
      * @returns {RestManager | undefined} - The least used request manager, or undefined if all are rate limited.
      */
     getLeastUsedRequest() {
-        const manager = this.manager.filter((request) => !request.stats.isRateLimited);
+        const manager = this.manager.filter(request => !request.stats.isRateLimited);
         if (!manager.length)
             return undefined;
         return manager.sort((a, b) => a.stats.requests - b.stats.requests)[0];

@@ -143,7 +143,7 @@ export declare class Player extends EventEmitter {
      * If no options are specified, it uses the default values from the player.
      * @param {ConnectionOptions} options - The connection options, including guildId, voiceChannel, deaf, and mute settings.
      * @returns {void}
-    */
+     */
     connect(options?: ConnectionOptions): void;
     /**
      * Disconnects the player from the voice channel.
@@ -170,7 +170,7 @@ export declare class Player extends EventEmitter {
      * Seeks to the specified position in the currently playing track.
      * @param {number} position - The position to seek to.
      * @returns {Promise<Player>} A promise that resolves once the seek operation is complete.
-    */
+     */
     seekTo(position: number): Promise<Player>;
     /**
      * @param volume Number to set the volume

@@ -53,9 +53,13 @@ class Deezer extends Plugin_1.Plugin {
      */
     async resolve({ query, source, requester }) {
         if (this.isDeezerShareLink(query)) {
-            const newURL = await this.decodeDeezerShareLink(query);
+            const newURL = (await this.decodeDeezerShareLink(query));
             if (newURL.startsWith('https://www.deezer.com/')) {
-                return this.resolve({ query: newURL, source: source ?? this.ruvyrias.options.defaultPlatform, requester });
+                return this.resolve({
+                    query: newURL,
+                    source: source ?? this.ruvyrias.options.defaultPlatform,
+                    requester,
+                });
             }
         }
         if (source?.toLowerCase() === 'dzsearch' && !this.check(query))
@@ -75,7 +79,11 @@ class Deezer extends Plugin_1.Plugin {
                 return this.getArtist(id, requester);
             }
             default: {
-                return this._resolve({ query, source: source ?? this.ruvyrias?.options.defaultPlatform, requester: requester });
+                return this._resolve({
+                    query,
+                    source: source ?? this.ruvyrias?.options.defaultPlatform,
+                    requester: requester,
+                });
             }
         }
     }
@@ -87,7 +95,7 @@ class Deezer extends Plugin_1.Plugin {
      */
     async getTrack(id, requester) {
         try {
-            const track = await this.getData(`/track/${id}`);
+            const track = (await this.getData(`/track/${id}`));
             const unresolvedTracks = await this.buildUnresolved(track, requester);
             return this.buildResponse('track', [unresolvedTracks]);
         }
@@ -119,8 +127,8 @@ class Deezer extends Plugin_1.Plugin {
      */
     async getArtist(id, requester) {
         try {
-            const artistData = await this.getData(`/artist/${id}`);
-            const artist = await this.getData(`/artist/${id}/top`);
+            const artistData = (await this.getData(`/artist/${id}`));
+            const artist = (await this.getData(`/artist/${id}/top`));
             await this.getArtistTracks(artist);
             if (artist.data.length === 0)
                 return this.buildResponse('error', [], undefined, 'This artist does not have any top songs');
@@ -138,7 +146,6 @@ class Deezer extends Plugin_1.Plugin {
      */
     async getArtistTracks(deezerArtist) {
         let nextPage = deezerArtist.next;
-        let pageLoaded = 1;
         while (nextPage) {
             if (!nextPage)
                 break;
@@ -146,7 +153,6 @@ class Deezer extends Plugin_1.Plugin {
             const json = await req.json();
             deezerArtist.data.push(...json.data);
             nextPage = json.next;
-            pageLoaded++;
         }
     }
     /**
@@ -159,7 +165,7 @@ class Deezer extends Plugin_1.Plugin {
         if (this.check(query))
             return this.resolve(query);
         try {
-            const tracks = await this.getData(`/search?q=${encodeURIComponent(query)}`);
+            const tracks = (await this.getData(`/search?q=${encodeURIComponent(query)}`));
             const unresolvedTracks = await Promise.all(tracks.data.map((x) => this.buildUnresolved(x, requester)));
             return this.buildResponse('search', unresolvedTracks);
         }
@@ -175,7 +181,7 @@ class Deezer extends Plugin_1.Plugin {
      */
     async getAlbum(id, requester) {
         try {
-            const album = await this.getData(`/album/${id}`);
+            const album = (await this.getData(`/album/${id}`));
             const unresolvedAlbumTracks = await Promise.all(album.tracks.data.map((x) => this.buildUnresolved(x, requester)));
             return this.buildResponse('playlist', unresolvedAlbumTracks, album.title);
         }
@@ -251,9 +257,7 @@ class Deezer extends Plugin_1.Plugin {
             loadType,
             tracks,
             playlistInfo: playlistName ? { name: playlistName } : {},
-        }, exceptionMsg
-            ? { exception: { message: exceptionMsg, severity: 'COMMON' } }
-            : {});
+        }, exceptionMsg ? { exception: { message: exceptionMsg, severity: 'COMMON' } } : {});
     }
 }
 exports.Deezer = Deezer;
