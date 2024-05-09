@@ -126,7 +126,7 @@ export class Rest {
      */
     public async get(path: RouteLike): Promise<RestMethodGet | null> {
         try {
-            const req = await fetch(this.url + path, {
+            const req = await globalThis.fetch(this.url + path, {
                 method: RequestMethod.Get,
                 headers: {
                     'Content-Type': 'application/json',
@@ -147,7 +147,7 @@ export class Rest {
      */
     public async patch(endpoint: RouteLike, body: any): Promise<Player | null> {
         try {
-            const req = await fetch(this.url + endpoint, {
+            const req = await globalThis.fetch(this.url + endpoint, {
                 method: RequestMethod.Patch,
                 headers: {
                     'Content-Type': 'application/json',
@@ -170,7 +170,7 @@ export class Rest {
      */
     public async post(endpoint: RouteLike, body: any): Promise<Track[] | null> {
         try {
-            const req = await fetch(this.url + endpoint, {
+            const req = await globalThis.fetch(this.url + endpoint, {
                 method: RequestMethod.Post,
                 headers: {
                     'Content-Type': 'application/json',
@@ -192,7 +192,7 @@ export class Rest {
      */
     public async delete(endpoint: RouteLike): Promise<null> {
         try {
-            const req = await fetch(this.url + endpoint, {
+            const req = await globalThis.fetch(this.url + endpoint, {
                 method: RequestMethod.Delete,
                 headers: {
                     'Content-Type': 'application/json',

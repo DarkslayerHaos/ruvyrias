@@ -63,7 +63,7 @@ class Rest {
      */
     async get(path) {
         try {
-            const req = await fetch(this.url + path, {
+            const req = await globalThis.fetch(this.url + path, {
                 method: RequestMethod.Get,
                 headers: {
                     'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ class Rest {
      */
     async patch(endpoint, body) {
         try {
-            const req = await fetch(this.url + endpoint, {
+            const req = await globalThis.fetch(this.url + endpoint, {
                 method: RequestMethod.Patch,
                 headers: {
                     'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ class Rest {
      */
     async post(endpoint, body) {
         try {
-            const req = await fetch(this.url + endpoint, {
+            const req = await globalThis.fetch(this.url + endpoint, {
                 method: RequestMethod.Post,
                 headers: {
                     'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ class Rest {
      */
     async delete(endpoint) {
         try {
-            const req = await fetch(this.url + endpoint, {
+            const req = await globalThis.fetch(this.url + endpoint, {
                 method: RequestMethod.Delete,
                 headers: {
                     'Content-Type': 'application/json',

@@ -53,7 +53,27 @@ class Node {
         this.rest = new Rest_1.Rest(ruvyrias, this);
         this.restURL = `http${node.secure ? 's' : ''}://${this.options.host}:${this.options.port}`;
         this.socketURL = `ws${node.secure ? 's' : ''}://${this.options.host}:${this.options.port}/v4/websocket`;
-        this.stats = null;
+        this.stats = {
+            players: 0,
+            playingPlayers: 0,
+            uptime: 0,
+            memory: {
+                free: 0,
+                used: 0,
+                allocated: 0,
+                reservable: 0,
+            },
+            cpu: {
+                cores: 0,
+                systemLoad: 0,
+                lavalinkLoad: 0,
+            },
+            frameStats: {
+                sent: 0,
+                nulled: 0,
+                deficit: 0,
+            }
+        };
     }
     /**
      * Establishes a connection to the Lavalink node.

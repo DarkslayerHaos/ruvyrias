@@ -43,7 +43,7 @@ export declare class Node {
     readonly restURL: string;
     readonly socketURL: string;
     readonly rest: Rest;
-    stats: NodeStats | null;
+    stats: NodeStats;
     readonly options: NodeGroup;
     readonly extras: Omit<Extras, 'library'>;
     /**
