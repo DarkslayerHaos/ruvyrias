@@ -49,7 +49,7 @@ export interface PacketVoiceStateUpdate {
     /** The data payload containing the state update. */
     d: SetStateUpdate;
     /** The type identifier for this packet. */
-    t: "VOICE_STATE_UPDATE";
+    t: 'VOICE_STATE_UPDATE';
 }
 /**
  * Represents a packet containing an update to the voice server information.
@@ -60,7 +60,7 @@ export interface PacketVoiceServerUpdate {
     /** The data payload containing the voice server information. */
     d: IVoiceServer;
     /** The type identifier for this packet. */
-    t: "VOICE_SERVER_UPDATE";
+    t: 'VOICE_SERVER_UPDATE';
 }
 /**
  * Represents a packet of any other type not explicitly defined.
@@ -421,10 +421,10 @@ export declare class Ruvyrias extends EventEmitter {
      */
     getLavalinkStatus(name: string): Promise<NodeStatsResponse>;
     /**
-    * Get the current lavalink version of the node
-    * @param {string} name The name of the node
-    * @returns {Promise<string>} The version of the node
-    */
+     * Get the current lavalink version of the node
+     * @param {string} name The name of the node
+     * @returns {Promise<string>} The version of the node
+     */
     getLavalinkVersion(name: string): Promise<string>;
     /**
      * Get a player from Ruvyrias instance.

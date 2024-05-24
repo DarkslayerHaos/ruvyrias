@@ -114,7 +114,7 @@ export class Connection {
                     sessionId: this.session_id,
                     token: this.token,
                     endpoint: this.endpoint,
-                }
+                },
             },
         });
 
@@ -136,10 +136,7 @@ export class Connection {
             this.player.stop();
         }
 
-        if (this.player.voiceChannel &&
-            channel_id &&
-            this.player.voiceChannel !== channel_id
-        ) {
+        if (this.player.voiceChannel && channel_id && this.player.voiceChannel !== channel_id) {
             this.player.voiceChannel = channel_id;
         }
 

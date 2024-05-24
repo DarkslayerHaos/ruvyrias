@@ -7,5 +7,5 @@ export enum Config {
     clientVersion = 1.3,
 
     /** Client name. */
-    clientName = 'Ruvyrias'
+    clientName = 'Ruvyrias',
 }

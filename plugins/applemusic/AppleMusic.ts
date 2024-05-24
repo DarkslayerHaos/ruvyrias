@@ -25,12 +25,7 @@ export interface AppleMusicOptions {
 /**
  * Types for the different load scenarios in the Apple Music plugin.
  */
-export type loadType =
-    | 'track'
-    | 'playlist'
-    | 'search'
-    | 'empty'
-    | 'error';
+export type loadType = 'track' | 'playlist' | 'search' | 'empty' | 'error';
 
 /**
  * Represents a track in the Apple Music API.
@@ -84,14 +79,15 @@ export interface AppleMusicTrack {
  * Represents the Apple Music class, extending the base Plugin class.
  */
 export class AppleMusic extends Plugin {
-    private baseURL: 'https://api.music.apple.com/v1/';
     private ruvyrias: Ruvyrias;
     private options: AppleMusicOptions;
     private _resolve!: ({ query, source, requester }: ResolveOptions) => any;
     constructor(options: Omit<AppleMusicOptions, 'fetchURL' | 'token'>) {
         super('AppleMusic');
         if (!options?.countryCode) {
-            throw new Error(`[Apple Music Options] CountryCode option must be included, for example: "us"`);
+            throw new Error(
+                `[Apple Music Options] CountryCode option must be included, for example: "us"`
+            );
         }
         this.options = {
             countryCode: options?.countryCode,
@@ -130,8 +126,8 @@ export class AppleMusic extends Plugin {
     private async getData(params: string): Promise<any> {
         const req = await fetch(`${this.options.fetchURL}${params}`, {
             headers: {
-                'Authorization': this.options.token,
-                'Origin': 'https://music.apple.com',
+                Authorization: this.options.token,
+                Origin: 'https://music.apple.com',
             } as any,
         });
 
@@ -151,7 +147,11 @@ export class AppleMusic extends Plugin {
         }
 
         if (!this.check(query)) {
-            return this._resolve({ query, source: source ?? this?.ruvyrias.options.defaultPlatform, requester: requester });
+            return this._resolve({
+                query,
+                source: source ?? this?.ruvyrias.options.defaultPlatform,
+                requester: requester,
+            });
         }
 
         const [, , type] = URL_PATTERN.exec(query)!;
@@ -181,16 +181,13 @@ export class AppleMusic extends Plugin {
             const playlist: any = await this.getData(`/playlists/${id}`);
             const name = playlist.data[0].attributes.name;
             const tracks = playlist.data[0]?.relationships.tracks.data;
-            const unresolvedTracks = await Promise.all(await tracks.map((x: AppleMusicTrack) => this.buildUnresolved(x, requester)));
+            const unresolvedTracks = await Promise.all(
+                await tracks.map((x: AppleMusicTrack) => this.buildUnresolved(x, requester))
+            );
 
             return this.buildResponse('playlist', unresolvedTracks, name);
         } catch (e: any) {
-            return this.buildResponse(
-                'error',
-                [],
-                undefined,
-                e.body?.error.message ?? e.message
-            );
+            return this.buildResponse('error', [], undefined, e.body?.error.message ?? e.message);
         }
     }
 
@@ -207,16 +204,13 @@ export class AppleMusic extends Plugin {
             const artist = await this.getData(`/artists/${id}/view/top-songs`);
             const name = `${artist.data[0].attributes.artistName}'s top songs`;
             const tracks = await artist.data;
-            const unresolvedTracks = await Promise.all(await tracks.map((x: AppleMusicTrack) => this.buildUnresolved(x, requester)));
+            const unresolvedTracks = await Promise.all(
+                await tracks.map((x: AppleMusicTrack) => this.buildUnresolved(x, requester))
+            );
 
             return this.buildResponse('playlist', unresolvedTracks, name);
         } catch (e: any) {
-            return this.buildResponse(
-                'error',
-                [],
-                undefined,
-                e.body?.error.message ?? e.message
-            );
+            return this.buildResponse('error', [], undefined, e.body?.error.message ?? e.message);
         }
     }
 
@@ -233,16 +227,13 @@ export class AppleMusic extends Plugin {
             const album = await this.getData(`/albums/${id}`);
             const name = album.data[0].attributes.name;
             const tracks = await album.data[0].relationships.tracks.data;
-            const unresolvedTracks = await Promise.all(await tracks.map((x: AppleMusicTrack) => this.buildUnresolved(x, requester)));
+            const unresolvedTracks = await Promise.all(
+                await tracks.map((x: AppleMusicTrack) => this.buildUnresolved(x, requester))
+            );
 
             return this.buildResponse('playlist', unresolvedTracks, name);
         } catch (e: any) {
-            return this.buildResponse(
-                'error',
-                [],
-                undefined,
-                e.body?.error.message ?? e.message
-            );
+            return this.buildResponse('error', [], undefined, e.body?.error.message ?? e.message);
         }
     }
 
@@ -255,16 +246,15 @@ export class AppleMusic extends Plugin {
     private async searchSong(query: string, requester: any): Promise<AppleMusicTrack | object> {
         try {
             const tracks = await this.getData(`/search?types=songs&term=${query}`);
-            const unresolvedTracks = await Promise.all(tracks.results.songs.data.map((x: AppleMusicTrack) => this.buildUnresolved(x, requester)));
+            const unresolvedTracks = await Promise.all(
+                tracks.results.songs.data.map((x: AppleMusicTrack) =>
+                    this.buildUnresolved(x, requester)
+                )
+            );
 
             return this.buildResponse('track', unresolvedTracks);
         } catch (e: any) {
-            return this.buildResponse(
-                'error',
-                [],
-                undefined,
-                e.body?.error.message ?? e.message
-            );
+            return this.buildResponse('error', [], undefined, e.body?.error.message ?? e.message);
         }
     }
 
@@ -298,7 +288,7 @@ export class AppleMusic extends Plugin {
                     isStream: false,
                 },
                 pluginInfo: null,
-                userData: {}
+                userData: {},
             },
             requester
         );
@@ -324,9 +314,7 @@ export class AppleMusic extends Plugin {
                 tracks,
                 playlistInfo: playlistName ? { name: playlistName } : {},
             },
-            exceptionMsg
-                ? { exception: { message: exceptionMsg, severity: 'COMMON' } }
-                : {}
+            exceptionMsg ? { exception: { message: exceptionMsg, severity: 'COMMON' } } : {}
         );
     }
 }

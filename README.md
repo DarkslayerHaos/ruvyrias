@@ -20,12 +20,12 @@
 
 ## Table of contents
 
-- [Documentation](https://ruvyrias-lock.vercel.app/)
-- [Installation](#installation)
-- [About](#about)
-- [Implementation Repositories](#implementation-repositories)
-- [Basic Usage](#basic-usage)
-- [Bot Example](https://github.com/DarkslayerHaos/ruvyrias-example)
+-   [Documentation](https://ruvyrias-lock.vercel.app/)
+-   [Installation](#installation)
+-   [About](#about)
+-   [Implementation Repositories](#implementation-repositories)
+-   [Basic Usage](#basic-usage)
+-   [Bot Example](https://github.com/DarkslayerHaos/ruvyrias-example)
 
 ## Installation
 
@@ -43,20 +43,21 @@ To use, you need a configured [Lavalink](https://github.com/lavalink-devs/Lavali
 
 Ruvyrias is a robust Discord music bot client tailored for Lavalink V4 and above. Key features include:
 
-- **Stability:** A reliable and smooth client experience.
-- **TypeScript Support:** Enhanced development with TypeScript.
-- **Lavalink Compatibility:** 100% compatible with Lavalink version 4 and above.
-- **Object-Oriented:** Organized and maintainable code.
-- **Customizable:** Adapt the client to your bot preferences.
-- **Easy Setup:** Quick and hassle-free installation.
-- **Queue System:** Efficiently manage music playback.
-- **Platform Support:** Built-in compatibility with Youtube, Soundcloud, Spotify, Apple Music, and Deezer.
+-   **Stability:** A reliable and smooth client experience.
+-   **TypeScript Support:** Enhanced development with TypeScript.
+-   **Lavalink Compatibility:** 100% compatible with Lavalink version 4 and above.
+-   **Object-Oriented:** Organized and maintainable code.
+-   **Customizable:** Adapt the client to your bot preferences.
+-   **Easy Setup:** Quick and hassle-free installation.
+-   **Queue System:** Efficiently manage music playback.
+-   **Platform Support:** Built-in compatibility with Youtube, Soundcloud, Spotify, Apple Music, and Deezer.
 
 ## Implementation Repositories
+
 Note: `Send PR to add your repository here.`
 
 | Repository                                                             | Creator                                             | Additional Information                              |
-| ---------------------------------------------------------------------- | ----------------------------------------------------| ----------------------------------------------------|
+| ---------------------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- |
 | [Ruvyrias Example](https://github.com/DarkslayerHaos/ruvyrias-example) | [DarkslayerHaos](https://github.com/DarkslayerHaos) | Official Ruvyrias Exampe Bot, easy setup and usage. |
 | [Lunox](https://github.com/adh319/Lunox/tree/Lavalink_v4)              | [adh319](https://github.com/adh319)                 | Check out the repository for futher information.    |
 
@@ -102,21 +103,21 @@ const client = new Client({
 client.ruvyrias = new Ruvyrias(client, nodes, RuvyriasOptions);
 
 // Event handler for when the bot is ready.
-client.on('ready', (client) => {
+client.on('ready', client => {
     console.log(`[+] Logged in as: ${client.user?.tag}`);
     client.ruvyrias.init(client);
 
-    client.user.setActivity({ name: '!play', type: ActivityType.Listening })
+    client.user.setActivity({ name: '!play', type: ActivityType.Listening });
 });
 
 // Event handler for message creation.
-client.on('messageCreate', async (message) => {
+client.on('messageCreate', async message => {
     // Ignore messages that don't start with '!' or are from bots.
     if (!message.content.toLowerCase().startsWith('!') || message.author.bot) return;
 
     // Extract command and arguments from the message
     const args = message.content.slice(1).trim().split(/ +/g);
-    const command = args.shift()?.toLowerCase()
+    const command = args.shift()?.toLowerCase();
 
     if (command === 'play') {
         const query = args.join(' ');
@@ -127,7 +128,7 @@ client.on('messageCreate', async (message) => {
             voiceChannel: message.member.voice.channel.id,
             textChannel: message.channelId,
             deaf: true,
-            mute: false
+            mute: false,
         });
 
         const resolve = await client.ruvyrias.resolve({ query, requester: message.author });
@@ -135,7 +136,11 @@ client.on('messageCreate', async (message) => {
 
         // Handle errors or empty responses.
         if (loadType === 'error' || loadType === 'empty') {
-            return message.reply({ embeds: [{ description: `❌ An error occurred, please try again!`, color: Colors.Red }] });
+            return message.reply({
+                embeds: [
+                    { description: `❌ An error occurred, please try again!`, color: Colors.Red },
+                ],
+            });
         }
 
         // Handle playlist loading.
@@ -145,8 +150,10 @@ client.on('messageCreate', async (message) => {
             }
 
             if (!player.playing && !player.paused) return player.play();
-            return message.reply(`🎶 [${playlistInfo?.name}](${query}) with \`${tracks.length}\` tracks added.`);
-        } 
+            return message.reply(
+                `🎶 [${playlistInfo?.name}](${query}) with \`${tracks.length}\` tracks added.`
+            );
+        }
         // Handle single track or search results loading.
         else if (loadType === 'search' || loadType === 'track') {
             const track = tracks[0];
@@ -160,7 +167,7 @@ client.on('messageCreate', async (message) => {
 
 // Runs when a Lavalink Node is successfully connected.
 client.ruvyrias.on('nodeConnect', node => {
-    console.log(`[+] Node ${node.options.name} connected.`)
+    console.log(`[+] Node ${node.options.name} connected.`);
 });
 
 // Runs when a new track starts playing in the music player.
@@ -175,7 +182,7 @@ client.ruvyrias.on('queueEnd', player => {
     player.stop();
 
     const channel = client.channels.cache.get(player.textChannel);
-    channel.send('⛔ The player queue has ended, i\'m leaving voice channal!');
+    channel.send("⛔ The player queue has ended, i'm leaving voice channal!");
 });
 
 // Log in the bot using the provided token.

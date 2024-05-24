@@ -1,5 +1,11 @@
 import { Node, NodeStats } from './Node/Node';
-import { Player, TrackEndEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from './Player/Player';
+import {
+    Player,
+    TrackEndEvent,
+    TrackStartEvent,
+    TrackStuckEvent,
+    WebSocketClosedEvent,
+} from './Player/Player';
 import { EventEmitter } from 'events';
 import { Config } from './Config';
 import { LoadTrackResponse, Response } from './Guild/Response';
@@ -54,7 +60,7 @@ export interface PacketVoiceStateUpdate {
     /** The data payload containing the state update. */
     d: SetStateUpdate;
     /** The type identifier for this packet. */
-    t: "VOICE_STATE_UPDATE";
+    t: 'VOICE_STATE_UPDATE';
 }
 
 /**
@@ -66,7 +72,7 @@ export interface PacketVoiceServerUpdate {
     /** The data payload containing the voice server information. */
     d: IVoiceServer;
     /** The type identifier for this packet. */
-    t: "VOICE_SERVER_UPDATE";
+    t: 'VOICE_SERVER_UPDATE';
 }
 
 /**
@@ -100,7 +106,14 @@ export type SupportedLibraries = 'discord.js' | 'eris' | 'oceanic' | 'other';
 /**
  * Supported platforms for resolving tracks in Ruvyrias.
  */
-export type SupportedPlatforms = 'spsearch' | 'dzsearch' | 'amsearch' | 'scsearch' | 'ytsearch' | 'ytmsearch' | 'ymsearch';
+export type SupportedPlatforms =
+    | 'spsearch'
+    | 'dzsearch'
+    | 'amsearch'
+    | 'scsearch'
+    | 'ytsearch'
+    | 'ytmsearch'
+    | 'ymsearch';
 
 /**
  * Options for configuring the Ruvyrias instance.
@@ -185,7 +198,7 @@ export interface NodeInfoResponse {
     /** List of available audio filters. */
     filters: string[];
     /** List of installed plugins with their names and versions. */
-    plugins: { name: string; version: string; }[];
+    plugins: { name: string; version: string }[];
 }
 
 /**
@@ -350,12 +363,13 @@ export class Ruvyrias extends EventEmitter {
      * @param {RuvyriasOptions} options RuvyriasOptions
      * @returns Ruvyrias
      */
-    constructor(client: any, nodes: NodeGroup[], options: Omit<RuvyriasOptions,
-        'clientName'
-        | 'clientId'
-        | 'clientVersion'
-        | 'isActivated'
-        | 'resumeTimeout'>
+    constructor(
+        client: any,
+        nodes: NodeGroup[],
+        options: Omit<
+            RuvyriasOptions,
+            'clientName' | 'clientId' | 'clientVersion' | 'isActivated' | 'resumeTimeout'
+        >
     ) {
         super();
         this.client = client;
@@ -367,7 +381,7 @@ export class Ruvyrias extends EventEmitter {
             clientVersion: Config.clientVersion as number,
             clientId: null,
             isActivated: false,
-            ...options
+            ...options,
         };
         this.send = null;
     }
@@ -380,11 +394,11 @@ export class Ruvyrias extends EventEmitter {
     public async init(client: any): Promise<this> {
         if (this.options.isActivated) return this;
         this.options.clientId = client.user?.id as string;
-        this._nodes.forEach(async (node) => await this.addNode(node));
+        this._nodes.forEach(async node => await this.addNode(node));
         this.options.isActivated = true;
 
         if (this.options.plugins) {
-            this.options.plugins.forEach((plugin) => {
+            this.options.plugins.forEach(plugin => {
                 plugin.load(this);
             });
         }
@@ -398,7 +412,9 @@ export class Ruvyrias extends EventEmitter {
                     if (guild) guild.shard?.send(packet);
                 };
 
-                client.on('raw', async (packet: Packet) => { await this.packetUpdate(packet); });
+                client.on('raw', async (packet: Packet) => {
+                    await this.packetUpdate(packet);
+                });
                 break;
             }
             case 'eris': {
@@ -407,7 +423,9 @@ export class Ruvyrias extends EventEmitter {
                     if (guild) guild.shard.sendWS(packet?.op, packet?.d);
                 };
 
-                client.on('rawWS', async (packet: Packet) => { await this.packetUpdate(packet); });
+                client.on('rawWS', async (packet: Packet) => {
+                    await this.packetUpdate(packet);
+                });
                 break;
             }
             case 'oceanic': {
@@ -416,7 +434,9 @@ export class Ruvyrias extends EventEmitter {
                     if (guild) guild.shard.send(packet?.op, packet?.d);
                 };
 
-                client.on('packet', async (packet: Packet) => { await this.packetUpdate(packet); });
+                client.on('packet', async (packet: Packet) => {
+                    await this.packetUpdate(packet);
+                });
                 break;
             }
             case 'other': {
@@ -435,7 +455,7 @@ export class Ruvyrias extends EventEmitter {
     /**
      * Handles Voice State Update and Voice Server Update packets from the Discord API.
      * @param {Packet} packet Packet from Discord API.
-     * @returns {Promise<void>} 
+     * @returns {Promise<void>}
      */
     public async packetUpdate(packet: Packet): Promise<void> {
         if (!['VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE'].includes(packet.t)) return;
@@ -471,7 +491,7 @@ export class Ruvyrias extends EventEmitter {
     public async removeNode(identifier: string): Promise<boolean> {
         const node = this.nodes.get(identifier);
         if (!node) {
-            throw new Error('The node identifier you specified doesn\'t exist');
+            throw new Error("The node identifier you specified doesn't exist");
         }
 
         await node.disconnect();
@@ -487,16 +507,12 @@ export class Ruvyrias extends EventEmitter {
     public getNodeByRegion(region: string): Node[] {
         return [...this.nodes.values()]
             .filter(
-                (node) =>
+                node =>
                     node.extras.isConnected && node.options.region?.includes(region?.toLowerCase())
             )
             .sort((a, b) => {
-                const aLoad = a.stats?.cpu
-                    ? (a.stats.cpu.systemLoad / a.stats.cpu.cores) * 100
-                    : 0;
-                const bLoad = b.stats?.cpu
-                    ? (b.stats.cpu.systemLoad / b.stats.cpu.cores) * 100
-                    : 0;
+                const aLoad = a.stats?.cpu ? (a.stats.cpu.systemLoad / a.stats.cpu.cores) * 100 : 0;
+                const bLoad = b.stats?.cpu ? (b.stats.cpu.systemLoad / b.stats.cpu.cores) * 100 : 0;
                 return aLoad - bLoad;
             });
     }
@@ -515,7 +531,7 @@ export class Ruvyrias extends EventEmitter {
 
         const node = this.nodes.get(identifier);
         if (!node) {
-            throw new Error('[Ruvyrias Error] The node identifier you specified doesn\'t exist');
+            throw new Error("[Ruvyrias Error] The node identifier you specified doesn't exist");
         }
 
         if (!node.extras.isConnected) await node.connect();
@@ -543,7 +559,9 @@ export class Ruvyrias extends EventEmitter {
 
         if (options.region) {
             const regionNode = this.getNodeByRegion(options.region)[0];
-            node = this.nodes.get(regionNode.options?.name ?? this.leastUsedNodes[0].options?.name) as Node;
+            node = this.nodes.get(
+                regionNode.options?.name ?? this.leastUsedNodes[0].options?.name
+            ) as Node;
         } else {
             node = this.nodes.get(this.leastUsedNodes[0]?.options?.name) as Node;
         }
@@ -595,7 +613,7 @@ export class Ruvyrias extends EventEmitter {
      */
     public async removeConnection(guildId: string): Promise<boolean> {
         this.players.delete(guildId);
-        return await this.players.get(guildId)?.stop() ?? false;
+        return (await this.players.get(guildId)?.stop()) ?? false;
     }
 
     /**
@@ -604,7 +622,7 @@ export class Ruvyrias extends EventEmitter {
      */
     public get leastUsedNodes(): Node[] {
         return [...this.nodes.values()]
-            .filter((node) => node.extras.isConnected)
+            .filter(node => node.extras.isConnected)
             .sort((a, b) => a.penalties - b.penalties);
     }
 
@@ -614,7 +632,10 @@ export class Ruvyrias extends EventEmitter {
      * @param {Node} [node] - The node to use for resolving the track. If not provided, the least used node will be used.
      * @returns {Promise<Response>} A promise that resolves to a Response object containing information about the resolved track.
      */
-    public async resolve({ query, source, requester }: ResolveOptions, node?: Node): Promise<Response> {
+    public async resolve(
+        { query, source, requester }: ResolveOptions,
+        node?: Node
+    ): Promise<Response> {
         if (!this.options.isActivated) {
             throw new Error('[Ruvyrias Error] Ruvyrias must be initialized in your ready event.');
         }
@@ -625,8 +646,12 @@ export class Ruvyrias extends EventEmitter {
 
         node = node ?? this.leastUsedNodes[0];
 
-        const trackIdentifier = /^https?:\/\//.test(query) ? query : `${source ?? 'ytsearch'}:${query}`;
-        const response = await node.rest.get(`/v4/loadtracks?identifier=${encodeURIComponent(trackIdentifier)}`) as LoadTrackResponse;
+        const trackIdentifier = /^https?:\/\//.test(query)
+            ? query
+            : `${source ?? 'ytsearch'}:${query}`;
+        const response = (await node.rest.get(
+            `/v4/loadtracks?identifier=${encodeURIComponent(trackIdentifier)}`
+        )) as LoadTrackResponse;
         return new Response(response, requester);
     }
 
@@ -639,7 +664,9 @@ export class Ruvyrias extends EventEmitter {
     public async decodeTrack(track: string, node?: Node): Promise<TrackData> {
         if (!node) node = this.leastUsedNodes[0];
 
-        return await node.rest.get(`/v4/decodetrack?encodedTrack=${encodeURIComponent(track)}`) as TrackData;
+        return (await node.rest.get(
+            `/v4/decodetrack?encodedTrack=${encodeURIComponent(track)}`
+        )) as TrackData;
     }
 
     /**
@@ -651,7 +678,7 @@ export class Ruvyrias extends EventEmitter {
     public async decodeTracks(tracks: string[], node?: Node): Promise<Track[]> {
         if (!node) node = this.leastUsedNodes[0];
 
-        return await node.rest.post(`/v4/decodetracks`, tracks) as Track[];
+        return (await node.rest.post(`/v4/decodetracks`, tracks)) as Track[];
     }
 
     /**
@@ -665,7 +692,7 @@ export class Ruvyrias extends EventEmitter {
             throw new Error('[Ruvyrias Error] Node not found!');
         }
 
-        return await node.rest.get(`/v4/info`) as NodeInfoResponse;
+        return (await node.rest.get(`/v4/info`)) as NodeInfoResponse;
     }
 
     /**
@@ -679,21 +706,21 @@ export class Ruvyrias extends EventEmitter {
             throw new Error('[Ruvyrias Error] Node not found!');
         }
 
-        return await node.rest.get(`/v4/stats`) as NodeStatsResponse;
+        return (await node.rest.get(`/v4/stats`)) as NodeStatsResponse;
     }
 
     /**
-    * Get the current lavalink version of the node
-    * @param {string} name The name of the node
-    * @returns {Promise<string>} The version of the node
-    */
+     * Get the current lavalink version of the node
+     * @param {string} name The name of the node
+     * @returns {Promise<string>} The version of the node
+     */
     public async getLavalinkVersion(name: string): Promise<string> {
-        const node = this.nodes.get(name)
+        const node = this.nodes.get(name);
         if (!node) {
             throw new Error('[Ruvyrias Error] Node not found!');
         }
 
-        return await node.rest.get(`/version`) as string;
+        return (await node.rest.get(`/version`)) as string;
     }
 
     /**

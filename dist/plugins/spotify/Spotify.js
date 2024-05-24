@@ -1,13 +1,33 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Spotify = void 0;
 const Track_1 = require("../../src/Guild/Track");
 const Plugin_1 = require("../../src/Plugin");
 const SpotifyManager_1 = require("./SpotifyManager");
-const cheerio_1 = __importDefault(require("cheerio"));
+const cheerio = __importStar(require("cheerio"));
 const spotifyPattern = /^(?:https:\/\/open\.spotify\.com\/(?:intl-\w+\/)?(?:user\/[A-Za-z0-9]+\/)?|spotify:)(album|playlist|track|artist)(?:[/:])([A-Za-z0-9]+).*$/;
 const SHORT_LINK_PATTERN = 'https://spotify.link';
 /**
@@ -30,7 +50,7 @@ class Spotify extends Plugin_1.Plugin {
             clientSecret: options.clientSecret,
             authorization: Buffer.from(`${options.clientID}:${options.clientSecret}`).toString('base64'),
             token: '',
-            interval: 0
+            interval: 0,
         };
     }
     /**
@@ -59,7 +79,7 @@ class Spotify extends Plugin_1.Plugin {
             const data = await fetch('https://accounts.spotify.com/api/token?grant_type=client_credentials', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Basic ${this.options.authorization}`,
+                    Authorization: `Basic ${this.options.authorization}`,
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
             });
@@ -115,10 +135,10 @@ class Spotify extends Plugin_1.Plugin {
      * @param {ResolveOptions} options - The resolve options including query, source, and requester.
      * @returns {Promise<any>} - The resolved data from the Spotify API.
      */
-    async decodeSpotifyShortLink({ query, source, requester }) {
-        let res = await fetch(query, { method: 'GET' });
+    async decodeSpotifyShortLink({ query, source, requester, }) {
+        const res = await fetch(query, { method: 'GET' });
         const text = await res.text();
-        const $ = cheerio_1.default.load(text);
+        const $ = cheerio.load(text);
         const spotifyLink = $('a.secondary-action');
         const spotifyUrl = spotifyLink.attr('href');
         return this.resolve({ query: spotifyUrl, source, requester });
@@ -225,7 +245,6 @@ class Spotify extends Plugin_1.Plugin {
      */
     async fetchPlaylistTracks(spotifyPlaylist) {
         let nextPage = spotifyPlaylist.tracks?.next;
-        let pageLoaded = 1;
         while (nextPage) {
             if (!nextPage)
                 break;
@@ -234,7 +253,6 @@ class Spotify extends Plugin_1.Plugin {
                 break;
             spotifyPlaylist.tracks?.items.push(...body.items);
             nextPage = body.next;
-            pageLoaded++;
         }
     }
     /**
@@ -260,10 +278,11 @@ class Spotify extends Plugin_1.Plugin {
                 isrc: track.external_ids.isrc,
                 length: track.duration_ms,
                 isSeekable: true,
+                position: 0,
                 isStream: false,
             },
             pluginInfo: null,
-            userData: {}
+            userData: {},
         }, requester);
     }
     /**
@@ -279,9 +298,7 @@ class Spotify extends Plugin_1.Plugin {
             loadType,
             tracks,
             playlistInfo: playlistName ? { name: playlistName } : {},
-        }, exceptionMsg
-            ? { exception: { message: exceptionMsg, severity: 'COMMON' } }
-            : {});
+        }, exceptionMsg ? { exception: { message: exceptionMsg, severity: 'COMMON' } } : {});
     }
 }
 exports.Spotify = Spotify;

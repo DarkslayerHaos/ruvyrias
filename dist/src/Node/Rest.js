@@ -38,7 +38,7 @@ class Rest {
      * @returns {Promise<Player[] | ErrorResponses | null>} A Promise that resolves to the information about all players.
      */
     async getAllPlayers() {
-        return await this.get(`/v4/sessions/${this.sessionId}/players`);
+        return (await this.get(`/v4/sessions/${this.sessionId}/players`));
     }
     /**
      * Updates a player with the specified options.
@@ -46,13 +46,13 @@ class Rest {
      * @returns {Promise<Player | ErrorResponses | null>} A Promise that resolves when the player is updated.
      */
     async updatePlayer(options) {
-        return await this.patch(`/v4/sessions/${this.sessionId}/players/${options.guildId}?noReplace=false`, options.data);
+        return (await this.patch(`/v4/sessions/${this.sessionId}/players/${options.guildId}?noReplace=false`, options.data));
     }
     /**
-    * Destroys a player for the specified guild.
-    * @param {string} guildId - The ID of the guild for which to destroy the player.
-    * @returns {Promise<null>} A Promise that resolves when the player is destroyed.
-    */
+     * Destroys a player for the specified guild.
+     * @param {string} guildId - The ID of the guild for which to destroy the player.
+     * @returns {Promise<null>} A Promise that resolves when the player is destroyed.
+     */
     async destroyPlayer(guildId) {
         return await this.delete(`/v4/sessions/${this.sessionId}/players/${guildId}`);
     }
@@ -63,14 +63,16 @@ class Rest {
      */
     async get(path) {
         try {
-            const req = await fetch(this.url + path, {
+            const req = await globalThis.fetch(this.url + path, {
                 method: RequestMethod.Get,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': this.password,
+                    Authorization: this.password,
                 },
             });
-            return req.headers.get('content-type') === 'application/json' ? await req.json() : await req.text();
+            return req.headers.get('content-type') === 'application/json'
+                ? (await req.json())
+                : (await req.text());
         }
         catch (e) {
             throw new Error('Failed to get data');
@@ -84,15 +86,15 @@ class Rest {
      */
     async patch(endpoint, body) {
         try {
-            const req = await fetch(this.url + endpoint, {
+            const req = await globalThis.fetch(this.url + endpoint, {
                 method: RequestMethod.Patch,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': this.password,
+                    Authorization: this.password,
                 },
                 body: JSON.stringify(body),
             });
-            return await req.json();
+            return (await req.json());
         }
         catch (e) {
             throw new Error('Failed to patch data');
@@ -106,15 +108,15 @@ class Rest {
      */
     async post(endpoint, body) {
         try {
-            const req = await fetch(this.url + endpoint, {
+            const req = await globalThis.fetch(this.url + endpoint, {
                 method: RequestMethod.Post,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': this.password,
+                    Authorization: this.password,
                 },
                 body: JSON.stringify(body),
             });
-            return await req.json();
+            return (await req.json());
         }
         catch (e) {
             return null;
@@ -127,14 +129,14 @@ class Rest {
      */
     async delete(endpoint) {
         try {
-            const req = await fetch(this.url + endpoint, {
+            const req = await globalThis.fetch(this.url + endpoint, {
                 method: RequestMethod.Delete,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': this.password,
+                    Authorization: this.password,
                 },
             });
-            return await req.json();
+            return (await req.json());
         }
         catch (e) {
             return null;

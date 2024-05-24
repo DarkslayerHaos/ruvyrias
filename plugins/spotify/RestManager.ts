@@ -2,8 +2,8 @@ const SPOTIFY_API_URL = 'https://api.spotify.com/v1';
 
 interface RestManagerOptions {
     clientID: string;
-    clientSecret: string
-    token?: string
+    clientSecret: string;
+    token?: string;
     authorization?: string;
 }
 
@@ -11,15 +11,19 @@ interface RestManagerOptions {
  * Manages RESTful requests to the Spotify API using client credentials for authentication.
  */
 export class RestManager {
-    public stats: { requests: number; isRateLimited: boolean, nextRenew: number } = { requests: 0, isRateLimited: false, nextRenew: 0 };
+    public stats: { requests: number; isRateLimited: boolean; nextRenew: number } = {
+        requests: 0,
+        isRateLimited: false,
+        nextRenew: 0,
+    };
     public options: RestManagerOptions;
 
     /**
      * @param {Omit<RestManagerOptions, 'token' | 'authorization'>} options - The REST manager configuration options.
      */
     public constructor(options: Omit<RestManagerOptions, 'token' | 'authorization'>) {
-        this.options = options
-        this.options.authorization = `Basic ${Buffer.from(`${options.clientID}:${options.clientSecret}`).toString('base64',)}`;
+        this.options = options;
+        this.options.authorization = `Basic ${Buffer.from(`${options.clientID}:${options.clientSecret}`).toString('base64')}`;
         this.refreshToken();
     }
 
@@ -32,14 +36,14 @@ export class RestManager {
         await this.renew();
 
         const req = await fetch(`${SPOTIFY_API_URL}${endpoint}`, {
-            headers: { 'Authorization': this.options.token as string },
+            headers: { Authorization: this.options.token as string },
         });
 
         const data = (await req.json()) as Promise<T>;
 
         if (req.headers.get('x-ratelimit-remaining') === '0') {
             this.handleRateLimited(Number(req.headers.get('x-ratelimit-reset')) * 1000);
-            throw new Error('[Ruvyrias Spotify] currently we got rate limited by spotify!')
+            throw new Error('[Ruvyrias Spotify] currently we got rate limited by spotify!');
         }
         this.stats.requests++;
 
@@ -54,14 +58,14 @@ export class RestManager {
     public async getData<T>(url: string): Promise<T> {
         await this.renew();
         const req = await fetch(url, {
-            headers: { 'Authorization': this.options.token as string },
+            headers: { Authorization: this.options.token as string },
         });
 
         const data = (await req.json()) as Promise<T>;
 
         if (req.headers.get('x-ratelimit-remaining') === '0') {
             this.handleRateLimited(Number(req.headers.get('x-ratelimit-reset')) * 1000);
-            throw new Error('[Ruvyrias Spotify] currently we got rate limited by spotify!')
+            throw new Error('[Ruvyrias Spotify] currently we got rate limited by spotify!');
         }
         this.stats.requests++;
 

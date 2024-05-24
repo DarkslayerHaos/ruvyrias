@@ -1,1 +1,1 @@
-export * from './AppleMusic'
+export * from './AppleMusic';

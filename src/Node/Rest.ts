@@ -98,7 +98,7 @@ export class Rest {
      * @returns {Promise<Player[] | ErrorResponses | null>} A Promise that resolves to the information about all players.
      */
     public async getAllPlayers(): Promise<Player[] | ErrorResponses | null> {
-        return await this.get(`/v4/sessions/${this.sessionId}/players`) as Player[];
+        return (await this.get(`/v4/sessions/${this.sessionId}/players`)) as Player[];
     }
 
     /**
@@ -107,14 +107,17 @@ export class Rest {
      * @returns {Promise<Player | ErrorResponses | null>} A Promise that resolves when the player is updated.
      */
     public async updatePlayer(options: PlayOptions): Promise<Player | ErrorResponses | null> {
-        return await this.patch(`/v4/sessions/${this.sessionId}/players/${options.guildId}?noReplace=false`, options.data) as Player;
+        return (await this.patch(
+            `/v4/sessions/${this.sessionId}/players/${options.guildId}?noReplace=false`,
+            options.data
+        )) as Player;
     }
 
     /**
-    * Destroys a player for the specified guild.
-    * @param {string} guildId - The ID of the guild for which to destroy the player.
-    * @returns {Promise<null>} A Promise that resolves when the player is destroyed.
-    */
+     * Destroys a player for the specified guild.
+     * @param {string} guildId - The ID of the guild for which to destroy the player.
+     * @returns {Promise<null>} A Promise that resolves when the player is destroyed.
+     */
     public async destroyPlayer(guildId: string): Promise<null> {
         return await this.delete(`/v4/sessions/${this.sessionId}/players/${guildId}`);
     }
@@ -126,14 +129,16 @@ export class Rest {
      */
     public async get(path: RouteLike): Promise<RestMethodGet | null> {
         try {
-            const req = await fetch(this.url + path, {
+            const req = await globalThis.fetch(this.url + path, {
                 method: RequestMethod.Get,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': this.password,
+                    Authorization: this.password,
                 },
             });
-            return req.headers.get('content-type') === 'application/json' ? await req.json() as RestMethodGet : await req.text() as RestMethodGet;
+            return req.headers.get('content-type') === 'application/json'
+                ? ((await req.json()) as RestMethodGet)
+                : ((await req.text()) as RestMethodGet);
         } catch (e) {
             throw new Error('Failed to get data');
         }
@@ -147,16 +152,16 @@ export class Rest {
      */
     public async patch(endpoint: RouteLike, body: any): Promise<Player | null> {
         try {
-            const req = await fetch(this.url + endpoint, {
+            const req = await globalThis.fetch(this.url + endpoint, {
                 method: RequestMethod.Patch,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': this.password,
+                    Authorization: this.password,
                 },
                 body: JSON.stringify(body),
             });
 
-            return await req.json() as Player;
+            return (await req.json()) as Player;
         } catch (e) {
             throw new Error('Failed to patch data');
         }
@@ -170,16 +175,16 @@ export class Rest {
      */
     public async post(endpoint: RouteLike, body: any): Promise<Track[] | null> {
         try {
-            const req = await fetch(this.url + endpoint, {
+            const req = await globalThis.fetch(this.url + endpoint, {
                 method: RequestMethod.Post,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': this.password,
+                    Authorization: this.password,
                 },
                 body: JSON.stringify(body),
             });
 
-            return await req.json() as Track[] | null;
+            return (await req.json()) as Track[] | null;
         } catch (e) {
             return null;
         }
@@ -192,15 +197,15 @@ export class Rest {
      */
     public async delete(endpoint: RouteLike): Promise<null> {
         try {
-            const req = await fetch(this.url + endpoint, {
+            const req = await globalThis.fetch(this.url + endpoint, {
                 method: RequestMethod.Delete,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': this.password,
+                    Authorization: this.password,
                 },
             });
 
-            return await req.json() as null;
+            return (await req.json()) as null;
         } catch (e) {
             return null;
         }

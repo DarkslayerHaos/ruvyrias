@@ -8,7 +8,6 @@ const URL_PATTERN = /(?:https:\/\/music\.apple\.com\/)([a-z]{2}\/)?(?:.+)?(artis
  * Represents the Apple Music class, extending the base Plugin class.
  */
 class AppleMusic extends Plugin_1.Plugin {
-    baseURL;
     ruvyrias;
     options;
     _resolve;
@@ -51,8 +50,8 @@ class AppleMusic extends Plugin_1.Plugin {
     async getData(params) {
         const req = await fetch(`${this.options.fetchURL}${params}`, {
             headers: {
-                'Authorization': this.options.token,
-                'Origin': 'https://music.apple.com',
+                Authorization: this.options.token,
+                Origin: 'https://music.apple.com',
             },
         });
         const body = await req.json();
@@ -68,7 +67,11 @@ class AppleMusic extends Plugin_1.Plugin {
             return this.searchSong(query, requester);
         }
         if (!this.check(query)) {
-            return this._resolve({ query, source: source ?? this?.ruvyrias.options.defaultPlatform, requester: requester });
+            return this._resolve({
+                query,
+                source: source ?? this?.ruvyrias.options.defaultPlatform,
+                requester: requester,
+            });
         }
         const [, , type] = URL_PATTERN.exec(query);
         switch (type) {
@@ -187,7 +190,7 @@ class AppleMusic extends Plugin_1.Plugin {
                 isStream: false,
             },
             pluginInfo: null,
-            userData: {}
+            userData: {},
         }, requester);
     }
     /**
@@ -203,9 +206,7 @@ class AppleMusic extends Plugin_1.Plugin {
             loadType,
             tracks,
             playlistInfo: playlistName ? { name: playlistName } : {},
-        }, exceptionMsg
-            ? { exception: { message: exceptionMsg, severity: 'COMMON' } }
-            : {});
+        }, exceptionMsg ? { exception: { message: exceptionMsg, severity: 'COMMON' } } : {});
     }
 }
 exports.AppleMusic = AppleMusic;

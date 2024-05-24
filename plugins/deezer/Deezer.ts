@@ -2,19 +2,15 @@ import { Ruvyrias, ResolveOptions } from '../../src/Ruvyrias';
 import { Track } from '../../src/Guild/Track';
 import { Plugin } from '../../src/Plugin';
 
-const DEEZER_SHARE_LINK = 'https://deezer.page.link/'
+const DEEZER_SHARE_LINK = 'https://deezer.page.link/';
 const DEEZER_PUBLIC_API = 'https://api.deezer.com/2.0';
-const DEEZER_REGEX = /^(?:https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|album|playlist|artist)\/(\d+)/;
+const DEEZER_REGEX =
+    /^(?:https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|album|playlist|artist)\/(\d+)/;
 
 /**
  * Represents the different types of load operations.
  */
-export type loadType =
-    | 'track'
-    | 'playlist'
-    | 'search'
-    | 'empty'
-    | 'error';
+export type loadType = 'track' | 'playlist' | 'search' | 'empty' | 'error';
 
 /**
  * Represents a contributor to a track on Deezer, providing information such as their ID, name, and role.
@@ -77,7 +73,7 @@ export interface DeezerAlbum {
  * Represents a track on Deezer, providing details like its ID, title, duration, and associated artist and album.
  */
 export interface DeezerTrack {
-    data: any
+    data: any;
     id: string;
     readable: boolean;
     title: string;
@@ -154,11 +150,14 @@ export class Deezer extends Plugin {
      * @returns {Promise<unknown>} - A promise that resolves to the result of the Deezer resolution.
      */
     private async resolve({ query, source, requester }: ResolveOptions): Promise<unknown> {
-
         if (this.isDeezerShareLink(query)) {
-            const newURL = await this.decodeDeezerShareLink(query) as string;
+            const newURL = (await this.decodeDeezerShareLink(query)) as string;
             if (newURL.startsWith('https://www.deezer.com/')) {
-                return this.resolve({ query: newURL, source: source ?? this.ruvyrias.options.defaultPlatform, requester });
+                return this.resolve({
+                    query: newURL,
+                    source: source ?? this.ruvyrias.options.defaultPlatform,
+                    requester,
+                });
             }
         }
 
@@ -167,22 +166,25 @@ export class Deezer extends Plugin {
 
         const [, type, id] = DEEZER_REGEX.exec(query) ?? [];
 
-
         switch (type) {
             case 'track': {
-                return this.getTrack(id, requester)
+                return this.getTrack(id, requester);
             }
             case 'album': {
-                return this.getAlbum(id, requester)
+                return this.getAlbum(id, requester);
             }
             case 'playlist': {
-                return this.getPlaylist(id, requester)
+                return this.getPlaylist(id, requester);
             }
             case 'artist': {
-                return this.getArtist(id, requester)
+                return this.getArtist(id, requester);
             }
             default: {
-                return this._resolve({ query, source: source ?? this.ruvyrias?.options.defaultPlatform, requester: requester })
+                return this._resolve({
+                    query,
+                    source: source ?? this.ruvyrias?.options.defaultPlatform,
+                    requester: requester,
+                });
             }
         }
     }
@@ -195,18 +197,12 @@ export class Deezer extends Plugin {
      */
     private async getTrack(id: string, requester: any): Promise<DeezerTrack | object> {
         try {
-            const track = await this.getData(`/track/${id}`) as DeezerTrack;
-            const unresolvedTracks = await this.buildUnresolved(track, requester)
+            const track = (await this.getData(`/track/${id}`)) as DeezerTrack;
+            const unresolvedTracks = await this.buildUnresolved(track, requester);
 
             return this.buildResponse('track', [unresolvedTracks]);
-
         } catch (e: any) {
-            return this.buildResponse(
-                'error',
-                [],
-                undefined,
-                e.body?.error.message ?? e.message
-            );
+            return this.buildResponse('error', [], undefined, e.body?.error.message ?? e.message);
         }
     }
 
@@ -219,17 +215,13 @@ export class Deezer extends Plugin {
     private async getPlaylist(id: string, requester: any): Promise<object> {
         try {
             const playlist: any = await this.getData(`/playlist/${id}`);
-            const unresolvedPlaylistTracks = await Promise.all(playlist.tracks.data.map((x: DeezerTrack) => this.buildUnresolved(x, requester)));
+            const unresolvedPlaylistTracks = await Promise.all(
+                playlist.tracks.data.map((x: DeezerTrack) => this.buildUnresolved(x, requester))
+            );
 
             return this.buildResponse('playlist', unresolvedPlaylistTracks, playlist.title);
-
         } catch (e: any) {
-            return this.buildResponse(
-                'error',
-                [],
-                undefined,
-                e.body?.error.message ?? e.message
-            );
+            return this.buildResponse('error', [], undefined, e.body?.error.message ?? e.message);
         }
     }
 
@@ -241,24 +233,29 @@ export class Deezer extends Plugin {
      */
     private async getArtist(id: string, requester: any): Promise<DeezerArtist | object> {
         try {
+            const artistData = (await this.getData(`/artist/${id}`)) as DeezerArtist;
+            const artist = (await this.getData(`/artist/${id}/top`)) as DeezerArtist;
+            await this.getArtistTracks(artist);
 
-            const artistData = await this.getData(`/artist/${id}`) as DeezerArtist;
-            const artist = await this.getData(`/artist/${id}/top`) as DeezerArtist;
-            await this.getArtistTracks(artist)
+            if (artist.data.length === 0)
+                return this.buildResponse(
+                    'error',
+                    [],
+                    undefined,
+                    'This artist does not have any top songs'
+                );
 
-            if (artist.data.length === 0) return this.buildResponse('error', [], undefined, 'This artist does not have any top songs');
-
-            const unresolvedArtistTracks = await Promise.all(artist.data.map((x: DeezerTrack) => this.buildUnresolved(x, requester)));
-
-            return this.buildResponse('playlist', unresolvedArtistTracks, `${artistData.name}'s top songs`);
-
-        } catch (e: any) {
-            return this.buildResponse(
-                'error',
-                [],
-                undefined,
-                e.body?.error.message ?? e.message
+            const unresolvedArtistTracks = await Promise.all(
+                artist.data.map((x: DeezerTrack) => this.buildUnresolved(x, requester))
             );
+
+            return this.buildResponse(
+                'playlist',
+                unresolvedArtistTracks,
+                `${artistData.name}'s top songs`
+            );
+        } catch (e: any) {
+            return this.buildResponse('error', [], undefined, e.body?.error.message ?? e.message);
         }
     }
 
@@ -269,7 +266,6 @@ export class Deezer extends Plugin {
      */
     private async getArtistTracks(deezerArtist: any): Promise<void> {
         let nextPage = deezerArtist.next;
-        let pageLoaded = 1;
         while (nextPage) {
             if (!nextPage) break;
             const req = await fetch(nextPage);
@@ -278,7 +274,6 @@ export class Deezer extends Plugin {
             deezerArtist.data.push(...json.data);
 
             nextPage = json.next;
-            pageLoaded++;
         }
     }
 
@@ -292,16 +287,15 @@ export class Deezer extends Plugin {
         if (this.check(query)) return this.resolve(query);
 
         try {
-            const tracks = await this.getData(`/search?q=${encodeURIComponent(query)}`) as DeezerTrack;
-            const unresolvedTracks = await Promise.all(tracks.data.map((x: DeezerTrack) => this.buildUnresolved(x, requester)));
+            const tracks = (await this.getData(
+                `/search?q=${encodeURIComponent(query)}`
+            )) as DeezerTrack;
+            const unresolvedTracks = await Promise.all(
+                tracks.data.map((x: DeezerTrack) => this.buildUnresolved(x, requester))
+            );
             return this.buildResponse('search', unresolvedTracks);
         } catch (e: any) {
-            return this.buildResponse(
-                'empty',
-                [],
-                undefined,
-                e.body?.error.message ?? e.message
-            );
+            return this.buildResponse('empty', [], undefined, e.body?.error.message ?? e.message);
         }
     }
 
@@ -313,18 +307,14 @@ export class Deezer extends Plugin {
      */
     private async getAlbum(id: string, requester: any): Promise<DeezerAlbum | object> {
         try {
-            const album = await this.getData(`/album/${id}`) as DeezerAlbum;
-            const unresolvedAlbumTracks = await Promise.all(album.tracks.data.map((x: DeezerTrack) => this.buildUnresolved(x, requester)));
+            const album = (await this.getData(`/album/${id}`)) as DeezerAlbum;
+            const unresolvedAlbumTracks = await Promise.all(
+                album.tracks.data.map((x: DeezerTrack) => this.buildUnresolved(x, requester))
+            );
 
             return this.buildResponse('playlist', unresolvedAlbumTracks, album.title);
-
         } catch (e: any) {
-            return this.buildResponse(
-                'error',
-                [],
-                undefined,
-                e.body?.error.message ?? e.message
-            );
+            return this.buildResponse('error', [], undefined, e.body?.error.message ?? e.message);
         }
     }
 
@@ -344,7 +334,7 @@ export class Deezer extends Plugin {
             return location;
         }
 
-        return null
+        return null;
     }
 
     /**
@@ -369,24 +359,27 @@ export class Deezer extends Plugin {
             throw new ReferenceError('The Deezer track object was not provided');
         }
 
-        return new Track({
-            encoded: '',
-            info: {
-                sourceName: 'deezer',
-                identifier: track.id,
-                title: track.title,
-                author: track.artist ? track.artist.name : 'Unknown Artist',
-                album: track.album.title ?? 'Unkown Album',
-                uri: track.link,
-                artworkUrl: track.album.cover_medium,
-                isrc: track.isrc,
-                length: track.duration * 1000,
-                isSeekable: true,
-                isStream: false,
+        return new Track(
+            {
+                encoded: '',
+                info: {
+                    sourceName: 'deezer',
+                    identifier: track.id,
+                    title: track.title,
+                    author: track.artist ? track.artist.name : 'Unknown Artist',
+                    album: track.album.title ?? 'Unkown Album',
+                    uri: track.link,
+                    artworkUrl: track.album.cover_medium,
+                    isrc: track.isrc,
+                    length: track.duration * 1000,
+                    isSeekable: true,
+                    isStream: false,
+                },
+                pluginInfo: null,
+                userData: {},
             },
-            pluginInfo: null,
-            userData: {},
-        }, requester);
+            requester
+        );
     }
 
     /**
@@ -409,9 +402,7 @@ export class Deezer extends Plugin {
                 tracks,
                 playlistInfo: playlistName ? { name: playlistName } : {},
             },
-            exceptionMsg
-                ? { exception: { message: exceptionMsg, severity: 'COMMON' } }
-                : {}
+            exceptionMsg ? { exception: { message: exceptionMsg, severity: 'COMMON' } } : {}
         );
     }
 }

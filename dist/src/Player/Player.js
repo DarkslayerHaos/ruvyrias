@@ -68,7 +68,7 @@ class Player extends events_1.EventEmitter {
         this.deaf = options.deaf ?? false;
         this.mute = options.mute ?? false;
         this.loop = 'NONE';
-        this.on('playerUpdate', (packet) => {
+        this.on('playerUpdate', packet => {
             this.isConnected = packet.state.connected;
             this.position = packet.state.position;
             this.ping = packet.state.ping;
@@ -96,7 +96,10 @@ class Player extends events_1.EventEmitter {
             await this.node.rest.updatePlayer({
                 guildId: this.guildId,
                 data: {
-                    track: { encoded: this.currentTrack.track, userData: this.currentTrack.userData },
+                    track: {
+                        encoded: this.currentTrack.track,
+                        userData: this.currentTrack.userData,
+                    },
                 },
             });
             this.isPlaying = true;
@@ -144,7 +147,7 @@ class Player extends events_1.EventEmitter {
      * If no options are specified, it uses the default values from the player.
      * @param {ConnectionOptions} options - The connection options, including guildId, voiceChannel, deaf, and mute settings.
      * @returns {void}
-    */
+     */
     connect(options = this) {
         const { guildId, voiceChannel, deaf, mute } = options;
         this.send({
@@ -192,7 +195,7 @@ class Player extends events_1.EventEmitter {
                     sessionId: this.connection.session_id,
                     token: this.connection.token,
                     endpoint: this.connection.endpoint,
-                }
+                },
             },
         });
         return this;
@@ -237,7 +240,7 @@ class Player extends events_1.EventEmitter {
      * Seeks to the specified position in the currently playing track.
      * @param {number} position - The position to seek to.
      * @returns {Promise<Player>} A promise that resolves once the seek operation is complete.
-    */
+     */
     async seekTo(position) {
         if (this.position + position >= this.currentTrack.info.length) {
             position = this.currentTrack.info.length;
@@ -355,8 +358,14 @@ class Player extends events_1.EventEmitter {
         if (trackSource === 'youtube') {
             try {
                 const data = `https://www.youtube.com/watch?v=${trackIdentifier}&list=RD${trackIdentifier}`;
-                const response = await this.ruvyrias.resolve({ query: data, source: 'ytmsearch', requester: trackRequester });
-                if (!response ?? !response.tracks ?? ['error', 'empty'].includes(response.loadType)) {
+                const response = await this.ruvyrias.resolve({
+                    query: data,
+                    source: 'ytmsearch',
+                    requester: trackRequester,
+                });
+                if (!response ??
+                    !response.tracks ??
+                    ['error', 'empty'].includes(response.loadType)) {
                     return await this.skip();
                 }
                 response.tracks.shift();
@@ -371,17 +380,23 @@ class Player extends events_1.EventEmitter {
         else if (trackSource === 'spotify') {
             try {
                 const data = await fetch('https://open.spotify.com/get_access_token?reason=transport&productType=embed');
-                const body = await data.json();
+                const body = (await data.json());
                 const res = await fetch(`https://api.spotify.com/v1/recommendations?limit=10&seed_tracks=${trackIdentifier}`, {
                     headers: {
-                        'Authorization': `Bearer ${body?.accessToken}`,
+                        Authorization: `Bearer ${body?.accessToken}`,
                         'Content-Type': 'application/json',
                     },
                 });
-                const json = await res.json();
+                const json = (await res.json());
                 const trackId = json.tracks[Math.floor(Math.random() * json.tracks.length)].id;
-                const response = await this.ruvyrias.resolve({ query: `https://open.spotify.com/track/${trackId}`, source: 'spsearch', requester: trackRequester });
-                if (!response ?? !response.tracks ?? ['error', 'empty'].includes(response.loadType)) {
+                const response = await this.ruvyrias.resolve({
+                    query: `https://open.spotify.com/track/${trackId}`,
+                    source: 'spsearch',
+                    requester: trackRequester,
+                });
+                if (!response ??
+                    !response.tracks ??
+                    ['error', 'empty'].includes(response.loadType)) {
                     return await this.skip();
                 }
                 this.queue.add(response.tracks[0]);
@@ -399,13 +414,17 @@ class Player extends events_1.EventEmitter {
      * @private
      */
     async resolveTrack(track) {
-        const query = [track.info?.author, track.info?.title].filter((x) => !!x).join(' - ');
-        const result = await this.resolve({ query, source: this.ruvyrias.options?.defaultPlatform ?? 'ytsearch', requester: track.info?.requester });
+        const query = [track.info?.author, track.info?.title].filter(x => !!x).join(' - ');
+        const result = await this.resolve({
+            query,
+            source: this.ruvyrias.options?.defaultPlatform ?? 'ytsearch',
+            requester: track.info?.requester,
+        });
         if (!result ?? !result.tracks.length)
             return null;
         if (track.info?.author) {
             const author = [track.info.author, `${track.info.author} - Topic`];
-            const officialAudio = result?.tracks?.find((track) => author.some((name) => new RegExp(`^${escapeRegExp(name)}$`, 'i').test(track?.info?.author)) ??
+            const officialAudio = result?.tracks?.find((track) => author.some(name => new RegExp(`^${escapeRegExp(name)}$`, 'i').test(track?.info?.author)) ??
                 new RegExp(`^${escapeRegExp(track?.info?.title)}$`, 'i').test(track?.info?.title));
             if (officialAudio) {
                 //track.info.identifier = officialAudio.info.identifier;
@@ -426,7 +445,6 @@ class Player extends events_1.EventEmitter {
             track.info.identifier = result?.tracks[0]?.info?.identifier;
         }
         catch (e) { }
-        ;
         return track;
     }
     /**
@@ -446,6 +464,8 @@ class Player extends events_1.EventEmitter {
             }
             case 'TrackEndEvent': {
                 this.previousTrack = this.currentTrack;
+                if (data.reason === "replaced")
+                    return this.ruvyrias.emit("trackEnd", this, this.currentTrack, data);
                 if (this.loop === 'TRACK') {
                     this.queue.unshift(this.previousTrack);
                     this.ruvyrias.emit('trackEnd', this, this.currentTrack, data);
@@ -499,8 +519,10 @@ class Player extends events_1.EventEmitter {
      * @returns {Promise<Response>} - The response containing information about the resolved track.
      */
     async resolve({ query, source, requester }) {
-        const trackIdentifier = /^https?:\/\//.test(query) ? query : `${source ?? 'ytsearch'}:${query}`;
-        const response = await this.node.rest.get(`/v4/loadtracks?identifier=${encodeURIComponent(trackIdentifier)}`);
+        const trackIdentifier = /^https?:\/\//.test(query)
+            ? query
+            : `${source ?? 'ytsearch'}:${query}`;
+        const response = (await this.node.rest.get(`/v4/loadtracks?identifier=${encodeURIComponent(trackIdentifier)}`));
         return new Response_1.Response(response, requester);
     }
     /**

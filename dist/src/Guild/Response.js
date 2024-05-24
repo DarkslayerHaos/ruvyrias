@@ -43,7 +43,7 @@ class Response {
      */
     handleTracks(data, requester) {
         if (Array.isArray(data)) {
-            return data.map((track) => new Track_1.Track(track, requester));
+            return data.map(track => new Track_1.Track(track, requester));
         }
         else {
             return [new Track_1.Track(data, requester)];

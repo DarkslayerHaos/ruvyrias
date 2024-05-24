@@ -44,7 +44,6 @@ export interface LowPassOptions {
     smoothing: number;
 }
 
-
 /**
  * Represents the options for applying tremolo effects to the currently player.
  */
@@ -108,7 +107,6 @@ export interface ChannelMixOptions {
     /** The right to right of the channelMix effect to apply. */
     rightToRight?: number;
 }
-
 
 /**
  * Represents the options for applying various filters to the currently player
@@ -316,10 +314,14 @@ export class Filters {
         this.bassBoost = value;
 
         const num = (value - 1) * (1.25 / 9) - 0.25;
-        await this.setEqualizer(Array(13).fill(0).map((n, i) => ({
-            band: i,
-            gain: num
-        })));
+        await this.setEqualizer(
+            Array(13)
+                .fill(0)
+                .map((n, i) => ({
+                    band: i,
+                    gain: num,
+                }))
+        );
 
         return this;
     }
@@ -334,7 +336,15 @@ export class Filters {
         if (!this.player) return this;
         this.slowMode = value;
 
-        await this.setTimescale(value ? { speed: options?.speed ?? 0.5, pitch: options?.pitch ?? 1.0, rate: options?.rate ?? 0.8, } : null);
+        await this.setTimescale(
+            value
+                ? {
+                      speed: options?.speed ?? 0.5,
+                      pitch: options?.pitch ?? 1.0,
+                      rate: options?.rate ?? 0.8,
+                  }
+                : null
+        );
         return this;
     }
 
@@ -354,7 +364,15 @@ export class Filters {
             this.chipmunk = false;
         }
 
-        await this.setTimescale(value ? { speed: options?.speed ?? 1.165, pitch: options?.pitch ?? 1.125, rate: options?.rate ?? 1.05 } : null);
+        await this.setTimescale(
+            value
+                ? {
+                      speed: options?.speed ?? 1.165,
+                      pitch: options?.pitch ?? 1.125,
+                      rate: options?.rate ?? 1.05,
+                  }
+                : null
+        );
         return this;
     }
 
@@ -364,7 +382,10 @@ export class Filters {
      * @param {TimescaleOptions} [options] - Optional custom parameters.
      * @returns {Promise<Filters>} - Returns the current instance of the filters.
      */
-    public async setDaycore(value: boolean, options?: Omit<TimescaleOptions, 'speed'>): Promise<Filters> {
+    public async setDaycore(
+        value: boolean,
+        options?: Omit<TimescaleOptions, 'speed'>
+    ): Promise<Filters> {
         if (!this.player) return this;
         this.daycore = value;
 
@@ -390,7 +411,9 @@ export class Filters {
             { band: 12, gain: -0.25 },
             { band: 13, gain: -0.25 },
         ]);
-        await this.setTimescale(value ? { pitch: options?.pitch ?? 0.63, rate: options?.rate ?? 1.05 } : null);
+        await this.setTimescale(
+            value ? { pitch: options?.pitch ?? 0.63, rate: options?.rate ?? 1.05 } : null
+        );
 
         return this;
     }
@@ -439,7 +462,15 @@ export class Filters {
         if (!this.player) return this;
         this.chipmunk = value;
 
-        await this.setTimescale(value ? { speed: options?.speed ?? 1.05, pitch: options?.pitch ?? 1.35, rate: options?.rate ?? 1.25 } : null);
+        await this.setTimescale(
+            value
+                ? {
+                      speed: options?.speed ?? 1.05,
+                      pitch: options?.pitch ?? 1.35,
+                      rate: options?.rate ?? 1.25,
+                  }
+                : null
+        );
         return this;
     }
 
@@ -461,13 +492,35 @@ export class Filters {
      * @returns {Promise<Filters>} - Returns the current Filters instance with updated filters.
      */
     public async updateFilters(): Promise<Filters> {
-        const { equalizer, karaoke, timescale, tremolo, vibrato, rotation, distortion, channelMix, lowPass, volume } = this;
+        const {
+            equalizer,
+            karaoke,
+            timescale,
+            tremolo,
+            vibrato,
+            rotation,
+            distortion,
+            channelMix,
+            lowPass,
+            volume,
+        } = this;
 
         await this.player.node.rest.updatePlayer({
             guildId: this.player.guildId,
             data: {
-                filters: { volume, equalizer, karaoke, timescale, tremolo, vibrato, rotation, distortion, channelMix, lowPass }
-            }
+                filters: {
+                    volume,
+                    equalizer,
+                    karaoke,
+                    timescale,
+                    tremolo,
+                    vibrato,
+                    rotation,
+                    distortion,
+                    channelMix,
+                    lowPass,
+                },
+            },
         });
 
         return this;

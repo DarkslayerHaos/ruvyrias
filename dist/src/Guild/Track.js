@@ -30,7 +30,7 @@ class Track {
             position: data?.info?.position,
             isSeekable: data?.info?.isSeekable,
             isStream: data?.info?.isStream,
-            requester
+            requester,
         };
     }
 }
