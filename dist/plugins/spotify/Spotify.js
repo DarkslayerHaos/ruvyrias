@@ -278,6 +278,7 @@ class Spotify extends Plugin_1.Plugin {
                 isrc: track.external_ids.isrc,
                 length: track.duration_ms,
                 isSeekable: true,
+                position: 0,
                 isStream: false,
             },
             pluginInfo: null,

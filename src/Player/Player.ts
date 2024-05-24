@@ -12,7 +12,7 @@ import { SpotifyData, SpotifyPublicCredentials } from '../../plugins/spotify/Spo
 const escapeRegExp = (str: string) => {
     try {
         str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    } catch {}
+    } catch { }
 };
 
 /**
@@ -180,7 +180,7 @@ export class Player extends EventEmitter {
 
             try {
                 this.currentTrack!.info.position = this.position;
-            } catch {}
+            } catch { }
         });
 
         this.on('event', data => this.eventHandler(data));
@@ -624,7 +624,7 @@ export class Player extends EventEmitter {
         }
         try {
             track.info.identifier = result?.tracks[0]?.info?.identifier;
-        } catch (e) {}
+        } catch (e) { }
         return track;
     }
 
@@ -645,6 +645,7 @@ export class Player extends EventEmitter {
             }
             case 'TrackEndEvent': {
                 this.previousTrack = this.currentTrack;
+                if (data.reason === "replaced") return this.ruvyrias.emit("trackEnd", this, this.currentTrack!, data)
                 if (this.loop === 'TRACK') {
                     this.queue.unshift(this.previousTrack!);
                     this.ruvyrias.emit('trackEnd', this, this.currentTrack!, data);

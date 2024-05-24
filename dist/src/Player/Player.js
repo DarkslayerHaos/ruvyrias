@@ -464,6 +464,8 @@ class Player extends events_1.EventEmitter {
             }
             case 'TrackEndEvent': {
                 this.previousTrack = this.currentTrack;
+                if (data.reason === "replaced")
+                    return this.ruvyrias.emit("trackEnd", this, this.currentTrack, data);
                 if (this.loop === 'TRACK') {
                     this.queue.unshift(this.previousTrack);
                     this.ruvyrias.emit('trackEnd', this, this.currentTrack, data);
