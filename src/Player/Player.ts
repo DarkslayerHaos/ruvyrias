@@ -11,8 +11,10 @@ import { SpotifyData, SpotifyPublicCredentials } from '../../plugins/spotify/Spo
 
 const escapeRegExp = (str: string) => {
     try {
-        str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    } catch { }
+        return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    } catch {
+        return str
+    }
 }
 
 /**
@@ -165,7 +167,6 @@ export class Player extends EventEmitter {
             this.position = packet.state.position;
             this.ping = packet.state.ping;
             this.timestamp = packet.state.time;
-            //this event will be useful for creating web player
             this.ruvyrias.emit('playerUpdate', this);
 
             try {
@@ -338,7 +339,7 @@ export class Player extends EventEmitter {
      */
     public async autoMoveNode(): Promise<Node | boolean | void | null> {
         if (!this.ruvyrias.leastUsedNodes.length) {
-            throw new Error('[Ruvyrias Error] No nodes are available.');
+            throw new Error('[Ruvyrias Error] There are no available nodes currently.');
         }
 
         const node = this.ruvyrias.nodes.get(this.ruvyrias.leastUsedNodes[0].options?.name);
@@ -353,12 +354,7 @@ export class Player extends EventEmitter {
      * @returns {Promise<Player>} A promise that resolves once the seek operation is complete.
     */
     public async seekTo(position: number): Promise<Player> {
-        if (this.position + position >= (this.currentTrack as Track).info.length) {
-            position = (this.currentTrack as Track).info.length;
-        }
-
         await this.node.rest.updatePlayer({ guildId: this.guildId, data: { position } });
-
         return this;
     }
 
@@ -367,7 +363,7 @@ export class Player extends EventEmitter {
      * @returns {Player} To set the volume
      */
     public async setVolume(volume: number): Promise<Player> {
-        if (volume < 0 ?? volume > 1000) {
+        if (volume < 0 || volume > 1000) {
             throw new Error('[Ruvyrias Exception] Volume must be between 0 to 1000.');
         }
 
@@ -430,7 +426,7 @@ export class Player extends EventEmitter {
      */
     public setVoiceChannel(channel: string, options?: { mute: boolean; deaf: boolean }): Player {
         if (this.isConnected && channel == this.voiceChannel) {
-            throw new ReferenceError(`[Ruvyrias Exception] Player is already connected to ${channel}`);
+            throw new ReferenceError(`[Ruvyrias Exception] Player is already connected to ${channel}.`);
         }
 
         this.voiceChannel = channel;
@@ -477,10 +473,6 @@ export class Player extends EventEmitter {
      * @returns {Promise<Player>} - The updated player instance playing the new song.
      */
     public async autoplay(player: Player): Promise<Player | void> {
-        if (!player ?? !player.isAutoPlay) {
-            return this;
-        }
-
         const trackIdentifier = player.previousTrack?.info?.identifier ?? player.currentTrack?.info?.identifier;
         const trackRequester = player.previousTrack?.info?.requester ?? player.currentTrack?.info?.requester;
         const trackSource = player.previousTrack?.info?.sourceName ?? player.currentTrack?.info?.sourceName;
@@ -490,15 +482,14 @@ export class Player extends EventEmitter {
                 const data = `https://www.youtube.com/watch?v=${trackIdentifier}&list=RD${trackIdentifier}`;
 
                 const response = await this.ruvyrias.resolve({ query: data, source: 'ytmsearch', requester: trackRequester });
-                if (!response ?? !response.tracks ?? ['error', 'empty'].includes(response.loadType)) {
+                if (!response || !response.tracks || ['error', 'empty'].includes(response.loadType)) {
                     return await this.skip();
                 }
 
                 response.tracks.shift();
-
                 const track = response.tracks[Math.floor(Math.random() * Math.floor(response.tracks.length))];
                 this.queue.add(track);
-
+                await this.play();
                 return this;
             } catch (e) {
                 return await this.skip();
@@ -519,12 +510,12 @@ export class Player extends EventEmitter {
                 const trackId = json.tracks[Math.floor(Math.random() * json.tracks.length)].id;
 
                 const response = await this.ruvyrias.resolve({ query: `https://open.spotify.com/track/${trackId}`, source: 'spsearch', requester: trackRequester });
-                if (!response ?? !response.tracks ?? ['error', 'empty'].includes(response.loadType)) {
+                if (!response || !response.tracks || ['error', 'empty'].includes(response.loadType)) {
                     return await this.skip();
                 }
 
                 this.queue.add(response.tracks[0]);
-
+                await this.play();
                 return this;
             } catch (e) {
                 return await this.skip();
@@ -541,7 +532,7 @@ export class Player extends EventEmitter {
     private async resolveTrack(track: Track): Promise<Track | null> {
         const query = [track.info?.author, track.info?.title].filter((x) => !!x).join(' - ');
         const result = await this.resolve({ query, source: this.ruvyrias.options?.defaultPlatform ?? 'ytsearch', requester: track.info?.requester });
-        if (!result ?? !result.tracks.length) return null;
+        if (!result || !result.tracks.length) return null;
 
         if (track.info?.author) {
             const author = [track.info.author, `${track.info.author} - Topic`];
@@ -592,12 +583,24 @@ export class Player extends EventEmitter {
             }
             case 'TrackEndEvent': {
                 this.previousTrack = this.currentTrack;
-                if (this.loop === 'TRACK') {
-                    this.queue.unshift(this.previousTrack!);
+                if (['loadFailed', 'cleanup', 'replaced'].includes(data.reason)) {
+                    if (this.queue.length === 0 && this.loop === 'NONE') {
+                        this.isPlaying = false;
+                        return this.ruvyrias.emit('queueEnd', this);
+                    } else {
+                        this.ruvyrias.emit('trackEnd', this, this.currentTrack!, data);
+                        return;
+                    }
+                }
+
+                if (this.loop === 'TRACK' && this.currentTrack!) {
+                    this.queue.unshift(this.currentTrack!);
                     this.ruvyrias.emit('trackEnd', this, this.currentTrack!, data);
                     return await this.play();
-                } else if (this.currentTrack && this.loop === 'QUEUE') {
-                    this.queue.push(this.previousTrack!);
+                }
+
+                if (this.loop === 'QUEUE' && this.currentTrack!) {
+                    this.queue.push(this.currentTrack!);
                     this.ruvyrias.emit('trackEnd', this, this.currentTrack!, data);
                     return await this.play();
                 }
@@ -605,12 +608,10 @@ export class Player extends EventEmitter {
                 if (this.queue.length === 0) {
                     this.isPlaying = false;
                     return this.ruvyrias.emit('queueEnd', this);
-                } else if (this.queue.length > 0) {
-                    this.ruvyrias.emit('trackEnd', this, this.currentTrack!, data);
-                    return await this.play();
                 }
 
                 this.isPlaying = false;
+                this.currentTrack = null;
                 this.ruvyrias.emit('queueEnd', this);
                 break;
             }
@@ -631,11 +632,10 @@ export class Player extends EventEmitter {
                     });
                 }
                 this.ruvyrias.emit('socketClose', this, this.currentTrack!, data);
-                await this.pause(true);
                 this.ruvyrias.emit(
                     'debug',
                     `Player -> ${this.guildId}`,
-                    'Player paused Cause Channel deleted Or Client was kicked.'
+                    'Player paused due channel deleted or client was kicked.'
                 );
                 break;
             }

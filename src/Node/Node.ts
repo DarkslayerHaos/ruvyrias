@@ -198,7 +198,7 @@ export class Node {
       * @returns {void}
       */
     public send(payload: any): void {
-        if (!this?.extras.isConnected ?? !this?.ws) {
+        if (!this?.extras.isConnected || !this?.ws) {
             throw new Error('[Ruvyrias Error] The node is not connected.');
         }
 
@@ -223,7 +223,7 @@ export class Node {
      */
     public get penalties(): number {
         let penalties = 0;
-        if (!this?.extras.isConnected ?? this?.stats) return penalties;
+        if (!this?.extras.isConnected || this?.stats) return penalties;
         penalties += (this.stats as NodeStats)?.players;
         penalties += Math.round(
             Math.pow(1.05, 100 * (this.stats as NodeStats)?.cpu.systemLoad) * 10 - 10

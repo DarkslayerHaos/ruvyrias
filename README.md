@@ -23,7 +23,6 @@
 - [Documentation](https://ruvyrias-lock.vercel.app/)
 - [Installation](#installation)
 - [About](#about)
-- [Implementation Repositories](#implementation-repositories)
 - [Basic Usage](#basic-usage)
 - [Bot Example](https://github.com/DarkslayerHaos/ruvyrias-example)
 
@@ -43,43 +42,20 @@ To use, you need a configured [Lavalink](https://github.com/lavalink-devs/Lavali
 
 Ruvyrias is a robust Discord music bot client tailored for Lavalink V4 and above. Key features include:
 
-- **Stability:** A reliable and smooth client experience.
-- **TypeScript Support:** Enhanced development with TypeScript.
-- **Lavalink Compatibility:** 100% compatible with Lavalink version 4 and above.
-- **Object-Oriented:** Organized and maintainable code.
-- **Customizable:** Adapt the client to your bot preferences.
-- **Easy Setup:** Quick and hassle-free installation.
-- **Queue System:** Efficiently manage music playback.
-- **Platform Support:** Built-in compatibility with Youtube, Soundcloud, Spotify, Apple Music, and Deezer.
-
-## Implementation Repositories
-Note: `Send PR to add your repository here.`
-
-| Repository                                                             | Creator                                             | Additional Information                              |
-| ---------------------------------------------------------------------- | ----------------------------------------------------| ----------------------------------------------------|
-| [Ruvyrias Example](https://github.com/DarkslayerHaos/ruvyrias-example) | [DarkslayerHaos](https://github.com/DarkslayerHaos) | Official Ruvyrias Exampe Bot, easy setup and usage. |
-| [Lunox](https://github.com/adh319/Lunox/tree/Lavalink_v4)              | [adh319](https://github.com/adh319)                 | Check out the repository for futher information.    |
+- **Rock-Solid Stability:** Handles heavy loads without hiccups, ensuring uninterrupted music playback.
+- **Full TypeScript Support:** Enjoy type safety, autocompletion, and robust development experience.
+- **Lavalink V4+ Ready:** Optimized for the latest Lavalink version, leveraging all new features.
+- **Clean Object-Oriented Architecture:** Easy to extend, maintain, and integrate into any bot project.
+- **Advanced Queue Management:** Sophisticated control over tracks, playlists, and playback order.
+- **Multi-Platform Support:** Seamlessly stream from YouTube, Spotify, SoundCloud, Apple Music, and Deezer.
+- **Developer-Friendly:** Minimal setup, clear API, and built to empower bot creators with full control.
 
 ## Basic Usage
 
 ```js
-// Import necessary modules.
 const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 const { Ruvyrias } = require('ruvyrias');
 
-// Define Lavalink nodes configuration.
-const nodes = [
-    {
-        name: 'main',
-        host: 'localhost',
-        port: 2333,
-        password: 'youshallnotpass',
-        secure: false,
-        resume: true,
-    },
-];
-
-// Define options for Ruvyrias client.
 const RuvyriasOptions = {
     library: 'discord.js',
     defaultPlatform: 'ytsearch',
@@ -88,7 +64,6 @@ const RuvyriasOptions = {
     reconnectTimeout: 1000 * 10,
 };
 
-// Initialize Discord client with necessary intents.
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -98,10 +73,23 @@ const client = new Client({
     ],
 });
 
-// Create Ruvyrias instance and bind it to the client.
-client.ruvyrias = new Ruvyrias(client, nodes, RuvyriasOptions);
+client.ruvyrias = new Ruvyrias(client, 
+    [{
+        name: 'main',
+        host: 'localhost',
+        port: 2333,
+        password: 'youshallnotpass',
+        secure: false,
+        resume: true,
+    }],
+    ,{
+        library: 'discord.js',
+        defaultPlatform: 'ytsearch',
+        autoResume: true,
+        reconnectTries: Infinity,
+        reconnectTimeout: 1000 * 10,
+});
 
-// Event handler for when the bot is ready.
 client.on('ready', (client) => {
     console.log(`[+] Logged in as: ${client.user?.tag}`);
     client.ruvyrias.init(client);
@@ -109,19 +97,15 @@ client.on('ready', (client) => {
     client.user.setActivity({ name: '!play', type: ActivityType.Listening })
 });
 
-// Event handler for message creation.
 client.on('messageCreate', async (message) => {
-    // Ignore messages that don't start with '!' or are from bots.
     if (!message.content.toLowerCase().startsWith('!') || message.author.bot) return;
 
-    // Extract command and arguments from the message
     const args = message.content.slice(1).trim().split(/ +/g);
     const command = args.shift()?.toLowerCase()
 
     if (command === 'play') {
         const query = args.join(' ');
 
-        // Creating the Player.
         const player = client.ruvyrias.createConnection({
             guildId: message.guildId,
             voiceChannel: message.member.voice.channel.id,
@@ -133,12 +117,10 @@ client.on('messageCreate', async (message) => {
         const resolve = await client.ruvyrias.resolve({ query, requester: message.author });
         const { loadType, tracks, playlistInfo } = resolve;
 
-        // Handle errors or empty responses.
         if (loadType === 'error' || loadType === 'empty') {
             return message.reply({ embeds: [{ description: `❌ An error occurred, please try again!`, color: Colors.Red }] });
         }
 
-        // Handle playlist loading.
         if (loadType === 'playlist') {
             for (const track of tracks) {
                 player.queue.add(track);
@@ -147,7 +129,6 @@ client.on('messageCreate', async (message) => {
             if (!player.playing && !player.paused) return player.play();
             return message.reply(`🎶 [${playlistInfo?.name}](${query}) with \`${tracks.length}\` tracks added.`);
         } 
-        // Handle single track or search results loading.
         else if (loadType === 'search' || loadType === 'track') {
             const track = tracks[0];
             player.queue.add(track);
@@ -158,19 +139,16 @@ client.on('messageCreate', async (message) => {
     }
 });
 
-// Runs when a Lavalink Node is successfully connected.
 client.ruvyrias.on('nodeConnect', node => {
     console.log(`[+] Node ${node.options.name} connected.`)
 });
 
-// Runs when a new track starts playing in the music player.
 client.ruvyrias.on('trackStart', (player, track) => {
     const channel = client.channels.cache.get(player.textChannel);
 
     channel.send(`🎶 Now playing: \`${track.info.title}\` by \`${track.info.author}\`.`);
 });
 
-// Runs when the music playlist reaches the end and the music player leaves the voice channel.
 client.ruvyrias.on('queueEnd', player => {
     player.stop();
 
@@ -178,10 +156,9 @@ client.ruvyrias.on('queueEnd', player => {
     channel.send('⛔ The player queue has ended, i\'m leaving voice channal!');
 });
 
-// Log in the bot using the provided token.
 client.login('token');
 ```
 
 ## Credits
 
-The [Ruvyrias](https://github.com/DarkslayerHaos/ruvyrias) client, customized by [DarkslayerHaos](https://github.com/DarkslayerHaos), is a fork originally derived from the code of [Poru](https://github.com/parasop/poru) developed by [Parasop](https://github.com/parasop).
+The [Ruvyrias](https://github.com/DarkslayerHaos/ruvyrias) client is a fork originally derived from the code of [Poru](https://github.com/parasop/poru).

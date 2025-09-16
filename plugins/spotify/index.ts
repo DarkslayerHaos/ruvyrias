@@ -1,1 +1,1 @@
-export {Spotify} from './Spotify'
+export { Spotify } from './Spotify';
