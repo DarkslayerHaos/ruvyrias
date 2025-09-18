@@ -1,5 +1,5 @@
 <p align='center'>
-  <img src='https://images.wallpaperscraft.com/image/single/girl_umbrella_anime_151317_1600x1200.jpg' />
+  <img src='https://i.imgur.com/Cg61LwP.png' />
 </p>
 
 # <p align='center'>Note: This version supports only Lavalink V4 or above.</p>
