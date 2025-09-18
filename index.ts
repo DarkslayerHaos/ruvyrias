@@ -1,9 +1,11 @@
+export { version } from './package.json';
+
 export * from './src/Ruvyrias';
 export * from './src/Plugin';
-export * from './src/Player/Connection';
-export * from './src/Player/Player';
-export * from './src/Node/Node';
-export * from './src/Node/Rest';
-export * from './src/Player/Filters';
-export * from './src/Guild/Track';
-export * from './src/Guild/Response';
+export * from './src/Connection';
+export * from './src/Player';
+export * from './src/Node';
+export * from './src/Rest';
+export * from './src/Filters';
+export * from './src/Track';
+export * from './src/Response';

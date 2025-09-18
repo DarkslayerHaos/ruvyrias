@@ -1,10 +1,10 @@
+import { NodeInfoResponse, NodeStatsResponse, Ruvyrias } from './Ruvyrias';
+import { LoadTrackResponse, LoadType } from './/Response';
+import { IVoiceServer } from './Connection';
+import { FiltersOptions } from './Filters';
 import { Node } from './Node';
-import { NodeInfoResponse, NodeStatsResponse, Ruvyrias } from '../Ruvyrias';
-import { Track } from '../Guild/Track';
-import { Player } from '../Player/Player';
-import { LoadTrackResponse, LoadType } from '../Guild/Response';
-import { FiltersOptions } from '../Player/Filters';
-import { IVoiceServer } from '../Player/Connection';
+import { Player } from './Player';
+import { Track } from './Track';
 
 /**
  * This interface represents the LavaLink V4 Error Responses

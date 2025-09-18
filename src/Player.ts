@@ -1,13 +1,13 @@
-import { Ruvyrias, ResolveOptions } from '../Ruvyrias';
-import { Node } from '../Node/Node';
-import { Track, TrackData } from '../Guild/Track';
+import { SpotifyData, SpotifyPublicCredentials } from '../plugins/spotify/Spotify';
+import { LoadTrackResponse, Response } from './Response';
+import { Ruvyrias, ResolveOptions } from './Ruvyrias';
+import { ConnectionOptions } from './Ruvyrias';
+import { Track, TrackData } from './Track';
 import { Connection } from './Connection';
-import Queue from '../Guild/Queue';
 import { EventEmitter } from 'events';
 import { Filters } from './Filters';
-import { LoadTrackResponse, Response } from '../Guild/Response';
-import { ConnectionOptions } from '../Ruvyrias';
-import { SpotifyData, SpotifyPublicCredentials } from '../../plugins/spotify/Spotify';
+import { Node } from './Node';
+import Queue from './Queue';
 
 const escapeRegExp = (str: string) => {
     try {
@@ -260,7 +260,7 @@ export class Player extends EventEmitter {
         });
 
         this.isConnected = true;
-        this.ruvyrias.emit('debug', this.guildId, `[Ruvyrias Player] Player has been connected.`);
+        this.ruvyrias.emit('debug', this.guildId, `Ruvyrias -> Player -> The player has been successfully connected.`);
     }
 
     /**
@@ -313,10 +313,10 @@ export class Player extends EventEmitter {
      * @returns {Promise<Node | void>} - A Promise that resolves once the player has been successfully moved to the specified node.
      */
     public async moveNode(name: string): Promise<Node | void> {
-        const availableNodes = Array.from(this.ruvyrias.nodes.values()).filter(node => node.options.name !== name && node.extras.isConnected);
+        const availableNodes = Array.from(this.ruvyrias.nodesMap.values()).filter(node => node.options.name !== name && node.extras.isConnected);
 
         if (availableNodes.length === 0) {
-            throw new Error('[Ruvyrias Error] No other connected nodes available to move to.');
+            throw new Error('No other connected nodes available to move to.');
         }
 
         const randomNode = availableNodes[Math.floor(Math.random() * availableNodes.length)];
@@ -339,10 +339,10 @@ export class Player extends EventEmitter {
      */
     public async autoMoveNode(): Promise<Node | boolean | void | null> {
         if (!this.ruvyrias.leastUsedNodes.length) {
-            throw new Error('[Ruvyrias Error] There are no available nodes currently.');
+            throw new Error('There are no available nodes currently.');
         }
 
-        const node = this.ruvyrias.nodes.get(this.ruvyrias.leastUsedNodes[0].options?.name);
+        const node = this.ruvyrias.nodesMap.get(this.ruvyrias.leastUsedNodes[0].options?.name);
         if (!node) return await this.stop();
 
         return await this.moveNode(node.options.name);
@@ -364,7 +364,7 @@ export class Player extends EventEmitter {
      */
     public async setVolume(volume: number): Promise<Player> {
         if (volume < 0 || volume > 1000) {
-            throw new Error('[Ruvyrias Exception] Volume must be between 0 to 1000.');
+            throw new Error('Volume must be between 0 to 1000.');
         }
 
         await this.node.rest.updatePlayer({ guildId: this.guildId, data: { volume } });
@@ -380,10 +380,10 @@ export class Player extends EventEmitter {
      */
     public setLoop(mode: Loop): Player {
         if (!mode) {
-            throw new Error(`[Ruvyrias Error] You must have to provide loop mode as argument of setLoop.`);
+            throw new Error(`You must have to provide loop mode as argument of setLoop.`);
         }
 
-        if (!['NONE', 'TRACK', 'QUEUE'].includes(mode)) throw new Error(`[Ruvyrias Exception] setLoop arguments are NONE, TRACK and QUEUE.`);
+        if (!['NONE', 'TRACK', 'QUEUE'].includes(mode)) throw new Error(`setLoop arguments are NONE, TRACK and QUEUE.`);
 
         switch (mode) {
             case 'NONE': {
@@ -426,7 +426,7 @@ export class Player extends EventEmitter {
      */
     public setVoiceChannel(channel: string, options?: { mute: boolean; deaf: boolean }): Player {
         if (this.isConnected && channel == this.voiceChannel) {
-            throw new ReferenceError(`[Ruvyrias Exception] Player is already connected to ${channel}.`);
+            throw new ReferenceError(`Player is already connected to ${channel}.`);
         }
 
         this.voiceChannel = channel;
@@ -632,11 +632,7 @@ export class Player extends EventEmitter {
                     });
                 }
                 this.ruvyrias.emit('socketClose', this, this.currentTrack!, data);
-                this.ruvyrias.emit(
-                    'debug',
-                    `Player -> ${this.guildId}`,
-                    'Player paused due channel deleted or client was kicked.'
-                );
+                this.ruvyrias.emit('debug', `Player -> ${this.guildId} -> Player paused due channel deleted or client was kicked.`);
                 break;
             }
             default: {
@@ -663,7 +659,7 @@ export class Player extends EventEmitter {
      */
     public send(data: { guild_id: string; channel_id: string | null, self_deaf: boolean; self_mute: boolean; }): void {
         if (!this.ruvyrias.send) {
-            throw new Error('[Ruvyrias Error] Please provide a send function in the Ruvyrias options or use one of the supported libraries.')
+            throw new Error('Please provide a send function in the Ruvyrias options or use one of the supported libraries.')
         }
 
         this.ruvyrias.send!({ op: 4, d: data });

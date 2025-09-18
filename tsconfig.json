@@ -17,5 +17,6 @@
         "skipDefaultLibCheck": true,
         "strictPropertyInitialization": false,
         "declaration": true,
+        "resolveJsonModule": true
     }
 }

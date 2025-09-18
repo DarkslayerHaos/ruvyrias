@@ -56,14 +56,6 @@ Ruvyrias is a robust Discord music bot client tailored for Lavalink V4 and above
 const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 const { Ruvyrias } = require('ruvyrias');
 
-const RuvyriasOptions = {
-    library: 'discord.js',
-    defaultPlatform: 'ytsearch',
-    autoResume: true,
-    reconnectTries: Infinity,
-    reconnectTimeout: 1000 * 10,
-};
-
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,

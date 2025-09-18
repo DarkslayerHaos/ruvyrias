@@ -1,5 +1,5 @@
 import { Ruvyrias, ResolveOptions } from '../../src/Ruvyrias';
-import { Track } from '../../src/Guild/Track';
+import { Track } from '../../src/Track';
 import { Plugin } from '../../src/Plugin';
 const URL_PATTERN =
     /(?:https:\/\/music\.apple\.com\/)([a-z]{2}\/)?(?:.+)?(artist|album|music-video|playlist)\/([\w\-\.]+(\/)+[\w\-\.]+|[^&]+)\/([\w\-\.]+(\/)+[\w\-\.]+|[^&]+)/;
@@ -84,10 +84,9 @@ export interface AppleMusicTrack {
  * Represents the Apple Music class, extending the base Plugin class.
  */
 export class AppleMusic extends Plugin {
-    private baseURL: 'https://api.music.apple.com/v1/';
     private ruvyrias: Ruvyrias;
     private options: AppleMusicOptions;
-    private _resolve!: ({ query, source, requester }: ResolveOptions) => any;
+    private originalResolve!: ({ query, source, requester }: ResolveOptions) => any;
     constructor(options: Omit<AppleMusicOptions, 'fetchURL' | 'token'>) {
         super('AppleMusic');
         if (!options?.countryCode) {
@@ -109,7 +108,7 @@ export class AppleMusic extends Plugin {
      */
     public async load(ruvyrias: Ruvyrias) {
         this.ruvyrias = ruvyrias;
-        this._resolve = ruvyrias.resolve.bind(ruvyrias);
+        this.originalResolve = ruvyrias.resolve.bind(ruvyrias);
         ruvyrias.resolve = this.resolve.bind(this) as never;
     }
 
@@ -151,7 +150,7 @@ export class AppleMusic extends Plugin {
         }
 
         if (!this.check(query)) {
-            return this._resolve({ query, source: source ?? this?.ruvyrias.options.defaultPlatform, requester: requester });
+            return this.originalResolve({ query, source: source ?? this?.ruvyrias.options.defaultPlatform, requester: requester });
         }
 
         const [, , type] = URL_PATTERN.exec(query)!;

@@ -100,7 +100,7 @@ export class Connection {
      */
     public async setServersUpdate(data: IVoiceServer): Promise<void> {
         if (!data.endpoint) {
-            throw new Error('[Ruvyrias Error] No Session ID found.');
+            throw new Error('No Session ID found.');
         }
 
         this.region = data.endpoint.split('.').shift()?.replace(/[0-9]/g, '') ?? null;
@@ -121,7 +121,7 @@ export class Connection {
         this.player.ruvyrias.emit(
             'debug',
             this.player.node.options.name,
-            `[Voice] <- [Discord]: Voice Server Update | Server: ${this.region} Guild: ${this.player.guildId}.`
+            `Ruvyrias -> Voice Server Update | Server -> ${this.region} Guild: ${this.player.guildId}.`
         );
     }
 

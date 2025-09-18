@@ -1,5 +1,5 @@
 import { Ruvyrias, ResolveOptions } from '../../src/Ruvyrias';
-import { Track } from '../../src/Guild/Track';
+import { Track } from '../../src/Track';
 import { Plugin } from '../../src/Plugin';
 
 const DEEZER_SHARE_LINK = 'https://deezer.page.link/'
@@ -111,7 +111,7 @@ export interface DeezerTrack {
 export class Deezer extends Plugin {
     private baseURL: string = DEEZER_PUBLIC_API;
     private ruvyrias: Ruvyrias;
-    private _resolve!: ({ query, source, requester }: ResolveOptions) => any;
+    private originalResolve!: ({ query, source, requester }: ResolveOptions) => any;
     public constructor() {
         super('Deezer');
     }
@@ -122,7 +122,7 @@ export class Deezer extends Plugin {
      */
     public async load(ruvyrias: Ruvyrias) {
         this.ruvyrias = ruvyrias;
-        this._resolve = ruvyrias.resolve.bind(ruvyrias);
+        this.originalResolve = ruvyrias.resolve.bind(ruvyrias);
         ruvyrias.resolve = this.resolve.bind(this) as never;
     }
 
@@ -182,7 +182,7 @@ export class Deezer extends Plugin {
                 return this.getArtist(id, requester)
             }
             default: {
-                return this._resolve({ query, source: source ?? this.ruvyrias?.options.defaultPlatform, requester: requester })
+                return this.originalResolve({ query, source: source ?? this.ruvyrias?.options.defaultPlatform, requester: requester })
             }
         }
     }

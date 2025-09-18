@@ -1,14 +1,14 @@
-import { Node, NodeStats } from './Node/Node';
-import { Player, TrackEndEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from './Player/Player';
-import { EventEmitter } from 'events';
-import { Config } from './Config';
-import { LoadTrackResponse, Response } from './Guild/Response';
-import { Plugin } from './Plugin';
-import { Track, TrackData } from './Guild/Track';
-import { Deezer } from '../plugins/deezer';
-import { Spotify } from '../plugins/spotify';
+import { Player, TrackEndEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from './Player';
+import { IVoiceServer, SetStateUpdate } from './Connection';
+import { LoadTrackResponse, Response } from './Response';
 import { AppleMusic } from '../plugins/applemusic';
-import { IVoiceServer, SetStateUpdate } from './Player/Connection';
+import { Spotify } from '../plugins/spotify';
+import { Deezer } from '../plugins/deezer';
+import { Track, TrackData } from './Track';
+import { Node, NodeStats } from './Node';
+import { EventEmitter } from 'events';
+import { version } from '../index';
+import { Plugin } from './Plugin';
 
 /**
  * @extends EventEmitter The main class of Ruvyrias
@@ -54,7 +54,7 @@ export interface PacketVoiceStateUpdate {
     /** The data payload containing the state update. */
     d: SetStateUpdate;
     /** The type identifier for this packet. */
-    t: "VOICE_STATE_UPDATE";
+    t: 'VOICE_STATE_UPDATE';
 }
 
 /**
@@ -66,7 +66,7 @@ export interface PacketVoiceServerUpdate {
     /** The data payload containing the voice server information. */
     d: IVoiceServer;
     /** The type identifier for this packet. */
-    t: "VOICE_SERVER_UPDATE";
+    t: 'VOICE_SERVER_UPDATE';
 }
 
 /**
@@ -120,14 +120,10 @@ export interface RuvyriasOptions {
     reconnectTimeout?: number | null;
     /** Number of reconnection attempts allowed before giving up. */
     reconnectTries?: number | null;
-    /** The name of the client using Ruvyrias. */
-    clientName?: string;
     /** The client ID associated with the Ruvyrias instance. */
     clientId?: string | null;
-    /** The version number of the client using Ruvyrias. */
-    clientVersion?: number;
     /** Indicates whether the Ruvyrias instance is activated or not. */
-    isActivated?: boolean;
+    isInitialized?: boolean;
     /** A function used for sending packets to the communication library. */
     send?: Function | null;
 }
@@ -224,6 +220,18 @@ export interface RuvyriasEvents {
     nodeDisconnect: (node: Node, event?: unknown) => void;
 
     /**
+     * Emitted when a Lavalink node is created in Ruvyrias.
+     * @param {Node} node - The created Lavalink node.
+     */
+    nodeCreate: (node: Node) => void;
+
+    /**
+     * Emitted when a Lavalink node is destroyed from Ruvyrias.
+     * @param {Node} node - The destroyed Lavalink node.
+     */
+    nodeDestroy: (node: Node) => void;
+
+    /**
      * Emitted when Ruvyrias attempts to reconnect with a disconnected Lavalink node.
      * @param {Node} node - The Lavalink node being reconnected to.
      */
@@ -298,37 +306,9 @@ export interface RuvyriasEvents {
  * This interface defines methods for event handling.
  */
 export interface Ruvyrias {
-    /**
-     * Adds a listener function to the specified event.
-     * @param {K} event - The event name.
-     * @param {RuvyriasEvents[K]} listener - The listener function to be called when the event is emitted.
-     * @returns {this} - The Ruvyrias instance.
-     */
     on<K extends keyof RuvyriasEvents>(event: K, listener: RuvyriasEvents[K]): this;
-
-    /**
-     * Adds a one-time listener function to the specified event.
-     * The listener will be removed after it is invoked once.
-     * @param {K} event - The event name.
-     * @param {RuvyriasEvents[K]} listener - The listener function to be called when the event is emitted.
-     * @returns {this} - The Ruvyrias instance.
-     */
     once<K extends keyof RuvyriasEvents>(event: K, listener: RuvyriasEvents[K]): this;
-
-    /**
-     * Emits the specified event with the provided arguments.
-     * @param {K} event - The event name to emit.
-     * @param {...Parameters<RuvyriasEvents[K]>} args - The arguments to pass to the event listeners.
-     * @returns {boolean} - Returns true if event had listeners, false otherwise.
-     */
     emit<K extends keyof RuvyriasEvents>(event: K, ...args: Parameters<RuvyriasEvents[K]>): boolean;
-
-    /**
-     * Removes the specified listener from the event.
-     * @param {K} event - The event name.
-     * @param {RuvyriasEvents[K]} listener - The listener function to remove.
-     * @returns {this} - The Ruvyrias instance.
-     */
     off<K extends keyof RuvyriasEvents>(event: K, listener: RuvyriasEvents[K]): this;
 }
 
@@ -337,9 +317,9 @@ export interface Ruvyrias {
  */
 export class Ruvyrias extends EventEmitter {
     public readonly client: any;
-    private readonly _nodes: NodeGroup[];
+    private readonly nodes: NodeGroup[];
     public options: RuvyriasOptions;
-    public nodes: Map<string, Node>;
+    public nodesMap: Map<string, Node>;
     public players: Map<string, Player>;
     public send: Function | null;
 
@@ -350,23 +330,15 @@ export class Ruvyrias extends EventEmitter {
      * @param {RuvyriasOptions} options RuvyriasOptions
      * @returns Ruvyrias
      */
-    constructor(client: any, nodes: NodeGroup[], options: Omit<RuvyriasOptions,
-        'clientName'
-        | 'clientId'
-        | 'clientVersion'
-        | 'isActivated'
-        | 'resumeTimeout'>
-    ) {
+    constructor(client: any, nodes: NodeGroup[], options: Omit<RuvyriasOptions, 'clientId' | 'isInitialized' | 'resumeTimeout'>) {
         super();
         this.client = client;
-        this._nodes = nodes;
-        this.nodes = new Map();
+        this.nodes = nodes;
+        this.nodesMap = new Map();
         this.players = new Map();
         this.options = {
-            clientName: Config.clientName as string,
-            clientVersion: Config.clientVersion as number,
             clientId: null,
-            isActivated: false,
+            isInitialized: false,
             ...options
         };
         this.send = null;
@@ -378,12 +350,18 @@ export class Ruvyrias extends EventEmitter {
      * @returns {Promise<this>} - The current Ruvyrias instance.
      */
     public async init(client: any): Promise<this> {
-        if (this.options.isActivated) return this;
+        if (this.options.isInitialized) return this;
+        this.options.isInitialized = true;
         this.options.clientId = client.user?.id as string;
-        this._nodes.forEach(async (node) => await this.addNode(node));
-        this.options.isActivated = true;
+        this.nodes.forEach(async (node) => await this.createNode(node));
+
+        this.emit('debug', `Ruvyrias -> Initialized with clientId(${this.options.clientId}), ready to go!`);
+        this.emit('debug', `Ruvyrias -> Version: ${version}.`);
+        this.emit('debug', `Ruvyrias -> Connected nodes: ${this.nodes.length}.`);
 
         if (this.options.plugins) {
+            this.emit('debug', `Ruvyrias -> Plugins loaded: ${this.options.plugins.length}.`);
+
             this.options.plugins.forEach((plugin) => {
                 plugin.load(this);
             });
@@ -456,10 +434,12 @@ export class Ruvyrias extends EventEmitter {
      * @param {NodeGroup} options - NodeGroup containing node configuration.
      * @returns {Promise<Node>} - The created Node instance.
      */
-    public async addNode(options: NodeGroup): Promise<Node> {
+    public async createNode(options: NodeGroup): Promise<Node> {
         const node = new Node(this, options, this.options);
-        this.nodes.set(options.name, node);
+        this.nodesMap.set(options.name, node);
         await node.connect();
+
+        this.emit('nodeCreate', node);
         return node;
     }
 
@@ -468,14 +448,16 @@ export class Ruvyrias extends EventEmitter {
      * @param {string} identifier - Node name.
      * @returns {Promise<boolean>} Whether the node was successfully removed.
      */
-    public async removeNode(identifier: string): Promise<boolean> {
-        const node = this.nodes.get(identifier);
+    public async destroyNode(identifier: string): Promise<boolean> {
+        const node = this.nodesMap.get(identifier);
         if (!node) {
             throw new Error('The node identifier you specified doesn\'t exist');
         }
 
         await node.disconnect();
-        this.nodes.delete(identifier);
+        this.nodesMap.delete(identifier);
+
+        this.emit('nodeDestroy', node);
         return true;
     }
 
@@ -485,7 +467,7 @@ export class Ruvyrias extends EventEmitter {
      * @returns {Node[]} An array of Node instances.
      */
     public getNodeByRegion(region: string): Node[] {
-        return [...this.nodes.values()]
+        return [...this.nodesMap.values()]
             .filter(
                 (node) =>
                     node.extras.isConnected && node.options.region?.includes(region?.toLowerCase())
@@ -507,15 +489,15 @@ export class Ruvyrias extends EventEmitter {
      * @returns {Node | Node[]} A Node instance or an array of Node instances.
      */
     public async getNode(identifier: string = 'auto'): Promise<Node | Node[]> {
-        if (!this.nodes.size) {
-            throw new Error('[Ruvyrias Error] No nodes available currently');
+        if (!this.nodesMap.size) {
+            throw new Error('There are no available nodes currently.');
         }
 
         if (identifier === 'auto') return this.leastUsedNodes;
 
-        const node = this.nodes.get(identifier);
+        const node = this.nodesMap.get(identifier);
         if (!node) {
-            throw new Error('[Ruvyrias Error] The node identifier you specified doesn\'t exist');
+            throw new Error('The node identifier you specified doesn\'t exist');
         }
 
         if (!node.extras.isConnected) await node.connect();
@@ -528,28 +510,28 @@ export class Ruvyrias extends EventEmitter {
      * @returns {Player} The created or existing Player instance for the specified guild.
      */
     public createConnection(options: ConnectionOptions): Player {
-        if (!this.options.isActivated) {
-            throw new Error('[Ruvyrias Error] Ruvyrias must be initialized in your ready event.');
+        if (!this.options.isInitialized) {
+            throw new Error('Ruvyrias must be initialized in your ready event.');
         }
 
         const player = this.players.get(options.guildId);
         if (player) return player;
 
         if (this.leastUsedNodes.length === 0) {
-            throw new Error('[Ruvyrias Error] No nodes are available.');
+            throw new Error('There are no available nodes currently.');
         }
 
         let node: Node;
 
         if (options.region) {
             const regionNode = this.getNodeByRegion(options.region)[0];
-            node = this.nodes.get(regionNode.options?.name ?? this.leastUsedNodes[0].options?.name) as Node;
+            node = this.nodesMap.get(regionNode.options?.name ?? this.leastUsedNodes[0].options?.name) as Node;
         } else {
-            node = this.nodes.get(this.leastUsedNodes[0]?.options?.name) as Node;
+            node = this.nodesMap.get(this.leastUsedNodes[0]?.options?.name) as Node;
         }
 
         if (!node) {
-            throw new Error('[Ruvyrias Error] No nodes are available.');
+            throw new Error('There are no available nodes currently.');
         }
 
         return this.createPlayer(node, options);
@@ -567,7 +549,7 @@ export class Ruvyrias extends EventEmitter {
         this.players.set(options.guildId, player);
         player.connect(options);
         this.emit('playerCreate', player);
-        this.emit('debug', options.guildId, '[Ruvyrias Player] Created a new player.');
+        this.emit('debug', options.guildId, 'Ruvyrias -> Player -> Player has been successfully created.');
 
         return player;
     }
@@ -582,7 +564,7 @@ export class Ruvyrias extends EventEmitter {
         if (!player) return null;
 
         this.emit('playerDestroy', player);
-        this.emit('debug', guildId, '[Ruvyrias Player] Destroyed the player.');
+        this.emit('debug', guildId, 'Ruvyrias -> Player -> Player has been successfully destroyed.');
         this.players.delete(guildId);
 
         return true;
@@ -603,7 +585,7 @@ export class Ruvyrias extends EventEmitter {
      * @returns {Node[]} An array of least used nodes.
      */
     public get leastUsedNodes(): Node[] {
-        return [...this.nodes.values()]
+        return [...this.nodesMap.values()]
             .filter((node) => node.extras.isConnected)
             .sort((a, b) => a.penalties - b.penalties);
     }
@@ -615,12 +597,12 @@ export class Ruvyrias extends EventEmitter {
      * @returns {Promise<Response>} A promise that resolves to a Response object containing information about the resolved track.
      */
     public async resolve({ query, source, requester }: ResolveOptions, node?: Node): Promise<Response> {
-        if (!this.options.isActivated) {
-            throw new Error('[Ruvyrias Error] Ruvyrias must be initialized in your ready event.');
+        if (!this.options.isInitialized) {
+            throw new Error('Ruvyrias must be initialized in your ready event.');
         }
 
         if (this.leastUsedNodes.length === 0) {
-            throw new Error('[Ruvyrias Error] No nodes are available.');
+            throw new Error('There are no available nodes currently.');
         }
 
         node = node ?? this.leastUsedNodes[0];
@@ -660,9 +642,9 @@ export class Ruvyrias extends EventEmitter {
      * @returns {NodeInfoResponse} Useful information about the node.
      */
     public async getLavalinkInfo(name: string): Promise<NodeInfoResponse> {
-        const node = this.nodes.get(name);
+        const node = this.nodesMap.get(name);
         if (!node) {
-            throw new Error('[Ruvyrias Error] Node not found!');
+            throw new Error('Node not found!');
         }
 
         return await node.rest.get(`/v4/info`) as NodeInfoResponse;
@@ -674,9 +656,9 @@ export class Ruvyrias extends EventEmitter {
      * @returns {NodeStatsResponse} The stats from the node
      */
     public async getLavalinkStatus(name: string): Promise<NodeStatsResponse> {
-        const node = this.nodes.get(name);
+        const node = this.nodesMap.get(name);
         if (!node) {
-            throw new Error('[Ruvyrias Error] Node not found!');
+            throw new Error('Node not found!');
         }
 
         return await node.rest.get(`/v4/stats`) as NodeStatsResponse;
@@ -688,9 +670,9 @@ export class Ruvyrias extends EventEmitter {
     * @returns {Promise<string>} The version of the node
     */
     public async getLavalinkVersion(name: string): Promise<string> {
-        const node = this.nodes.get(name)
+        const node = this.nodesMap.get(name)
         if (!node) {
-            throw new Error('[Ruvyrias Error] Node not found!');
+            throw new Error('Node not found!');
         }
 
         return await node.rest.get(`/version`) as string;

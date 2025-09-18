@@ -1,5 +1,5 @@
 import { Ruvyrias, ResolveOptions } from '../../src/Ruvyrias';
-import { Track } from '../../src/Guild/Track';
+import { Track } from '../../src/Track';
 import { Plugin } from '../../src/Plugin';
 import { SpotifyManager } from './SpotifyManager';
 import cheerio from 'cheerio';
@@ -250,7 +250,7 @@ export class Spotify extends Plugin {
     private baseURL: string = 'https://api.spotify.com/v1';
     public ruvyrias: Ruvyrias;
     public options: SpotifyOptions;
-    private _resolve!: ({ query, source, requester }: ResolveOptions) => any;
+    private originalResolve!: ({ query, source, requester }: ResolveOptions) => any;
     public spotifyManager: SpotifyManager;
 
     public constructor(options: Omit<SpotifyOptions, 'authorization' | 'interval' | 'token'>) {
@@ -274,7 +274,7 @@ export class Spotify extends Plugin {
      */
     public async load(ruvyrias: Ruvyrias) {
         this.ruvyrias = ruvyrias;
-        this._resolve = ruvyrias.resolve.bind(ruvyrias);
+        this.originalResolve = ruvyrias.resolve.bind(ruvyrias);
         ruvyrias.resolve = this.resolve.bind(this);
     }
 
@@ -344,7 +344,7 @@ export class Spotify extends Plugin {
                 return this.fetchArtist(id, requester);
             }
             default: {
-                return this._resolve({
+                return this.originalResolve({
                     query,
                     source: source ?? this.ruvyrias.options.defaultPlatform,
                     requester: requester,
