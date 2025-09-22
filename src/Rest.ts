@@ -1,92 +1,30 @@
-import { NodeInfoResponse, NodeStatsResponse, Ruvyrias } from './Ruvyrias';
-import { LoadTrackResponse, LoadType } from './/Response';
-import { IVoiceServer } from './Connection';
-import { FiltersOptions } from './Filters';
-import { Node } from './Node';
+import { ErrorResponses, PlayOptions, RouteLike, RestMethodGet, RequestMethod } from '../types';
+import { Ruvyrias } from './Ruvyrias';
 import { Player } from './Player';
 import { Track } from './Track';
-
-/**
- * This interface represents the LavaLink V4 Error Responses
- * @reference https://lavalink.dev/api/rest.html#error-responses
- */
-export interface ErrorResponses {
-    timestamp: number;
-    status: number;
-    error: string;
-    trace?: string;
-    message: string;
-    path: string;
-}
-
-/**
- * Represents the options for playing audio in a guild.
- */
-export interface PlayOptions {
-    guildId: string;
-    data: {
-        track?: {
-            encoded?: string | null;
-            identifier?: string;
-            userData?: object;
-            requester?: any;
-        };
-        identifier?: string;
-        startTime?: number;
-        endTime?: number;
-        volume?: number;
-        position?: number;
-        paused?: boolean;
-        filters?: Partial<FiltersOptions>;
-        voice?: IVoiceServer | PartialNull<IVoiceServer> | null;
-    };
-}
-
-/** Represents a route path string in the format `/${string}`. */
-export type RouteLike = `/${string}`;
-
-/** Represents a partial type with nullable properties. */
-export type PartialNull<T> = { [P in keyof T]: T[P] | null };
-
-/** Represents a type that can be used for HTTP GET methods with various response types. */
-export type RestMethodGet =
-    | LoadType
-    | Track
-    | Player
-    | NodeInfoResponse
-    | LoadTrackResponse
-    | NodeStatsResponse
-    | Player[];
-
-/** Represents the HTTP request method types. */
-export enum RequestMethod {
-    'Get' = 'GET',
-    'Delete' = 'DELETE',
-    'Post' = 'POST',
-    'Patch' = 'PATCH',
-    'Put' = 'PUT',
-}
+import { Node } from './Node';
 
 /**
  * Provides a RESTful interface for making HTTP requests to interact with the Lavalink server.
  * This class facilitates actions such as retrieving player information, updating player settings, and managing tracks.
  */
 export class Rest {
-    public ruvyrias: Ruvyrias;
-    public url: string;
-    private password: string;
+    public readonly ruvyrias: Ruvyrias;
+    public readonly url: string;
+    private readonly password: string;
     public sessionId: string | null;
 
     constructor(ruvyrias: Ruvyrias, node: Node) {
         this.ruvyrias = ruvyrias;
         this.url = `http${node.options.secure ? 's' : ''}://${node.options.host}:${node.options.port}`;
-        this.password = node.options.password;
+        this.password = node.options.auth;
         this.sessionId = null;
     }
 
     /**
-     * Sets the session ID for the REST instance.
-     * @param {string} sessionId - The session ID to set.
+     * Sets the session ID for the REST instance, used in subsequent requests.
+     *
+     * @param {string} sessionId - The session ID to assign to this REST instance.
      * @returns {void}
      */
     public setSessionId(sessionId: string): void {
@@ -94,35 +32,42 @@ export class Rest {
     }
 
     /**
-     * Gets information about all players in the session.
-     * @returns {Promise<Player[] | ErrorResponses | null>} A Promise that resolves to the information about all players.
+     * Retrieves information about all players in the current session.
+     *
+     * @returns {Promise<Player[] | ErrorResponses | null>} A Promise resolving to an array of players,
+     * an error response, or null if no players exist.
      */
     public async getAllPlayers(): Promise<Player[] | ErrorResponses | null> {
         return await this.get(`/v4/sessions/${this.sessionId}/players`) as Player[];
     }
 
     /**
-     * Updates a player with the specified options.
-     * @param {PlayOptions} options - The options to update the player.
-     * @returns {Promise<Player | ErrorResponses | null>} A Promise that resolves when the player is updated.
+     * Updates a player with the provided options.
+     *
+     * @param {PlayOptions} options - Options including guildId and data to update the player.
+     * @returns {Promise<Player | ErrorResponses | null>} A Promise resolving to the updated player, 
+     * an error response, or null if the update failed.
      */
     public async updatePlayer(options: PlayOptions): Promise<Player | ErrorResponses | null> {
         return await this.patch(`/v4/sessions/${this.sessionId}/players/${options.guildId}?noReplace=false`, options.data) as Player;
     }
 
     /**
-    * Destroys a player for the specified guild.
-    * @param {string} guildId - The ID of the guild for which to destroy the player.
-    * @returns {Promise<null>} A Promise that resolves when the player is destroyed.
-    */
-    public async destroyPlayer(guildId: string): Promise<null> {
+     * Destroys the player associated with the specified guild ID.
+     *
+     * @param {string} guildId - The ID of the guild whose player should be destroyed.
+     * @returns {Promise<null>} A Promise that resolves once the player is removed.
+     */
+    public async deletePlayer(guildId: string): Promise<null> {
         return await this.delete(`/v4/sessions/${this.sessionId}/players/${guildId}`);
     }
 
     /**
-     * Performs an HTTP GET request to the specified path.
-     * @param {RouteLike} path - The path to make the GET request.
-     * @returns {Promise<RestMethodGet | null>} A Promise that resolves with the response data.
+     * Performs an HTTP GET request to the given path.
+     *
+     * @param {RouteLike} path - The endpoint path for the GET request.
+     * @returns {Promise<RestMethodGet | null>} A Promise resolving with the server response data
+     * or null if the request fails.
      */
     public async get(path: RouteLike): Promise<RestMethodGet | null> {
         try {
@@ -140,10 +85,11 @@ export class Rest {
     }
 
     /**
-     * Performs an HTTP PATCH request to the specified endpoint with the provided body.
-     * @param {RouteLike} endpoint - The endpoint to make the PATCH request.
-     * @param {any} body - The data to include in the PATCH request body.
-     * @returns {Promise<Player | null>} A Promise that resolves with the response data.
+     * Performs an HTTP PATCH request to the given endpoint with the provided data.
+     *
+     * @param {RouteLike} endpoint - The endpoint to patch.
+     * @param {any} body - The data to send in the PATCH request.
+     * @returns {Promise<Player | null>} A Promise resolving to the updated player or null if the request fails.
      */
     public async patch(endpoint: RouteLike, body: any): Promise<Player | null> {
         try {
@@ -163,10 +109,11 @@ export class Rest {
     }
 
     /**
-     * Performs an HTTP POST request to the specified endpoint with the provided body.
-     * @param {RouteLike} endpoint - The endpoint to make the POST request.
+     * Performs an HTTP POST request to the given endpoint with the provided data.
+     *
+     * @param {RouteLike} endpoint - The endpoint to send the POST request to.
      * @param {any} body - The data to include in the POST request body.
-     * @returns {Promise<Track[] | null>} A Promise that resolves with the response data.
+     * @returns {Promise<Track[] | null>} A Promise resolving to an array of tracks or null if the request fails.
      */
     public async post(endpoint: RouteLike, body: any): Promise<Track[] | null> {
         try {
@@ -186,9 +133,10 @@ export class Rest {
     }
 
     /**
-     * Performs an HTTP DELETE request to the specified endpoint.
-     * @param {RouteLike} endpoint - The endpoint to make the DELETE request.
-     * @returns {Promise<null>} A Promise that resolves with the response data.
+     * Performs an HTTP DELETE request to the given endpoint.
+     *
+     * @param {RouteLike} endpoint - The endpoint to send the DELETE request to.
+     * @returns {Promise<null>} A Promise that resolves once the deletion is complete, or null on failure.
      */
     public async delete(endpoint: RouteLike): Promise<null> {
         try {
@@ -207,17 +155,19 @@ export class Rest {
     }
 
     /**
-     * This function will get the RoutePlanner status
-     * @returns {Promise<unknown>}
+     * Retrieves the status of the Lavalink RoutePlanner.
+     *
+     * @returns {Promise<unknown>} A Promise resolving with the route planner status information.
      */
     public async getRoutePlannerStatus(): Promise<unknown> {
         return await this.get(`/v4/routeplanner/status`);
     }
 
     /**
-     * This function will Unmark a failed address
-     * @param {string} address The address to unmark as failed. This address must be in the same ip block.
-     * @returns {ErrorResponses | unknown} This function will most likely error if you havn't enabled the route planner
+     * Unmarks a failed IP address in the RoutePlanner, freeing it for use.
+     *
+     * @param {string} address - The address to unmark as failed (must be in the same IP block).
+     * @returns {Promise<ErrorResponses | unknown>} A Promise resolving with the response or an error if the route planner is not enabled.
      */
     public async unmarkFailedAddress(address: string): Promise<ErrorResponses | unknown> {
         return this.post(`/v4/routeplanner/free/address`, { address });

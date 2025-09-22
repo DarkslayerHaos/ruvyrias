@@ -1,5 +1,6 @@
+import { SpotifyOptions } from '../../types/Spotify';
 import { RestManager } from './RestManager';
-import { SpotifyOptions } from './Spotify';
+
 
 const errorMessage: string = '[Ruvyrias Spotify] your all spotify clientID are ratelimited try to add more clientID due to you have high usage'
 
@@ -19,7 +20,7 @@ export class SpotifyManager {
             for (const client of data.clients) this.manager?.push(new RestManager(client));
             this.mode = 'multiple';
         } else {
-            this.manager.push(new RestManager({ clientID: data.clientID, clientSecret: data.clientSecret }));
+            this.manager.push(new RestManager({ clientId: data.clientId, clientSecret: data.clientSecret }));
         }
     }
 

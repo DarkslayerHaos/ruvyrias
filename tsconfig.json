@@ -4,7 +4,7 @@
             "ESNext"
         ],
         "module": "commonjs",
-        "moduleResolution": "node",
+        "moduleResolution": "node10",
         "target": "ESNext",
         "outDir": "./dist",
         "sourceMap": false,

@@ -1,305 +1,23 @@
-import { Player, TrackEndEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from './Player';
-import { IVoiceServer, SetStateUpdate } from './Connection';
-import { LoadTrackResponse, Response } from './Response';
-import { AppleMusic } from '../plugins/applemusic';
-import { Spotify } from '../plugins/spotify';
-import { Deezer } from '../plugins/deezer';
-import { Track, TrackData } from './Track';
-import { Node, NodeStats } from './Node';
+import { LoadTrackResponse } from '../types';
+import { Response } from './Response';
 import { EventEmitter } from 'events';
+import { TrackData } from '../types';
+import { NodeGroup } from '../types';
 import { version } from '../index';
-import { Plugin } from './Plugin';
-
-/**
- * @extends EventEmitter The main class of Ruvyrias
- */
-export type Constructor<T> = new (...args: any[]) => T;
-
-/**
- * Exporting the plugins to the Ruvyrias class.
- */
-export { Deezer, Spotify, AppleMusic };
-
-/**
- * Configuration for a group of nodes in Ruvyrias.
- */
-export interface NodeGroup {
-    /** The name identifier for the node group. */
-    name: string;
-    /** The host address of the Lavalink node. */
-    host: string;
-    /** The port number on which the Lavalink node is running. */
-    port: number;
-    /** The password used for authentication with the Lavalink node. */
-    password: string;
-    /** Whether to automatically resume playback after a node disconnect. */
-    resume?: boolean;
-    /** Whether to use a secure connection (HTTPS) with the Lavalink node. */
-    secure?: boolean;
-    /** An array of region identifiers supported by the node for voice connections. */
-    region?: string[] | null;
-}
-
-/**
- * Represents a packet sent over a communication channel, which can be one of several types.
- */
-export type Packet = PacketVoiceStateUpdate | PacketVoiceServerUpdate | AnyOtherPacket;
-
-/**
- * Represents a packet containing an update to the voice state.
- */
-export interface PacketVoiceStateUpdate {
-    /** The opcode for this packet type. */
-    op: number;
-    /** The data payload containing the state update. */
-    d: SetStateUpdate;
-    /** The type identifier for this packet. */
-    t: 'VOICE_STATE_UPDATE';
-}
-
-/**
- * Represents a packet containing an update to the voice server information.
- */
-export interface PacketVoiceServerUpdate {
-    /** The opcode for this packet type. */
-    op: number;
-    /** The data payload containing the voice server information. */
-    d: IVoiceServer;
-    /** The type identifier for this packet. */
-    t: 'VOICE_SERVER_UPDATE';
-}
-
-/**
- * Represents a packet of any other type not explicitly defined.
- */
-export interface AnyOtherPacket {
-    /** The opcode for this packet type. */
-    op: number;
-    /** The data payload containing arbitrary information. */
-    d: any;
-    /** The type identifier for this packet. */
-    t: string;
-}
-
-/**
- * Options for resolving a track in Ruvyrias.
- */
-export interface ResolveOptions {
-    /** The query used to search for a track, e.g., a search term or track URL. */
-    query: string;
-    /** The source platform for the track resolution, if specified. */
-    source?: SupportedPlatforms | (string & {});
-    /** The entity making the request for track resolution. */
-    requester?: any;
-}
-
-/**
- * Supported communication libraries for Ruvyrias.
- */
-export type SupportedLibraries = 'discord.js' | 'eris' | 'oceanic' | 'other';
-/**
- * Supported platforms for resolving tracks in Ruvyrias.
- */
-export type SupportedPlatforms = 'spsearch' | 'dzsearch' | 'amsearch' | 'scsearch' | 'ytsearch' | 'ytmsearch' | 'ymsearch';
-
-/**
- * Options for configuring the Ruvyrias instance.
- */
-export interface RuvyriasOptions {
-    /** An array of plugins to be used with Ruvyrias. */
-    plugins?: Plugin[];
-    /** Whether to automatically resume playback after a disconnect. */
-    autoResume?: boolean;
-    /** The library used for communication (e.g., 'discord.js', 'eris', etc.). */
-    library: SupportedLibraries;
-    /** The default platform for resolving tracks if not specified. */
-    defaultPlatform?: SupportedPlatforms;
-    /** Timeout duration in milliseconds for automatic resuming of playback. */
-    resumeTimeout?: number;
-    /** Timeout duration in milliseconds for attempting reconnection to nodes. */
-    reconnectTimeout?: number | null;
-    /** Number of reconnection attempts allowed before giving up. */
-    reconnectTries?: number | null;
-    /** The client ID associated with the Ruvyrias instance. */
-    clientId?: string | null;
-    /** Indicates whether the Ruvyrias instance is activated or not. */
-    isInitialized?: boolean;
-    /** A function used for sending packets to the communication library. */
-    send?: Function | null;
-}
-
-/**
- * Options for establishing a voice connection in Ruvyrias.
- */
-export interface ConnectionOptions {
-    /** The unique identifier of the guild (server) where the connection is established. */
-    guildId: string;
-    /** The ID of the voice channel to connect to. Can be `null` if disconnecting. */
-    voiceChannel: string | null;
-    /** The ID of the text channel associated with the voice connection. Can be `null` if not applicable. */
-    textChannel: string | null;
-    /** Indicates whether the bot should join the voice channel as deafened. */
-    deaf?: boolean;
-    /** Indicates whether the bot should join the voice channel as muted. */
-    mute?: boolean;
-    /** The preferred region for the voice connection. */
-    region?: string;
-}
-
-/**
- * Represents the response structure for retrieving information about a Lavalink node.
- */
-export interface NodeInfoResponse {
-    /** Information about the Lavalink version. */
-    version: {
-        semver: string;
-        major: number;
-        minor: number;
-        patch: number;
-        /** Optional pre-release version. */
-        preRelease?: string;
-        /** Optional build version. */
-        build?: string;
-    };
-    /** The build time of the Lavalink node. */
-    buildTime: number;
-    /** Git-related information. */
-    git: {
-        /** The Git branch. */
-        branch: string;
-        /** The Git commit hash. */
-        commit: string;
-        /** The timestamp of the Git commit. */
-        commitTime: string;
-    };
-    /** Information about the Java Virtual Machine (JVM) used by the Lavalink node. */
-    jvm: string;
-    /** The version of the Lavaplayer library used by the Lavalink node. */
-    lavaplayer: string;
-    /** List of source managers supported by the Lavalink node. */
-    sourceManagers: string[];
-    /** List of available audio filters. */
-    filters: string[];
-    /** List of installed plugins with their names and versions. */
-    plugins: { name: string; version: string; }[];
-}
-
-/**
- * Represents a subset of Lavalink node statistics response, excluding frame statistics.
- */
-export type NodeStatsResponse = Omit<NodeStats, 'frameStats'>;
-
-/**
- * Represents the events emitted by Ruvyrias.
- */
-export interface RuvyriasEvents {
-    /**
-     * Emitted when data useful for debugging is produced.
-     * @param {...any} args - The arguments emitted with the event.
-     */
-    debug: (...args: any[]) => void;
-
-    /**
-     * Emitted when a response is received.
-     * @param {string} topic - The section from which the event originates.
-     * @param {...unknown} args - The arguments emitted with the event.
-     */
-    raw: (topic: string, ...args: unknown[]) => void;
-
-    /**
-     * Emitted when a Lavalink node is connected to Ruvyrias.
-     * @param {Node} node - The connected Lavalink node.
-     */
-    nodeConnect: (node: Node) => void;
-
-    /**
-     * Emitted when a Lavalink node is disconnected from Ruvyrias.
-     * @param {Node} node - The disconnected Lavalink node.
-     * @param {unknown} [event] - Additional event data.
-     */
-    nodeDisconnect: (node: Node, event?: unknown) => void;
-
-    /**
-     * Emitted when a Lavalink node is created in Ruvyrias.
-     * @param {Node} node - The created Lavalink node.
-     */
-    nodeCreate: (node: Node) => void;
-
-    /**
-     * Emitted when a Lavalink node is destroyed from Ruvyrias.
-     * @param {Node} node - The destroyed Lavalink node.
-     */
-    nodeDestroy: (node: Node) => void;
-
-    /**
-     * Emitted when Ruvyrias attempts to reconnect with a disconnected Lavalink node.
-     * @param {Node} node - The Lavalink node being reconnected to.
-     */
-    nodeReconnect: (node: Node) => void;
-
-    /**
-     * Emitted when a Lavalink node encounters an error.
-     * @param {Node} node - The Lavalink node that encountered the error.
-     * @param {any} event - The error event.
-     */
-    nodeError: (node: Node, event: any) => void;
-
-    /**
-     * Emitted whenever a player starts playing a new track.
-     * @param {Player} player - The player instance.
-     * @param {Track} track - The track being played.
-     * @param {TrackStartEvent} data - Additional data related to the track start event.
-     */
-    trackStart: (player: Player, track: Track, data: TrackStartEvent) => void;
-
-    /**
-     * Emitted whenever a track ends.
-     * @param {Player} player - The player instance.
-     * @param {Track} track - The track that ended.
-     * @param {TrackEndEvent} data - Additional data related to the track end event.
-     */
-    trackEnd: (player: Player, track: Track, data: TrackEndEvent) => void;
-
-    /**
-     * Emitted when a player's queue is completed and going to disconnect.
-     * @param {Player} player - The player instance.
-     */
-    queueEnd: (player: Player) => void;
-
-    /**
-     * Emitted when a track gets stuck while playing.
-     * @param {Player} player - The player instance.
-     * @param {Track} track - The track that got stuck.
-     * @param {TrackStuckEvent} data - Additional data related to the track stuck event.
-     */
-    trackError: (player: Player, track: Track, data: TrackStuckEvent) => void;
-
-    /**
-     * Emitted when a player is updated.
-     * @param {Player} player - The player instance.
-     */
-    playerUpdate: (player: Player) => void;
-
-    /**
-     * Emitted when a player is created.
-     * @param {Player} player - The player instance.
-     */
-    playerCreate: (player: Player) => void;
-
-    /**
-     * Emitted when a player is destroyed.
-     * @param {Player} player - The player instance.
-     */
-    playerDestroy: (player: Player) => void;
-
-    /**
-     * Emitted when the websocket connection to Discord voice servers is closed.
-     * @param {Player} player - The player instance.
-     * @param {Track} track - The track being played.
-     * @param {WebSocketClosedEvent} data - Additional data related to the socket close event.
-     */
-    socketClose: (player: Player, track: Track, data: WebSocketClosedEvent) => void;
-}
+import { Player } from './Player';
+import { Track } from './Track';
+import { Node } from './Node';
+import {
+    RuvyriasOptions,
+    Packet,
+    NodeInfoResponse,
+    NodeStatsResponse,
+    ConnectionOptions,
+    ResolveOptions,
+    RuvyriasEvents,
+    RuvyriasEvent,
+    LibrariesType
+} from '../types/Ruvyrias';
 
 /**
  * Represents the Ruvyrias instance.
@@ -317,24 +35,24 @@ export interface Ruvyrias {
  */
 export class Ruvyrias extends EventEmitter {
     public readonly client: any;
-    private readonly nodes: NodeGroup[];
-    public options: RuvyriasOptions;
-    public nodesMap: Map<string, Node>;
-    public players: Map<string, Player>;
+    private readonly nodesMap: NodeGroup[];
+    public readonly options: RuvyriasOptions;
+    public readonly nodes: Map<string, Node>;
+    public readonly players: Map<string, Player>;
     public send: Function | null;
 
     /**
-     * This is the main class of Ruvyrias
-     * @param {any} client VoiceClient for Ruvyrias library to use to connect to lavalink node server (discord.js, eris, oceanic)
-     * @param {NodeGroup[]} nodes Node
-     * @param {RuvyriasOptions} options RuvyriasOptions
-     * @returns Ruvyrias
+     * Constructs the main Ruvyrias instance, initializing nodes and event handling.
+     *
+     * @param {any} client - The voice client used to connect to Lavalink (discord.js, eris, oceanic).
+     * @param {NodeGroup[]} nodes - Array of nodes to manage.
+     * @param {Omit<RuvyriasOptions, 'clientId' | 'isInitialized' | 'resumeTimeout'>} options - Configuration options.
      */
     constructor(client: any, nodes: NodeGroup[], options: Omit<RuvyriasOptions, 'clientId' | 'isInitialized' | 'resumeTimeout'>) {
         super();
         this.client = client;
-        this.nodes = nodes;
-        this.nodesMap = new Map();
+        this.nodesMap = nodes;
+        this.nodes = new Map();
         this.players = new Map();
         this.options = {
             clientId: null,
@@ -345,29 +63,31 @@ export class Ruvyrias extends EventEmitter {
     }
 
     /**
-     * Initializes the Ruvyrias instance with the specified VoiceClient.
-     * @param {any} client - VoiceClient for the Ruvyrias library to use to connect to the Lavalink node server (discord.js, eris, oceanic).
-     * @returns {Promise<this>} - The current Ruvyrias instance.
+     * Initializes the Ruvyrias instance with the provided voice client,
+     * connecting nodes and setting up event listeners.
+     *
+     * @param {any} client - The voice client used to connect to Lavalink.
+     * @returns {Promise<this>} The initialized Ruvyrias instance.
      */
     public async init(client: any): Promise<this> {
         if (this.options.isInitialized) return this;
         this.options.isInitialized = true;
         this.options.clientId = client.user?.id as string;
-        this.nodes.forEach(async (node) => await this.createNode(node));
+        this.nodesMap.forEach(async (node) => await this.addNode(node));
 
-        this.emit('debug', `Ruvyrias -> Initialized with clientId(${this.options.clientId}), ready to go!`);
-        this.emit('debug', `Ruvyrias -> Version: ${version}.`);
-        this.emit('debug', `Ruvyrias -> Connected nodes: ${this.nodes.length}.`);
+        this.emit(RuvyriasEvent.Debug, `Ruvyrias -> Initialized with clientId "${this.options.clientId}", ready to go!`);
+        this.emit(RuvyriasEvent.Debug, `Ruvyrias -> Version: ${version}.`);
+        this.emit(RuvyriasEvent.Debug, `Ruvyrias -> Connected nodes: ${this.nodesMap.length}.`);
 
         if (this.options.plugins) {
-            this.emit('debug', `Ruvyrias -> Plugins loaded: ${this.options.plugins.length}.`);
+            this.emit(RuvyriasEvent.Debug, `Ruvyrias -> Plugins loaded: ${this.options.plugins.length}.`);
 
             this.options.plugins.forEach((plugin) => {
                 plugin.load(this);
             });
         }
 
-        if (!this.options.library) this.options.library = 'discord.js';
+        if (!this.options.library) this.options.library = LibrariesType.DiscordJS;
 
         switch (this.options.library) {
             case 'discord.js': {
@@ -376,7 +96,7 @@ export class Ruvyrias extends EventEmitter {
                     if (guild) guild.shard?.send(packet);
                 };
 
-                client.on('raw', async (packet: Packet) => { await this.packetUpdate(packet); });
+                client.on('raw', async (packet: Packet) => { await this.handleVoicePacket(packet); });
                 break;
             }
             case 'eris': {
@@ -385,7 +105,7 @@ export class Ruvyrias extends EventEmitter {
                     if (guild) guild.shard.sendWS(packet?.op, packet?.d);
                 };
 
-                client.on('rawWS', async (packet: Packet) => { await this.packetUpdate(packet); });
+                client.on('rawWS', async (packet: Packet) => { await this.handleVoicePacket(packet); });
                 break;
             }
             case 'oceanic': {
@@ -394,7 +114,7 @@ export class Ruvyrias extends EventEmitter {
                     if (guild) guild.shard.send(packet?.op, packet?.d);
                 };
 
-                client.on('packet', async (packet: Packet) => { await this.packetUpdate(packet); });
+                client.on('packet', async (packet: Packet) => { await this.handleVoicePacket(packet); });
                 break;
             }
             case 'other': {
@@ -402,7 +122,7 @@ export class Ruvyrias extends EventEmitter {
                     throw new Error('Send function is required in Ruvyrias Options');
                 }
 
-                this.send = this.options.send ?? null;
+                this.send = this.options.sendPayload ?? null;
                 break;
             }
         }
@@ -411,66 +131,70 @@ export class Ruvyrias extends EventEmitter {
     }
 
     /**
-     * Handles Voice State Update and Voice Server Update packets from the Discord API.
-     * @param {Packet} packet Packet from Discord API.
-     * @returns {Promise<void>} 
+     * Handles voice-related packets from the client and updates the corresponding player connection.
+     *
+     * @param {Packet} packet - A packet received from the voice server.
+     * @returns {Promise<void>}
      */
-    public async packetUpdate(packet: Packet): Promise<void> {
+    public async handleVoicePacket(packet: Packet): Promise<void> {
         if (!['VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE'].includes(packet.t)) return;
         const player = this.players.get(packet.d.guild_id);
         if (!player) return;
 
         if (packet.t === 'VOICE_SERVER_UPDATE') {
-            await player.connection.setServersUpdate(packet.d);
+            await player.connection.updateVoiceServer(packet.d);
         }
         if (packet.t === 'VOICE_STATE_UPDATE') {
             if (packet.d.user_id !== this.options.clientId) return;
-            await player.connection.setStateUpdate(packet.d);
+            await player.connection.updateVoiceState(packet.d);
         }
     }
 
     /**
-     * Adds a node to the Ruvyrias instance.
-     * @param {NodeGroup} options - NodeGroup containing node configuration.
-     * @returns {Promise<Node>} - The created Node instance.
+     * Adds a new node to the Ruvyrias instance and connects it.
+     *
+     * @param {NodeGroup} options - Node configuration options.
+     * @returns {Promise<Node>} The created Node instance.
      */
-    public async createNode(options: NodeGroup): Promise<Node> {
+    public async addNode(options: NodeGroup): Promise<Node> {
         const node = new Node(this, options, this.options);
-        this.nodesMap.set(options.name, node);
+        this.nodes.set(options.name as string, node);
         await node.connect();
 
-        this.emit('nodeCreate', node);
+        this.emit(RuvyriasEvent.NodeCreate, node);
         return node;
     }
 
     /**
-     * Removes a node from the Ruvyrias instance.
-     * @param {string} identifier - Node name.
-     * @returns {Promise<boolean>} Whether the node was successfully removed.
+     * Removes a node from the Ruvyrias instance and disconnects it.
+     *
+     * @param {string} identifier - Name of the node to remove.
+     * @returns {Promise<boolean>} True if the node was successfully removed.
      */
-    public async destroyNode(identifier: string): Promise<boolean> {
-        const node = this.nodesMap.get(identifier);
+    public async removeNode(identifier: string): Promise<boolean> {
+        const node = this.nodes.get(identifier);
         if (!node) {
             throw new Error('The node identifier you specified doesn\'t exist');
         }
 
         await node.disconnect();
-        this.nodesMap.delete(identifier);
+        this.nodes.delete(identifier);
 
-        this.emit('nodeDestroy', node);
+        this.emit(RuvyriasEvent.NodeDestroy, node);
         return true;
     }
 
     /**
-     * Retrieves an array of nodes from the Ruvyrias instance based on the specified region.
-     * @param {string} region - Region of the node.
-     * @returns {Node[]} An array of Node instances.
+     * Retrieves nodes that match a specific region, sorted by system load.
+     *
+     * @param {string} region - The region to filter nodes.
+     * @returns {Node[]} An array of nodes in the specified region.
      */
-    public getNodeByRegion(region: string): Node[] {
-        return [...this.nodesMap.values()]
+    public getNodesByRegion(region: string): Node[] {
+        return [...this.nodes.values()]
             .filter(
                 (node) =>
-                    node.extras.isConnected && node.options.region?.includes(region?.toLowerCase())
+                    node.isConnected && node.options.region?.includes(region?.toLowerCase())
             )
             .sort((a, b) => {
                 const aLoad = a.stats?.cpu
@@ -484,32 +208,35 @@ export class Ruvyrias extends EventEmitter {
     }
 
     /**
-     * Retrieves a node or an array of nodes from the Ruvyrias instance based on the specified identifier.
-     * @param {string} identifier - Node name. If set to 'auto', it returns the least used nodes.
-     * @returns {Node | Node[]} A Node instance or an array of Node instances.
+     * Retrieves a node by name or the least used nodes when 'auto' is specified.
+     *
+     * @param {string} [identifier='auto'] - Node name or 'auto' to select least used.
+     * @returns {Promise<Node | Node[]>} A node instance or array of nodes.
      */
-    public async getNode(identifier: string = 'auto'): Promise<Node | Node[]> {
-        if (!this.nodesMap.size) {
+    public async fetchNode(identifier: string = 'auto'): Promise<Node | Node[]> {
+        if (!this.nodes.size) {
             throw new Error('There are no available nodes currently.');
         }
 
         if (identifier === 'auto') return this.leastUsedNodes;
 
-        const node = this.nodesMap.get(identifier);
+        const node = this.nodes.get(identifier);
         if (!node) {
             throw new Error('The node identifier you specified doesn\'t exist');
         }
 
-        if (!node.extras.isConnected) await node.connect();
+        if (!node.isConnected) await node.connect();
         return node;
     }
 
     /**
-     * Creates a player connection for the specified guild using the provided options.
-     * @param {ConnectionOptions} options - Options for creating the player connection.
-     * @returns {Player} The created or existing Player instance for the specified guild.
+     * Creates (or returns existing) a player for a specific guild.
+     *
+     * @param {ConnectionOptions} options - Options for player creation.
+     * @returns {Player} The created or existing player.
+     * @throws {Error} If Ruvyrias is not initialized or no nodes are available.
      */
-    public createConnection(options: ConnectionOptions): Player {
+    public createPlayer(options: ConnectionOptions): Player {
         if (!this.options.isInitialized) {
             throw new Error('Ruvyrias must be initialized in your ready event.');
         }
@@ -517,86 +244,98 @@ export class Ruvyrias extends EventEmitter {
         const player = this.players.get(options.guildId);
         if (player) return player;
 
-        if (this.leastUsedNodes.length === 0) {
-            throw new Error('There are no available nodes currently.');
-        }
-
-        let node: Node;
-
-        if (options.region) {
-            const regionNode = this.getNodeByRegion(options.region)[0];
-            node = this.nodesMap.get(regionNode.options?.name ?? this.leastUsedNodes[0].options?.name) as Node;
-        } else {
-            node = this.nodesMap.get(this.leastUsedNodes[0]?.options?.name) as Node;
-        }
+        const node = this.selectNode(options.region);
 
         if (!node) {
             throw new Error('There are no available nodes currently.');
         }
 
-        return this.createPlayer(node, options);
+        return this.instantiatePlayer(node, options);
     }
 
     /**
-     * Creates a player instance for the specified guild using the provided node and options.
+     * Selects a node based on region or least used nodes.
+     *
+     * @param {string} [region] - Optional region for node selection.
+     * @returns {Node | undefined} The selected node or undefined.
+     */
+    private selectNode(region?: string): Node | undefined {
+        if (!this.leastUsedNodes.length) return undefined;
+
+        if (region) {
+            const regionNode = this.getNodesByRegion(region)[0];
+            if (regionNode) {
+                return this.nodes.get(regionNode.options?.name ?? this.leastUsedNodes[0].options?.name as string);
+            }
+        }
+        return this.nodes.get(this.leastUsedNodes[0]?.options?.name as string);
+    }
+
+    /**
+     * Creates a player instance for a specific guild using a given node.
+     *
      * @param {Node} node - The node to associate with the player.
      * @param {ConnectionOptions} options - Options for creating the player.
-     * @returns {Player} The created Player instance.
+     * @returns {Player} The created player instance.
      */
-    private createPlayer(node: Node, options: ConnectionOptions): Player {
+    private instantiatePlayer(node: Node, options: ConnectionOptions): Player {
         const player = new Player(this, node, options);
 
         this.players.set(options.guildId, player);
-        player.connect(options);
-        this.emit('playerCreate', player);
-        this.emit('debug', options.guildId, 'Ruvyrias -> Player -> Player has been successfully created.');
+        player.joinVoiceChannel(options);
+        this.emit(RuvyriasEvent.PlayerCreate, player);
+        this.emit(RuvyriasEvent.Debug, options.guildId, 'Ruvyrias -> Player -> Player has been successfully created.');
 
         return player;
     }
 
     /**
-     * Destroys the player instance for the specified guild using the provided guild ID.
-     * @param {string} guildId - The ID of the guild associated with the player instance.
-     * @returns {boolean|null} A Promise that resolves with a boolean indicating success or null if no specific value is needed.
+     * Destroys the player associated with a guild.
+     *
+     * @param {string} guildId - The guild ID of the player to destroy.
+     * @returns {boolean | null} True if destroyed, null if no player existed.
      */
     public destroyPlayer(guildId: string): boolean | null {
         const player = this.players.get(guildId);
         if (!player) return null;
 
-        this.emit('playerDestroy', player);
-        this.emit('debug', guildId, 'Ruvyrias -> Player -> Player has been successfully destroyed.');
+        this.emit(RuvyriasEvent.PlayerDestroy, player);
+        this.emit(RuvyriasEvent.Debug, guildId, 'Ruvyrias -> Player -> Player has been successfully destroyed.');
         this.players.delete(guildId);
 
         return true;
     }
 
     /**
-     * Removes a player associated with the specified guild from Ruvyrias instance.
-     * @param {string} guildId - The ID of the guild for which to remove the player.
-     * @returns {Promise<boolean>} A promise that resolves to true if the player is successfully removed; otherwise, false.
+     * Removes a player's connection for a specific guild.
+     *
+     * @param {string} guildId - The guild ID of the player.
+     * @returns {Promise<boolean>} True if the connection was removed, false otherwise.
      */
-    public async removeConnection(guildId: string): Promise<boolean> {
+    public async disconnectPlayer(guildId: string): Promise<boolean> {
         this.players.delete(guildId);
         return await this.players.get(guildId)?.stop() ?? false;
     }
 
     /**
-     * Gets an array of least used nodes from the Ruvyrias instance.
-     * @returns {Node[]} An array of least used nodes.
+     * Returns nodes sorted by their current load, least used first.
+     *
+     * @returns {Node[]} Array of least used nodes.
      */
     public get leastUsedNodes(): Node[] {
-        return [...this.nodesMap.values()]
-            .filter((node) => node.extras.isConnected)
+        return [...this.nodes.values()]
+            .filter((node) => node.isConnected)
             .sort((a, b) => a.penalties - b.penalties);
     }
 
     /**
-     * Resolves a track using the specified options and node in Ruvyrias instance.
-     * @param {ResolveOptions} options - The options for resolving the track.
-     * @param {Node} [node] - The node to use for resolving the track. If not provided, the least used node will be used.
-     * @returns {Promise<Response>} A promise that resolves to a Response object containing information about the resolved track.
+     * Searches for tracks based on query and optional source using a specified or least used node.
+     *
+     * @param {ResolveOptions} options - Search options including query, source, and requester.
+     * @param {Node} [node] - Optional node to use for search.
+     * @returns {Promise<Response>} A Response object containing resolved track information.
      */
-    public async resolve({ query, source, requester }: ResolveOptions, node?: Node): Promise<Response> {
+    public async search({ query, source, requester }: ResolveOptions, node?: Node): Promise<Response> {
         if (!this.options.isInitialized) {
             throw new Error('Ruvyrias must be initialized in your ready event.');
         }
@@ -613,36 +352,39 @@ export class Ruvyrias extends EventEmitter {
     }
 
     /**
-     * Decode a track from Ruvyrias instance.
-     * @param {string} track - The encoded track.
-     * @param {Node} [node] - The node to decode the track on. If not provided, the least used node will be used.
-     * @returns {Promise<TrackData>} A promise that resolves to the decoded track.
+     * Decodes a single track string into track data using a specified or least used node.
+     *
+     * @param {string} track - The encoded track string.
+     * @param {Node} [node] - Optional node for decoding.
+     * @returns {Promise<TrackData>} Decoded track information.
      */
-    public async decodeTrack(track: string, node?: Node): Promise<TrackData> {
+    public async decodeSingleTrack(track: string, node?: Node): Promise<TrackData> {
         if (!node) node = this.leastUsedNodes[0];
 
         return await node.rest.get(`/v4/decodetrack?encodedTrack=${encodeURIComponent(track)}`) as TrackData;
     }
 
     /**
-     * Decode tracks from Ruvyrias instance.
-     * @param {string[]} tracks - The encoded strings.
-     * @param {Node} [node] - The node to decode the tracks on. If not provided, the least used node will be used.
-     * @returns {Promise<Track[]>} A promise that resolves to an array of decoded tracks.
+     * Decodes multiple track strings into Track objects using a specified or least used node.
+     *
+     * @param {string[]} tracks - Array of encoded track strings.
+     * @param {Node} [node] - Optional node for decoding.
+     * @returns {Promise<Track[]>} Array of decoded tracks.
      */
-    public async decodeTracks(tracks: string[], node?: Node): Promise<Track[]> {
+    public async decodeMultipleTracks(tracks: string[], node?: Node): Promise<Track[]> {
         if (!node) node = this.leastUsedNodes[0];
 
         return await node.rest.post(`/v4/decodetracks`, tracks) as Track[];
     }
 
     /**
-     * Get lavalink info from Ruvyrias instance
-     * @param {string} name The name of the node
-     * @returns {NodeInfoResponse} Useful information about the node.
+     * Retrieves Lavalink node information.
+     *
+     * @param {string} name - The name of the node.
+     * @returns {Promise<NodeInfoResponse>} Node information object.
      */
-    public async getLavalinkInfo(name: string): Promise<NodeInfoResponse> {
-        const node = this.nodesMap.get(name);
+    public async fetchNodeInfo(name: string): Promise<NodeInfoResponse> {
+        const node = this.nodes.get(name);
         if (!node) {
             throw new Error('Node not found!');
         }
@@ -651,12 +393,13 @@ export class Ruvyrias extends EventEmitter {
     }
 
     /**
-     * Get lavalink status from Ruvyrias instance
-     * @param {string} name The name of the node
-     * @returns {NodeStatsResponse} The stats from the node
+     * Retrieves Lavalink node stats.
+     *
+     * @param {string} name - The name of the node.
+     * @returns {Promise<NodeStatsResponse>} Node statistics object.
      */
-    public async getLavalinkStatus(name: string): Promise<NodeStatsResponse> {
-        const node = this.nodesMap.get(name);
+    public async fetchNodeStats(name: string): Promise<NodeStatsResponse> {
+        const node = this.nodes.get(name);
         if (!node) {
             throw new Error('Node not found!');
         }
@@ -665,12 +408,13 @@ export class Ruvyrias extends EventEmitter {
     }
 
     /**
-    * Get the current lavalink version of the node
-    * @param {string} name The name of the node
-    * @returns {Promise<string>} The version of the node
-    */
-    public async getLavalinkVersion(name: string): Promise<string> {
-        const node = this.nodesMap.get(name)
+     * Retrieves the Lavalink version running on a node.
+     *
+     * @param {string} name - The name of the node.
+     * @returns {Promise<string>} Lavalink version string.
+     */
+    public async fetchNodeVersion(name: string): Promise<string> {
+        const node = this.nodes.get(name)
         if (!node) {
             throw new Error('Node not found!');
         }
@@ -679,9 +423,10 @@ export class Ruvyrias extends EventEmitter {
     }
 
     /**
-     * Get a player from Ruvyrias instance.
+     * Retrieves a player instance for the specified guild.
+     *
      * @param {string} guildId - Guild ID.
-     * @returns {Player | null} The player instance for the specified guild or undefined in case of nothing.
+     * @returns {Player | null} The player instance or null if not found.
      */
     public get(guildId: string): Player | null {
         return this.players.get(guildId) ?? null;

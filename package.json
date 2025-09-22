@@ -1,21 +1,15 @@
 {
   "name": "ruvyrias",
-  "version": "1.4.1",
+  "version": "2.0.0",
   "description": "A high-performance, rock-solid Lavalink client for Node.js, built for speed and reliability.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    }
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc && npm run build:esm",
     "build:esm": "gen-esm-wrapper dist/index.js dist/index.mjs",
-    "build:docs": "npx typedoc --plugin typedoc-plugin-markdown --out docs index.ts"
+    "build:docs": "npx typedoc --plugin typedoc-plugin-markdown --entryPointStrategy expand --out docs index.ts"
   },
   "homepage": "https://ruvyrias-lock.vercel.app/",
   "repository": {

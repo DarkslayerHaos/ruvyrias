@@ -1,87 +1,15 @@
-import { Ruvyrias, ResolveOptions } from '../../src/Ruvyrias';
-import { Track } from '../../src/Track';
+import { ResolveOptions } from '../../types/Ruvyrias';
+import { Ruvyrias } from '../../src/Ruvyrias';
 import { Plugin } from '../../src/Plugin';
+import { Track } from '../../src/Track';
+import { AppleMusicOptions, AppleMusicTrack, loadTypeProps } from '../../types/AppleMusic';
+
 const URL_PATTERN =
     /(?:https:\/\/music\.apple\.com\/)([a-z]{2}\/)?(?:.+)?(artist|album|music-video|playlist)\/([\w\-\.]+(\/)+[\w\-\.]+|[^&]+)\/([\w\-\.]+(\/)+[\w\-\.]+|[^&]+)/;
 
-/**
- * Represents options for fetching Apple Music data.
- */
-export interface AppleMusicOptions {
-    /** The country code for the Apple Music store to be used for fetching data. */
-    countryCode: string;
-    /** The API key required for accessing Apple Music resources. */
-    apiKey: string;
-    /** The desired width for fetched images. */
-    imageWidth?: number;
-    /** The desired height for fetched images. */
-    imageHeight?: number;
-    /** The custom URL used for fetching Apple Music data. */
-    fetchURL?: string;
-    /** The authentication token for accessing Apple Music resources. */
-    token?: string;
-}
 
 /**
- * Types for the different load scenarios in the Apple Music plugin.
- */
-export type loadType =
-    | 'track'
-    | 'playlist'
-    | 'search'
-    | 'empty'
-    | 'error';
-
-/**
- * Represents a track in the Apple Music API.
- */
-export interface AppleMusicTrack {
-    id: string;
-    type: string;
-    href: string;
-    attributes: {
-        hasTimeSyncedLyrics: boolean;
-        albumName: string;
-        genreNames: string[];
-        trackNumber: number;
-        durationInMillis: number;
-        releaseDate: string;
-        isVocalAttenuationAllowed: boolean;
-        isMasteredForItunes: boolean;
-        isrc: string;
-        artwork: {
-            width: number;
-            url: string;
-            height: number;
-            textColor3: string;
-            textColor2: string;
-            textColor4: string;
-            textColor1: string;
-            bgColor: string;
-            hasP3: boolean;
-        };
-        composerName: string;
-        audioLocale: string;
-        url: string;
-        playParams: {
-            id: string;
-            kind: string;
-        };
-        discNumber: number;
-        hasCredits: boolean;
-        isAppleDigitalMaster: boolean;
-        hasLyrics: boolean;
-        audioTraits: string[];
-        name: string;
-        previews: {
-            [key: string]: any;
-        }[];
-        artistName: string;
-    };
-}
-
-/**
- * Represents the Apple Music class, extending the base Plugin class.
+ * Represents the Apple Music plugin class, extending the base Plugin class.
  */
 export class AppleMusic extends Plugin {
     private ruvyrias: Ruvyrias;
@@ -108,8 +36,8 @@ export class AppleMusic extends Plugin {
      */
     public async load(ruvyrias: Ruvyrias) {
         this.ruvyrias = ruvyrias;
-        this.originalResolve = ruvyrias.resolve.bind(ruvyrias);
-        ruvyrias.resolve = this.resolve.bind(this) as never;
+        this.originalResolve = ruvyrias.search.bind(ruvyrias);
+        ruvyrias.search = this.resolve.bind(this) as never;
     }
 
     /**
@@ -305,14 +233,14 @@ export class AppleMusic extends Plugin {
 
     /**
      * Builds a response object based on the specified parameters.
-     * @param {loadType} loadType - The load type of the response.
+     * @param {loadTypeProps} loadType - The load type of the response.
      * @param {any} tracks - The tracks associated with the response.
      * @param {string | undefined} playlistName - The name of the playlist (optional).
      * @param {string | undefined} exceptionMsg - The exception message (optional).
      * @returns {object} - The constructed response object.
      */
     private buildResponse(
-        loadType: loadType,
+        loadType: loadTypeProps,
         tracks: any,
         playlistName?: string,
         exceptionMsg?: string

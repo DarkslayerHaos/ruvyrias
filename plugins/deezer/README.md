@@ -2,18 +2,18 @@
 
 ```
 // Just import the class from Ruvyrias
-const { Deezer } = require('ruvyrias');
+const { Plugin } = require('ruvyrias');
 ```
 ## Example usage basic bot
 
 ```javascript
 const { Client, GatewayIntentBits } = require('discord.js');
-const { Deezer } = require('ruvyrias');
-const deezer = new Deezer();
+const { Plugin, LibrariesType, PlatformsType } = require('ruvyrias');
+const deezer = new Plugin.Deezer();
 
 const RuvyriasOptions = {
-    library: 'discord.js',
-    defaultPlatform: 'dzsearch',
+    library: LibrariesType.DiscordJS,
+    defaultPlatform: PlatformsType.YtSearch,
     plugins: [deezer], 
 };
 

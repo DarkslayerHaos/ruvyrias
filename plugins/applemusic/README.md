@@ -2,21 +2,21 @@
 
 ```
 // Just import the class from Ruvyrias
-const { AppleMusic } = require('ruvyrias');
+const { Plugin } = require('ruvyrias');
 ```
 ## Example usage basic bot
 
 ```javascript
 const { Client, GatewayIntentBits } = require('discord.js');
-const { AppleMusic } = require('ruvyrias');
-const applemusic = new AppleMusic({ 
+const { Plugin, LibrariesType, PlatformsType } = require('ruvyrias');
+const applemusic = new Plugin.AppleMusic({ 
     countryCode: 'us',
     apiKey: 'your-api-key'
 });
 
 const RuvyriasOptions = {
-    library: 'discord.js',
-    defaultPlatform: 'amsearch',
+    library: LibrariesType.DiscordJS,
+    defaultPlatform: PlatformsType.YtSearch,
     plugins: [applemusic], 
 };
 

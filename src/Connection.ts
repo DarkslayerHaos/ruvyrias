@@ -1,76 +1,12 @@
+import { VoiceServer, SetStateUpdate } from '../types';
+import { RuvyriasEvent } from '../types';
 import { Player } from './Player';
-
-/**
- * Interface representing the data received in a voice server update.
- */
-export interface IVoiceServer {
-    /** The authentication token for the voice server connection. */
-    token: string;
-    /** The session ID for the voice server connection. */
-    sessionId: string;
-    /** The endpoint URL for the voice server connection. */
-    endpoint?: string;
-}
-
-/** Type representing a four-digit year. */
-type TYear = `${number}${number}${number}${number}`;
-/** Type representing a two-digit month. */
-type TMonth = `${number}${number}`;
-/** Type representing a two-digit day. */
-type TDay = `${number}${number}`;
-/** Type representing a two-digit hour. */
-type THours = `${number}${number}`;
-/** Type representing a two-digit minute. */
-type TMinutes = `${number}${number}`;
-/** Type representing a two-digit second. */
-type TSeconds = `${number}${number}`;
-/** Type representing a three-digit millisecond. */
-type TMilliseconds = `${number}${number}${number}`;
-/** Type representing a date in ISO format (YYYY-MM-DD). */
-type TDateISODate = `${TYear}-${TMonth}-${TDay}`;
-/** Type representing a time in ISO format (HH:mm:ss.SSS). */
-type TDateISOTime = `${THours}:${TMinutes}:${TSeconds}.${TMilliseconds}`;
-/** Type representing a full date and time in ISO format (YYYY-MM-DDTHH:mm:ss.SSSZ). */
-type TDateISO = `${TDateISODate}T${TDateISOTime}Z`;
-
-/**
- * Represents the data structure of a Discord voice state update.
- * @reference https://discord.com/developers/docs/resources/voice#voice-state-object
- */
-export interface SetStateUpdate {
-    /** The ID of the guild. */
-    guild_id?: string;
-    /** The ID of the channel. */
-    channel_id: string;
-    /** The ID of the user. */
-    user_id: string;
-    /** The member object, if available. */
-    member?: Record<string, unknown>;
-    /** The session ID. */
-    session_id: string;
-    /** Whether the user is deafened. */
-    deaf: boolean;
-    /** Whether the user is muted. */
-    mute: boolean;
-    /** Whether the user is self-deafened. */
-    self_deaf: boolean;
-    /** Whether the user is self-muted. */
-    self_mute: boolean;
-    /** Whether the user is streaming. */
-    self_stream?: boolean;
-    /** Whether the user is using video. */
-    self_video: boolean;
-    /** Whether the user is suppressed. */
-    suppress: boolean;
-    /** The timestamp for the user's request to speak. */
-    request_to_speak_timestamp?: TDateISO;
-}
 
 /**
  * Manages the connection between the player and an external source.
  */
 export class Connection {
-    public player: Player;
+    public readonly player: Player;
     public region: string | null;
     public self_mute: boolean;
     public self_deaf: boolean;
@@ -95,10 +31,14 @@ export class Connection {
     }
 
     /**
-     * Set the voice server update
-     * @param {IVoiceServer} data The data from the voice server update
+     * Handles updates from the voice server, setting connection properties
+     * and notifying the player node with the new voice session information.
+     *
+     * @param {VoiceServer} data - Object containing the voice server endpoint and token.
+     * @throws {Error} If the endpoint is missing from the voice server data.
+     * @returns {Promise<void>} Resolves when the player node has been updated.
      */
-    public async setServersUpdate(data: IVoiceServer): Promise<void> {
+    public async updateVoiceServer(data: VoiceServer): Promise<void> {
         if (!data.endpoint) {
             throw new Error('No Session ID found.');
         }
@@ -119,28 +59,32 @@ export class Connection {
         });
 
         this.player.ruvyrias.emit(
-            'debug',
+            RuvyriasEvent.Debug,
             this.player.node.options.name,
             `Ruvyrias -> Voice Server Update | Server -> ${this.region} Guild: ${this.player.guildId}.`
         );
     }
 
     /**
-     * Set the state update
-     * @param {SetStateUpdate} data The data from the state update
+     * Handles updates from the voice state, updating the connection's session,
+     * channel, and mute/deaf status. Stops the player if the bot is removed
+     * from the voice channel and updates the player's voice channel ID if it changed.
+     *
+     * @param {SetStateUpdate} data - Object containing session ID, channel ID, self-mute, and self-deaf status.
+     * @returns {Promise<void>} Resolves after updating the connection state.
      */
-    public async setStateUpdate(data: SetStateUpdate): Promise<void> {
+    public async updateVoiceState(data: SetStateUpdate): Promise<void> {
         const { session_id, channel_id, self_deaf, self_mute } = data;
 
         if (channel_id == null) {
             this.player.stop();
         }
 
-        if (this.player.voiceChannel &&
+        if (this.player.voiceChannelId &&
             channel_id &&
-            this.player.voiceChannel !== channel_id
+            this.player.voiceChannelId !== channel_id
         ) {
-            this.player.voiceChannel = channel_id;
+            this.player.voiceChannelId = channel_id;
         }
 
         this.channel_id = channel_id;

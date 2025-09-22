@@ -1,7 +1,7 @@
 const SPOTIFY_API_URL = 'https://api.spotify.com/v1';
 
 interface RestManagerOptions {
-    clientID: string;
+    clientId: string;
     clientSecret: string
     token?: string
     authorization?: string;
@@ -19,7 +19,7 @@ export class RestManager {
      */
     public constructor(options: Omit<RestManagerOptions, 'token' | 'authorization'>) {
         this.options = options
-        this.options.authorization = `Basic ${Buffer.from(`${options.clientID}:${options.clientSecret}`).toString('base64',)}`;
+        this.options.authorization = `Basic ${Buffer.from(`${options.clientId}:${options.clientSecret}`).toString('base64',)}`;
         this.refreshToken();
     }
 

@@ -2,22 +2,22 @@
 
 ```
 // Just import the class from Ruvyrias
-const { Spotify } = require('ruvyrias');
+const { Plugin, LibrariesType, PlatformsType } = require('ruvyrias');
 ```
 ## Example usage basic bot
 
 ```javascript
 const { Client, GatewayIntentBits } = require('discord.js');
-const { Spotify } = require('ruvyrias');
+const { Plugin } = require('ruvyrias');
 
-const spotify = new Spotify({
-    clientID: 'client-id-here',
+const spotify = new Plugin.Spotify({
+    clientId: 'client-id-here',
     clientSecret: 'client-secret-here',
 });
 
 const RuvyriasOptions = {
-    library: 'discord.js',
-    defaultPlatform: 'spsearch',
+    library: LibrariesType.DiscordJS,
+    defaultPlatform: PlatformsType.YtSearch,
     plugins: [spotify], 
 };
 

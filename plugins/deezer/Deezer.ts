@@ -1,112 +1,15 @@
-import { Ruvyrias, ResolveOptions } from '../../src/Ruvyrias';
-import { Track } from '../../src/Track';
+import { DeezerAlbum, DeezerArtist, DeezerTrack, loadType } from '../../types/Deezer';
+import { ResolveOptions } from '../../types/Ruvyrias';
+import { Ruvyrias } from '../../src/Ruvyrias';
 import { Plugin } from '../../src/Plugin';
+import { Track } from '../../src/Track';
 
 const DEEZER_SHARE_LINK = 'https://deezer.page.link/'
 const DEEZER_PUBLIC_API = 'https://api.deezer.com/2.0';
 const DEEZER_REGEX = /^(?:https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|album|playlist|artist)\/(\d+)/;
 
 /**
- * Represents the different types of load operations.
- */
-export type loadType =
-    | 'track'
-    | 'playlist'
-    | 'search'
-    | 'empty'
-    | 'error';
-
-/**
- * Represents a contributor to a track on Deezer, providing information such as their ID, name, and role.
- */
-export interface DeezerContributor {
-    id: number;
-    name: string;
-    link: string;
-    share: string;
-    picture: string;
-    picture_small: string;
-    picture_medium: string;
-    picture_big: string;
-    picture_xl: string;
-    radio: boolean;
-    tracklist: string;
-    type: string;
-    role: string;
-}
-
-/**
- * Represents an artist on Deezer, containing details such as their ID, name, and link.
- */
-export interface DeezerArtist {
-    data: any;
-    id: number;
-    name: string;
-    link: string;
-    share: string;
-    picture: string;
-    picture_small: string;
-    picture_medium: string;
-    picture_big: string;
-    picture_xl: string;
-    radio: boolean;
-    tracklist: string;
-    type: string;
-}
-
-/**
- * Represents an album on Deezer, containing information such as its ID, title, and release date.
- */
-export interface DeezerAlbum {
-    tracks: DeezerTrack;
-    id: number;
-    title: string;
-    link: string;
-    cover: string;
-    cover_small: string;
-    cover_medium: string;
-    cover_big: string;
-    cover_xl: string;
-    md5_image: string;
-    release_date: string;
-    tracklist: string;
-    type: string;
-}
-
-/**
- * Represents a track on Deezer, providing details like its ID, title, duration, and associated artist and album.
- */
-export interface DeezerTrack {
-    data: any
-    id: string;
-    readable: boolean;
-    title: string;
-    title_short: string;
-    title_version: string;
-    isrc: string;
-    link: string;
-    share: string;
-    duration: number;
-    track_position: number;
-    disk_number: number;
-    rank: number;
-    release_date: string;
-    explicit_lyrics: boolean;
-    explicit_content_lyrics: number;
-    explicit_content_cover: number;
-    preview: string;
-    bpm: number;
-    gain: number;
-    available_countries: string[];
-    contributors: DeezerContributor[];
-    md5_image: string;
-    artist: DeezerArtist;
-    album: DeezerAlbum;
-    type: string;
-}
-
-/**
- * Represents the Deezer class, extending the base Plugin class.
+ * Represents the Deezer plugin class, extending the base Plugin class.
  */
 export class Deezer extends Plugin {
     private baseURL: string = DEEZER_PUBLIC_API;
@@ -122,8 +25,8 @@ export class Deezer extends Plugin {
      */
     public async load(ruvyrias: Ruvyrias) {
         this.ruvyrias = ruvyrias;
-        this.originalResolve = ruvyrias.resolve.bind(ruvyrias);
-        ruvyrias.resolve = this.resolve.bind(this) as never;
+        this.originalResolve = ruvyrias.search.bind(ruvyrias);
+        ruvyrias.search = this.resolve.bind(this) as never;
     }
 
     /**
@@ -182,7 +85,7 @@ export class Deezer extends Plugin {
                 return this.getArtist(id, requester)
             }
             default: {
-                return this.originalResolve({ query, source: source ?? this.ruvyrias?.options.defaultPlatform, requester: requester })
+                return this.originalResolve({ query, source: source ?? this.ruvyrias?.options.defaultPlatform, requester })
             }
         }
     }
@@ -391,7 +294,7 @@ export class Deezer extends Plugin {
 
     /**
      * Builds a response object based on the specified parameters.
-     * @param {loadType} loadType - The load type of the response.
+     * @param {loadTypes} loadType - The load type of the response.
      * @param {any} tracks - The tracks associated with the response.
      * @param {string | undefined} playlistName - The name of the playlist (optional).
      * @param {string | undefined} exceptionMsg - The exception message (optional).
